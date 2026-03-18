@@ -1,0 +1,175 @@
+import React, { useState, useEffect } from 'react';
+import { TeamService } from '../services/api';
+import type { Team } from '../types';
+import { UserPlus, Shield, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
+import { AnimatedSection } from '../components/AnimatedSection';
+
+const Teams: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [newTeam, setNewTeam] = useState({ teamName: '', coachName: '' });
+
+  useEffect(() => {
+    fetchTeams();
+  }, []);
+
+  const fetchTeams = async () => {
+    try {
+      const res = await TeamService.getAllTeams();
+      setTeams(res.data);
+    } catch (e) {
+      console.error('Failed to fetch teams', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRandomLogo = (id: number) => `https://api.dicebear.com/7.x/identicon/svg?seed=Team${id}&backgroundColor=1e293b`;
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await TeamService.createTeam(newTeam as any);
+      setShowModal(false);
+      setNewTeam({ teamName: '', coachName: '' });
+      toast.success('Team registered successfully!');
+      fetchTeams();
+    } catch (error) {
+      console.error('Failed to register team', error);
+      toast.error('Failed to register team.');
+    }
+  };
+
+  if (loading) return <div className="loader" style={{ textAlign: 'center', marginTop: '20vh' }}>Loading teams...</div>;
+
+  const featuredTeams = teams.slice(0, 5);
+
+  return (
+    <div className="dashboard-wrapper">
+      {/* SECTION 1: HERO */}
+      <div className="parallax-hero" style={{ 
+        height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+        backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop")',
+        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '-80px'
+      }}>
+        <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
+        <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem' }}>
+          <h1 className="gradient-text" style={{ fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
+            Tournament Teams
+          </h1>
+          <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
+            Meet the franchises competing for the championship.
+          </p>
+          <button onClick={() => document.getElementById('teams-content')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary hover-lift" style={{ padding: '1rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px' }}>
+            View Squads <Users size={20} style={{ marginLeft: '8px' }}/>
+          </button>
+        </div>
+      </div>
+
+      <div id="teams-content" className="page-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        
+        {/* SECTION 2: FEATURED TEAMS */}
+        {featuredTeams.length > 0 && (
+        <AnimatedSection>
+          <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Featured Franchises</h2>
+          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The top contenders drawing the crowds.</p>
+          <div className="horizontal-scroller">
+            {featuredTeams.map(team => (
+              <div key={team.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={() => navigate(`/teams/${team.id}`)}>
+                <img src={getRandomLogo(team.id || 0)} alt={team.teamName} style={{ width: 80, height: 80, borderRadius: '16px', marginBottom: '1rem' }} />
+                <h3 className="gradient-text" style={{ fontSize: '1.3rem', textAlign: 'center', marginBottom: '0.5rem' }}>{team.teamName}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                  <Shield size={14} color="var(--primary)" /> Coach: {team.coachName}
+                </div>
+              </div>
+            ))}
+          </div>
+        </AnimatedSection>
+        )}
+
+        {/* SECTION 3: TEAM GALLERY */}
+        <AnimatedSection>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>Team Gallery</h2>
+              <p className="scroll-section-subtitle" style={{ marginBottom: 0, textAlign: 'left' }}>Complete tournament roster.</p>
+            </div>
+            {isAuthenticated && (
+              <button className="btn btn-primary hover-lift" onClick={() => setShowModal(true)}>
+                <UserPlus size={18} /> Register Team
+              </button>
+            )}
+          </div>
+
+          <div className="dashboard-grid">
+            {teams.length === 0 ? (
+              <div className="glass-panel" style={{ gridColumn: '1 / -1', padding: '3rem', textAlign: 'center' }}>
+                <UsersIcon size={48} color="var(--text-secondary)" style={{marginBottom: '1rem'}} />
+                <h3 style={{color: 'var(--text-secondary)'}}>No teams registered yet.</h3>
+                {isAuthenticated && (
+                   <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ marginTop: '1rem' }}>Register a Team</button>
+                )}
+              </div>
+            ) : (
+              teams.map((team) => (
+                <div key={team.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <img src={getRandomLogo(team.id || 0)} alt={team.teamName} style={{ width: 64, height: 64, borderRadius: '12px', marginBottom: '1rem' }} />
+                  <h3 className="gradient-text" style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem', marginBottom: '1rem', width: '100%' }}>
+                    {team.teamName}
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+                      <Shield size={16} color="var(--primary)" />
+                      <span>Coach: <strong style={{color: 'var(--text-primary)'}}>{team.coachName}</strong></span>
+                    </div>
+                    <button className="btn btn-secondary" style={{ marginTop: '1rem', width: '100%', display: 'flex', justifyContent: 'center' }} 
+                      onClick={() => navigate(`/teams/${team.id}`)}>
+                      <Users size={16} /> View Squad
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </AnimatedSection>
+      </div>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content glass-panel">
+            <h2>Register New Team</h2>
+            <form onSubmit={handleRegister} style={{ marginTop: '1.5rem' }}>
+              <div className="form-group">
+                <label className="form-label">Team Name</label>
+                <input required type="text" className="form-input" 
+                  value={newTeam.teamName} onChange={e => setNewTeam({...newTeam, teamName: e.target.value})} 
+                  placeholder="e.g. Royal Challengers" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Coach Name</label>
+                <input required type="text" className="form-input" 
+                  value={newTeam.coachName} onChange={e => setNewTeam({...newTeam, coachName: e.target.value})} 
+                  placeholder="Coach Full Name" />
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} style={{ flex: 1 }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Register</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Temp
+const UsersIcon = UserPlus;
+
+export default Teams;

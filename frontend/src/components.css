@@ -1,0 +1,150 @@
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  gap: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.stat-icon-wrapper.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.stat-icon-wrapper.green { background: linear-gradient(135deg, #10b981, #059669); }
+.stat-icon-wrapper.purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+
+.stat-content h3 {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Action Cards */
+.action-card {
+  flex: 1;
+  min-width: 250px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+}
+
+.action-card:hover {
+  border-color: var(--primary);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.action-card h3 {
+  font-size: 1.2rem;
+  color: var(--primary);
+}
+
+.action-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.action-icon {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  color: var(--primary);
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+}
+
+.action-card:hover .action-icon {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Data Tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background: rgba(15, 23, 42, 0.8);
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.data-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s ease;
+}
+
+.data-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.data-table .team-name {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-primary { color: var(--primary); }
+.text-green { color: #10b981; }
+.text-red { color: #ef4444; }
+
+/* Loaders and Errors */
+.loader {
+  padding: 3rem;
+  color: var(--text-secondary);
+  animation: pulse 2s infinite;
+}
+
+.error {
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+  border-radius: 8px;
+  display: inline-block;
+}
