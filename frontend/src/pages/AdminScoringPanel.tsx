@@ -35,7 +35,7 @@ const AdminScoringPanel: React.FC = () => {
   const [playerOutId, setPlayerOutId] = useState<number | ''>('');
   const [nextBatsmanId, setNextBatsmanId] = useState<number | ''>('');
   const [nextBowlerId, setNextBowlerId] = useState<number | ''>('');
-
+  const [manOfTheMatchId, setManOfTheMatchId] = useState<number | ''>('');
   useEffect(() => {
     if (matchId) {
       loadMatchData(parseInt(matchId));
@@ -95,6 +95,12 @@ const AdminScoringPanel: React.FC = () => {
 
   const submitBall = async () => {
     if (!matchId) return;
+    if (isWicket) {
+      if (!wicketType || !playerOutId || !nextBatsmanId) {
+        return toast.error("Validation Error: Wicket Type, Out Batsman, and Next Batsman are all strictly required to record a wicket.");
+      }
+    }
+    
     try {
       await MatchScoringService.recordBall(parseInt(matchId), {
         runs,
@@ -128,6 +134,22 @@ const AdminScoringPanel: React.FC = () => {
     }
   };
 
+  const [forceBowlerId, setForceBowlerId] = useState<number | ''>('');
+  const [showForceBowler, setShowForceBowler] = useState<boolean>(false);
+
+  const forceConfirmBowler = async () => {
+    if (!matchId || forceBowlerId === '') return;
+    try {
+      await MatchScoringService.updateBowler(parseInt(matchId), Number(forceBowlerId));
+      toast.success('Bowler changed mid-over successfully!');
+      setForceBowlerId('');
+      setShowForceBowler(false);
+      loadMatchData(parseInt(matchId));
+    } catch (err) {
+      toast.error('Failed to change bowler');
+    }
+  };
+
   const handleUndo = async () => {
     if (!matchId) return;
     const confirmUndo = window.confirm("Undo the last recorded ball?");
@@ -145,7 +167,10 @@ const AdminScoringPanel: React.FC = () => {
   const endInnings = async () => {
     if (!matchId || !details) return;
     if (strikerId === '' || nonStrikerId === '' || bowlerId === '') {
-      return toast.error('Please select openers for the next innings first below.');
+      return toast.error('Validation Error: Please select openers and bowler for the next innings first.');
+    }
+    if (strikerId === nonStrikerId) {
+      return toast.error('Validation Error: Striker and Non-Striker cannot be the same player!');
     }
     
     // Auto calculate target: current score + 1
@@ -176,8 +201,11 @@ const AdminScoringPanel: React.FC = () => {
          else if (details.currentScore < details.targetScore - 1) winnerId = details.match.bowlingTeam?.id;
          // else tie
       }
-      await MatchScoringService.completeMatch(parseInt(matchId), winnerId);
-      toast.success('Match completed and scorecard saved!');
+      if (!manOfTheMatchId) {
+         return toast.error('Validation Error: You must formally select a Man of the Match before finalizing scoring!');
+      }
+      await MatchScoringService.completeMatch(parseInt(matchId), winnerId, Number(manOfTheMatchId));
+      toast.success('Match completed and scorecard finalized!');
       navigate('/matches');
     } catch (err) {
       toast.error('Failed to complete match');
@@ -193,7 +221,7 @@ const AdminScoringPanel: React.FC = () => {
         <div className="glass-panel">
           <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>{match.teamA.teamName} vs {match.teamB.teamName}</h2>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
             <div>
               <h3 style={{ marginBottom: '1rem' }}>{match.teamA.teamName} Playing XI ({playingXiTeamA.length}/11)</h3>
               <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid var(--glass-border)', padding: '1rem', borderRadius: '8px' }}>
@@ -271,19 +299,19 @@ const AdminScoringPanel: React.FC = () => {
 
           <div className="form-group">
             <label>Opening Striker</label>
-            <select className="form-input" value={strikerId} onChange={e => setStrikerId(Number(e.target.value))}>
+            <select className="form-input" value={strikerId} onChange={e => { setStrikerId(Number(e.target.value)); if (Number(e.target.value) === nonStrikerId) setNonStrikerId(''); }}>
               <option value="">Select Player</option>
               {(tossDecision === 'BATTING' ? (tossWinnerId === match.teamA.id ? teamASquad.filter(p => playingXiTeamA.includes(p.id!)) : teamBSquad.filter(p => playingXiTeamB.includes(p.id!))) : (tossWinnerId === match.teamA.id ? teamBSquad.filter(p => playingXiTeamB.includes(p.id!)) : teamASquad.filter(p => playingXiTeamA.includes(p.id!)))).map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+                <option key={p.id} value={p.id} disabled={p.id === nonStrikerId}>{p.name}</option>
               ))}
             </select>
           </div>
           <div className="form-group">
             <label>Opening Non-Striker</label>
-            <select className="form-input" value={nonStrikerId} onChange={e => setNonStrikerId(Number(e.target.value))}>
+            <select className="form-input" value={nonStrikerId} onChange={e => { setNonStrikerId(Number(e.target.value)); if (Number(e.target.value) === strikerId) setStrikerId(''); }}>
               <option value="">Select Player</option>
               {(tossDecision === 'BATTING' ? (tossWinnerId === match.teamA.id ? teamASquad.filter(p => playingXiTeamA.includes(p.id!)) : teamBSquad.filter(p => playingXiTeamB.includes(p.id!))) : (tossWinnerId === match.teamA.id ? teamBSquad.filter(p => playingXiTeamB.includes(p.id!)) : teamASquad.filter(p => playingXiTeamA.includes(p.id!)))).map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+                <option key={p.id} value={p.id} disabled={p.id === strikerId}>{p.name}</option>
               ))}
             </select>
           </div>
@@ -319,13 +347,19 @@ const AdminScoringPanel: React.FC = () => {
     ? (details.match.playingXiTeamA && details.match.playingXiTeamA.length > 0 ? details.match.playingXiTeamA : teamASquad) 
     : (details.match.playingXiTeamB && details.match.playingXiTeamB.length > 0 ? details.match.playingXiTeamB : teamBSquad);
 
+  const roleOrder: Record<string, number> = { 'BATSMAN': 1, 'ALL_ROUNDER': 2, 'WICKET_KEEPER': 3, 'BOWLER': 4 };
+  const sortedBatters = [...battingSquad].sort((a, b) => (roleOrder[a.role] || 99) - (roleOrder[b.role] || 99));
+
   const isOverComplete = ((details.currentOvers * 10) % 10) === 0 && details.currentOvers > 0;
+  
+  const isMatchOverWarning = details.match.currentInnings === 2 && (details.currentWickets >= 10 || (details.match.overs && details.currentOvers >= details.match.overs) || (details.targetScore && details.currentScore >= details.targetScore));
+  const isAwaitingSecondInnings = !details.currentStriker && details.match.currentInnings === 2;
 
   return (
     <div className="page-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
       
       {/* LIVE MINI BAR */}
-      <div className="glass-panel" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="glass-panel sticky-top" style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
         <div>
           <h2 style={{ margin: 0 }}>{details.match.battingTeam?.teamName} <span style={{ color: 'var(--primary)' }}>{details.currentScore} - {details.currentWickets}</span></h2>
           <p style={{ margin: 0, color: '#94a3b8' }}>Overs: {details.currentOvers} | CRR: {details.currentRunRate.toFixed(2)}</p>
@@ -338,157 +372,191 @@ const AdminScoringPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="glass-panel">
-        <h3 className="gradient-text text-center">Control Panel</h3>
-        <p className="text-center" style={{ color: '#ef4444', fontWeight: 'bold' }}>Caution: Actions are permanent.</p>
+      {isAwaitingSecondInnings && !isMatchOverWarning && (
+         <div className="glass-panel text-center animate-slide-up" style={{ marginTop: '2rem', border: '2px solid var(--primary)', padding: '2.5rem' }}>
+            <h2 className="gradient-text gradient-secondary" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>1st Innings Complete!</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>The target for {details.match.battingTeam!.teamName} is <strong style={{color: '#fff', fontSize: '1.2rem'}}>{details.targetScore} runs</strong>. Setup the chase below.</p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', textAlign: 'left', marginBottom: '2rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label>Opening Striker</label>
+                  <select className="form-input" value={strikerId} onChange={e => { setStrikerId(Number(e.target.value)); if (Number(e.target.value) === nonStrikerId) setNonStrikerId(''); }}>
+                    <option value="">Striker</option>
+                    {sortedBatters.map(p => <option key={p.id} value={p.id} disabled={p.id === nonStrikerId}>{p.name} ({p.role.replace('_', ' ')})</option>)}
+                  </select>
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label>Opening Non-Striker</label>
+                  <select className="form-input" value={nonStrikerId} onChange={e => { setNonStrikerId(Number(e.target.value)); if (Number(e.target.value) === strikerId) setStrikerId(''); }}>
+                    <option value="">Non-Striker</option>
+                    {sortedBatters.map(p => <option key={p.id} value={p.id} disabled={p.id === strikerId}>{p.name} ({p.role.replace('_', ' ')})</option>)}
+                  </select>
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label>Opening Bowler</label>
+                  <select className="form-input" value={bowlerId} onChange={e => setBowlerId(Number(e.target.value))}>
+                    <option value="">Bowler</option>
+                    {bowlingSquad.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+            </div>
+            
+            <button className="btn btn-primary" onClick={endInnings} style={{ width: '100%', padding: '1rem', fontSize: '1.2rem' }}>Start 2nd Innings</button>
+         </div>
+      )}
 
-        {isOverComplete && !details.currentBowler ? (
-          <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', textAlign: 'center' }}>
-            <h4 style={{ color: '#ef4444' }}>Over Completed. Select Next Bowler to Continue</h4>
-            <select className="form-input" value={nextBowlerId} onChange={e => setNextBowlerId(Number(e.target.value))} style={{ maxWidth: '300px', margin: '1rem auto' }}>
-              <option value="">Select Bowler</option>
-              {bowlingSquad.filter(p => p.id !== details.currentBowler?.id && p.id !== details.previousBowlerId).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-            <button className="btn btn-primary" onClick={confirmBowler} disabled={nextBowlerId === ''}>Confirm Bowler</button>
-            <p style={{ fontSize: '0.8rem', marginTop: '1rem', color: '#94a3b8' }}>Since the over is complete, the strike has automatically rotated.</p>
+      {isMatchOverWarning && (
+         <div className="glass-panel text-center animate-slide-up" style={{ marginTop: '2rem', border: '2px solid #10b981', padding: '2.5rem' }}>
+            <h2 className="gradient-text gradient-success" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Match Completed!</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem' }}>Finalize the scoring data and select the standout performer of the game.</p>
+            
+            <div className="form-group" style={{ textAlign: 'left', maxWidth: '400px', margin: '0 auto 2rem auto' }}>
+              <label>Assign Man of the Match</label>
+              <select className="form-input" value={manOfTheMatchId} onChange={e => setManOfTheMatchId(Number(e.target.value))}>
+                 <option value="">-- Choose Player --</option>
+                 <optgroup label={match.teamA.teamName}>
+                   {teamASquad.filter(p => match.playingXiTeamA?.some(xi => xi.id === p.id)).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                 </optgroup>
+                 <optgroup label={match.teamB.teamName}>
+                   {teamBSquad.filter(p => match.playingXiTeamB?.some(xi => xi.id === p.id)).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                 </optgroup>
+              </select>
+            </div>
+
+            <button className="btn btn-primary" style={{ background: '#10b981', color: '#fff', width: '100%', padding: '1rem', fontSize: '1.2rem' }} onClick={completeMatchBtn}>Save Match Verdict</button>
+         </div>
+      )}
+
+      {!isAwaitingSecondInnings && !isMatchOverWarning && (
+        <div className="glass-panel">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 className="gradient-text" style={{ margin: 0 }}>Control Panel</h3>
+            <button 
+               onClick={() => setShowForceBowler(!showForceBowler)}
+               className="btn" 
+               style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: showForceBowler ? 'rgba(59, 130, 246, 0.2)' : 'transparent', border: '1px solid #3b82f6', color: '#3b82f6' }}>
+               {showForceBowler ? 'Cancel Change' : 'Change Bowler'}
+            </button>
           </div>
-        ) : (
+          
+          <p className="text-center" style={{ color: '#ef4444', fontWeight: 'bold' }}>Caution: Actions are permanent.</p>
+
+          {showForceBowler && (
+            <div className="animate-slide-up" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid #3b82f6', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', textAlign: 'center' }}>
+              <h4 style={{ color: '#3b82f6', margin: '0 0 1rem 0' }}>Change Bowler Mid-Over</h4>
+              <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '1rem' }}>
+                Use this if a bowler is injured or needs to be swapped. The active over count will resume normally.
+              </p>
+              <select className="form-input" value={forceBowlerId} onChange={e => setForceBowlerId(Number(e.target.value))} style={{ maxWidth: '300px', margin: '0 auto 1rem auto' }}>
+                <option value="">Select Replacement Bowler</option>
+                {bowlingSquad.filter(p => p.id !== details.currentBowler?.id).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+              <button className="btn btn-primary" onClick={forceConfirmBowler} disabled={forceBowlerId === ''} style={{ background: '#3b82f6' }}>Confirm Swap</button>
+            </div>
+          )}
+
+          {isOverComplete && !details.currentBowler ? (
+            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', textAlign: 'center' }}>
+              <h4 style={{ color: '#ef4444' }}>Over Completed. Select Next Bowler to Continue</h4>
+              <select className="form-input" value={nextBowlerId} onChange={e => setNextBowlerId(Number(e.target.value))} style={{ maxWidth: '300px', margin: '1rem auto' }}>
+                <option value="">Select Bowler</option>
+                {bowlingSquad.filter(p => p.id !== details.currentBowler?.id && p.id !== details.previousBowlerId).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+              <button className="btn btn-primary" onClick={confirmBowler} disabled={nextBowlerId === ''}>Confirm Bowler</button>
+              <p style={{ fontSize: '0.8rem', marginTop: '1rem', color: '#94a3b8' }}>Since the over is complete, the strike has automatically rotated.</p>
+            </div>
+          ) : (
           <>
-            {/* RUNS */}
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-              {[0, 1, 2, 3, 4, 6].map(r => (
+            <div className="sticky-bottom-action-bar">
+              {/* RUNS */}
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                {[0, 1, 2, 3, 4, 6].map(r => (
+                  <button 
+                    key={r} 
+                    className={`btn ${runs === r && !isWicket ? 'btn-primary' : ''}`}
+                    onClick={() => { setRuns(r); setIsWicket(false); setExtraType(''); }}
+                    style={{ width: '55px', height: '55px', padding: '0', borderRadius: '50%', fontSize: '1.4rem', fontWeight: 'bold', border: runs !== r ? '1px solid var(--glass-border)' : 'none' }}>
+                    {r}
+                  </button>
+                ))}
+              </div>
+
+              {/* EXTRAS */}
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                {['WIDE', 'NO_BALL', 'BYE', 'LEG_BYE'].map(ex => (
+                  <button 
+                    key={ex} 
+                    className={`btn ${extraType === ex ? 'btn-primary' : ''}`}
+                    onClick={() => setExtraType(ex === extraType ? '' : ex)}
+                    style={{ borderRadius: '30px', padding: '0.5rem 1rem', border: extraType !== ex ? '1px solid var(--glass-border)' : 'none' }}>
+                    {ex.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+
+              {/* WICKET TOGGLE */}
+              <div style={{ textAlign: 'center', marginBottom: '0.5rem', padding: '0.5rem', background: isWicket ? 'rgba(239, 68, 68, 0.1)' : 'transparent', borderRadius: '12px', border: isWicket ? '1px solid #ef4444' : 'none' }}>
                 <button 
-                  key={r} 
-                  className={`btn ${runs === r && !isWicket ? 'btn-primary' : ''}`}
-                  onClick={() => { setRuns(r); setIsWicket(false); setExtraType(''); }}
-                  style={{ width: '60px', height: '60px', borderRadius: '50%', fontSize: '1.4rem', fontWeight: 'bold', border: runs !== r ? '1px solid var(--glass-border)' : 'none' }}>
-                  {r}
+                  className="btn" 
+                  onClick={() => setIsWicket(!isWicket)}
+                  style={{ background: isWicket ? '#ef4444' : 'transparent', color: isWicket ? '#fff' : '#ef4444', border: '1px solid #ef4444', width: '100%' }}>
+                  WICKET LOGIC {isWicket ? 'ENABLED' : 'DISABLED'}
                 </button>
-              ))}
+
+                {isWicket && (
+                  <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.5rem' }}>
+                    <select className="form-input" value={wicketType} onChange={e => setWicketType(e.target.value)}>
+                      <option value="BOWLED">Bowled</option>
+                      <option value="CAUGHT">Caught</option>
+                      <option value="LBW">LBW</option>
+                      <option value="RUN_OUT">Run Out</option>
+                      <option value="STUMPED">Stumped</option>
+                      <option value="HIT_WICKET">Hit Wicket</option>
+                    </select>
+                    
+                    <select className="form-input" value={playerOutId} onChange={e => setPlayerOutId(Number(e.target.value))}>
+                      <option value="">Who is out?</option>
+                      <option value={details.currentStriker?.id}>{details.currentStriker?.name}</option>
+                      <option value={details.currentNonStriker?.id}>{details.currentNonStriker?.name}</option>
+                    </select>
+
+                    <select className="form-input" value={nextBatsmanId} onChange={e => setNextBatsmanId(Number(e.target.value))}>
+                      <option value="">Next Batsman In</option>
+                      {sortedBatters.filter(p => 
+                        p.id !== details.currentStriker?.id && 
+                        p.id !== details.currentNonStriker?.id && 
+                        !battingScorecard.find(card => card.player.id === p.id && card.howOut && card.howOut.toLowerCase() !== 'not out')
+                      ).map(p => (
+                        <option key={p.id} value={p.id}>{p.name} ({p.role.replace('_', ' ')})</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <button className="btn btn-primary" onClick={submitBall} style={{ width: '100%', height: '54px', fontSize: '1.2rem', fontWeight: 'bold' }}>Record Delivery</button>
             </div>
-
-            {/* EXTRAS */}
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-              {['WIDE', 'NO_BALL', 'BYE', 'LEG_BYE'].map(ex => (
-                <button 
-                  key={ex} 
-                  className={`btn ${extraType === ex ? 'btn-primary' : ''}`}
-                  onClick={() => setExtraType(ex === extraType ? '' : ex)}
-                  style={{ borderRadius: '30px', border: extraType !== ex ? '1px solid var(--glass-border)' : 'none' }}>
-                  {ex.replace('_', ' ')}
-                </button>
-              ))}
-            </div>
-
-            {/* WICKET TOGGLE */}
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem', padding: '1rem', background: isWicket ? 'rgba(239, 68, 68, 0.1)' : 'transparent', borderRadius: '12px', border: isWicket ? '1px solid #ef4444' : 'none' }}>
-              <button 
-                className="btn" 
-                onClick={() => setIsWicket(!isWicket)}
-                style={{ background: isWicket ? '#ef4444' : 'transparent', color: isWicket ? '#fff' : '#ef4444', border: '1px solid #ef4444' }}>
-                WICKET LOGIC {isWicket ? 'ENABLED' : 'DISABLED'}
-              </button>
-
-              {isWicket && (
-                <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <select className="form-input" style={{ width: 'auto' }} value={wicketType} onChange={e => setWicketType(e.target.value)}>
-                    <option value="BOWLED">Bowled</option>
-                    <option value="CAUGHT">Caught</option>
-                    <option value="LBW">LBW</option>
-                    <option value="RUN_OUT">Run Out</option>
-                    <option value="STUMPED">Stumped</option>
-                    <option value="HIT_WICKET">Hit Wicket</option>
-                  </select>
-                  
-                  <select className="form-input" style={{ width: 'auto' }} value={playerOutId} onChange={e => setPlayerOutId(Number(e.target.value))}>
-                    <option value="">Who is out?</option>
-                    <option value={details.currentStriker?.id}>{details.currentStriker?.name}</option>
-                    <option value={details.currentNonStriker?.id}>{details.currentNonStriker?.name}</option>
-                  </select>
-
-                  <select className="form-input" style={{ width: 'auto' }} value={nextBatsmanId} onChange={e => setNextBatsmanId(Number(e.target.value))}>
-                    <option value="">Next Batsman In</option>
-                    {battingSquad.filter(p => 
-                      p.id !== details.currentStriker?.id && 
-                      p.id !== details.currentNonStriker?.id && 
-                      !battingScorecard.find(card => card.player.id === p.id && card.howOut && card.howOut.toLowerCase() !== 'not out')
-                    ).map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
-
-            <button className="btn btn-primary" onClick={submitBall} style={{ width: '100%', height: '60px', fontSize: '1.2rem', fontWeight: 'bold' }}>Record Delivery</button>
+            
+            {/* Spacer to prevent content from hiding behind sticky action bar on mobile */}
+            <div className="mobile-spacer" style={{ height: '320px' }}></div>
           </>
-        )}
-        
-        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-          <button 
-             className="btn" 
-             onClick={handleUndo} 
-             disabled={details.currentOvers === 0}
-             style={{ 
-               background: 'transparent', 
-               color: (details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24', 
-               border: `1px solid ${(details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24'}` 
-             }}>
-             Undo Last Ball
-          </button>
+          )}
+
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <button 
+               className="btn" 
+               onClick={handleUndo} 
+               disabled={details.currentOvers === 0}
+               style={{ 
+                 background: 'transparent', 
+                 color: (details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24', 
+                 border: `1px solid ${(details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24'}` 
+               }}>
+               Undo Last Ball
+            </button>
+          </div>
         </div>
-
-      </div>
-
-      <div className="glass-panel" style={{ marginTop: '2rem' }}>
-        <h3 className="gradient-text">Match Operations</h3>
-        
-        {!details.currentStriker && details.match.currentInnings === 2 ? (
-            <div style={{ marginTop: '1rem', padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                <h4 className="gradient-text" style={{ marginBottom: '1rem' }}>Start 2nd Innings</h4>
-                <p style={{ marginBottom: '1.5rem' }}>Select the openers for the 2nd Innings to begin the run chase.</p>
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                    <select className="form-input" style={{ flex: 1 }} value={strikerId} onChange={e => setStrikerId(Number(e.target.value))}>
-                      <option value="">Striker</option>
-                      {battingSquad.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                    <select className="form-input" style={{ flex: 1 }} value={nonStrikerId} onChange={e => setNonStrikerId(Number(e.target.value))}>
-                      <option value="">Non-Striker</option>
-                      {battingSquad.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                    <select className="form-input" style={{ flex: 1 }} value={bowlerId} onChange={e => setBowlerId(Number(e.target.value))}>
-                      <option value="">Opening Bowler</option>
-                      {bowlingSquad.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                </div>
-                <button className="btn btn-primary" onClick={endInnings} style={{ width: '100%' }}>Start Chase</button>
-            </div>
-        ) : details.match.currentInnings === 1 ? (
-          <div style={{ marginTop: '1rem' }}>
-             <p>To end innings early, select the openers for the next innings, then click End Innings.</p>
-             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                <select className="form-input" style={{ flex: 1 }} value={strikerId} onChange={e => setStrikerId(Number(e.target.value))}>
-                  <option value="">Next Striker</option>
-                  {bowlingSquad.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                <select className="form-input" style={{ flex: 1 }} value={nonStrikerId} onChange={e => setNonStrikerId(Number(e.target.value))}>
-                  <option value="">Next Non-Striker</option>
-                  {bowlingSquad.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                <select className="form-input" style={{ flex: 1 }} value={bowlerId} onChange={e => setBowlerId(Number(e.target.value))}>
-                  <option value="">Next Opening Bowler</option>
-                  {battingSquad.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-             </div>
-             <button className="btn" style={{ background: '#f59e0b', color: '#fff' }} onClick={endInnings}>Complete 1st Innings</button>
-          </div>
-        ) : (
-          <div style={{ marginTop: '1rem' }}>
-            <p>Once the target is chased or all wickets fall, finalize the match to save statistics to the database.</p>
-            <button className="btn" style={{ background: '#10b981', color: '#fff' }} onClick={completeMatchBtn}>Complete Match & Save Stats</button>
-          </div>
-        )}
-      </div>
+      )}
 
     </div>
   );

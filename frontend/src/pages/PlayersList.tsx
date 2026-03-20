@@ -48,7 +48,7 @@ const PlayersList: React.FC = () => {
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-        <img src={getRandomAvatar(player.id || 0)} alt={player.name} style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+        <img src={player.playerImage || getRandomAvatar(player.id || 0)} alt={player.name} style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', objectFit: 'cover' }} />
         <div>
           <h3 style={{ fontSize: '1.1rem', margin: 0 }}>
             {player.name}
@@ -88,7 +88,7 @@ const PlayersList: React.FC = () => {
       }}>
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem' }}>
-          <h1 className="gradient-text" style={{ fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
+          <h1 className="gradient-text" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
             Tournament Players
           </h1>
           <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>

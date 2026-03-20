@@ -19,6 +19,19 @@ public class PointsService {
     @Autowired
     private MatchService matchService;
 
+    @Autowired
+    private com.cricket.tournament.repository.ScorecardBattingRepository battingRepository;
+
+    @Autowired
+    private com.cricket.tournament.repository.ScorecardBowlingRepository bowlingRepository;
+
+    public Map<String, Object> getTopPerformers() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("topRunScorers", battingRepository.getTopRunScorers());
+        response.put("topWicketTakers", bowlingRepository.getTopWicketTakers());
+        return response;
+    }
+
     public List<Map<String, Object>> getPointsTable() {
         List<Team> allTeams = teamService.getAllTeams();
         List<Match> completedMatches = matchService.getCompletedMatches();

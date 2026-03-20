@@ -59,6 +59,9 @@ public class PlayerService {
         if (updatedPlayer.getJerseyNumber() != null) existingPlayer.setJerseyNumber(updatedPlayer.getJerseyNumber());
         if (updatedPlayer.getBattingStyle() != null) existingPlayer.setBattingStyle(updatedPlayer.getBattingStyle());
         if (updatedPlayer.getBowlingStyle() != null) existingPlayer.setBowlingStyle(updatedPlayer.getBowlingStyle());
+        if (updatedPlayer.getPlayerImage() != null) existingPlayer.setPlayerImage(updatedPlayer.getPlayerImage());
+        if (updatedPlayer.getIsCaptain() != null) existingPlayer.setIsCaptain(updatedPlayer.getIsCaptain());
+        if (updatedPlayer.getIsViceCaptain() != null) existingPlayer.setIsViceCaptain(updatedPlayer.getIsViceCaptain());
         
         return playerRepository.save(existingPlayer);
     }

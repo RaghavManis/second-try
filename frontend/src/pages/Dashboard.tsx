@@ -82,7 +82,7 @@ const Dashboard: React.FC = () => {
       }}>
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem' }}>
-          <h1 className="gradient-text" style={{ fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
+          <h1 className="gradient-text" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
             Ultimate Cricket League
           </h1>
           <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
@@ -150,12 +150,12 @@ const Dashboard: React.FC = () => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem', marginBottom: '1.5rem' }}>
                   <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                    <img src={getRandomLogo(match.teamA.id || 0)} alt={match.teamA.teamName} style={{ width: 48, height: 48, borderRadius: '50%' }} />
+                    <img src={match.teamA.teamLogo || getRandomLogo(match.teamA.id || 0)} alt={match.teamA.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
                     <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{match.teamA.teamName}</h3>
                   </div>
                   <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-secondary)', padding: '0 1rem' }}>VS</div>
                   <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                    <img src={getRandomLogo(match.teamB.id || 0)} alt={match.teamB.teamName} style={{ width: 48, height: 48, borderRadius: '50%' }} />
+                    <img src={match.teamB.teamLogo || getRandomLogo(match.teamB.id || 0)} alt={match.teamB.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
                     <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{match.teamB.teamName}</h3>
                   </div>
                 </div>
@@ -189,7 +189,7 @@ const Dashboard: React.FC = () => {
             {teams.map(team => (
               <div key={team.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer' }} onClick={() => navigate(`/teams/${team.id}`)}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                  <img src={getRandomLogo(team.id || 0)} alt={team.teamName} style={{ width: 56, height: 56, borderRadius: '12px' }} />
+                  <img src={team.teamLogo || getRandomLogo(team.id || 0)} alt={team.teamName} style={{ width: 56, height: 56, borderRadius: '12px', objectFit: 'cover' }} />
                   <div>
                     <h3 className="gradient-text" style={{ fontSize: '1.3rem', marginBottom: '0.25rem' }}>{team.teamName}</h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
@@ -217,7 +217,7 @@ const Dashboard: React.FC = () => {
           <div className="horizontal-scroller">
             {players.map(player => (
               <div key={player.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', width: '280px' }} onClick={() => navigate(`/players/${player.id}`)}>
-                <img src={getRandomAvatar(player.id || 0)} alt={player.name} style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+                <img src={player.playerImage || getRandomAvatar(player.id || 0)} alt={player.name} style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', objectFit: 'cover' }} />
                 <div>
                   <h3 style={{ fontSize: '1.1rem', margin: '0 0 0.25rem 0' }}>{player.name}</h3>
                   <div style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '0.25rem' }}>{player.role.replace('_', ' ')}</div>
@@ -253,12 +253,14 @@ const Dashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {standings.map((pt, index) => (
+                {standings.map((pt, index) => {
+                  const teamObj = teams.find(t => t.id === pt.teamId);
+                  return (
                   <tr key={pt.teamId}>
                     <td className="font-bold">{index + 1}</td>
                     <td className="team-name">
                       {index === 0 && <Trophy size={16} color="#fbbf24" style={{marginRight: '0.5rem'}} />}
-                      <img src={getRandomLogo(pt.teamId || 0)} alt={pt.teamName} style={{ width: 24, height: 24, borderRadius: '50%', marginRight: '10px' }} />
+                      <img src={(teamObj && teamObj.teamLogo) || getRandomLogo(pt.teamId || 0)} alt={pt.teamName} style={{ width: 24, height: 24, borderRadius: '50%', marginRight: '10px', objectFit: 'cover' }} />
                       {pt.teamName}
                     </td>
                     <td>{pt.matchesPlayed}</td>
@@ -266,7 +268,8 @@ const Dashboard: React.FC = () => {
                     <td className="font-bold text-primary">{pt.points}</td>
                     <td>{pt.netRunRate ? pt.netRunRate.toFixed(2) : '0.00'}</td>
                   </tr>
-                ))}
+                )}
+                )}
               </tbody>
             </table>
           </div>

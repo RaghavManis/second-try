@@ -31,10 +31,12 @@ public class LiveMatchDetailsDto {
     private Integer bowlerRuns;
     private Integer bowlerWickets;
 
-    private List<String> lastSixBalls; 
+    private List<String> recentBalls; 
+    private List<String> thisOverBalls; 
 
     public LiveMatchDetailsDto() {}
     
+    // ... Getters and Setters omitted for brevity are untouched ...
     public Match getMatch() { return match; }
     public void setMatch(Match match) { this.match = match; }
     public Integer getCurrentScore() { return currentScore; }
@@ -71,6 +73,8 @@ public class LiveMatchDetailsDto {
     public void setBowlerRuns(Integer bowlerRuns) { this.bowlerRuns = bowlerRuns; }
     public Integer getBowlerWickets() { return bowlerWickets; }
     public void setBowlerWickets(Integer bowlerWickets) { this.bowlerWickets = bowlerWickets; }
-    public List<String> getLastSixBalls() { return lastSixBalls; }
-    public void setLastSixBalls(List<String> lastSixBalls) { this.lastSixBalls = lastSixBalls; }
+    public List<String> getRecentBalls() { return recentBalls; }
+    public void setRecentBalls(List<String> recentBalls) { this.recentBalls = recentBalls; }
+    public List<String> getThisOverBalls() { return thisOverBalls; }
+    public void setThisOverBalls(List<String> thisOverBalls) { this.thisOverBalls = thisOverBalls; }
 }

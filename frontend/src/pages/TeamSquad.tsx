@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { TeamService, PlayerService } from '../services/api';
+import { TeamService, PlayerService, UploadService } from '../services/api';
 import type { Team, Player, PlayerRole } from '../types';
-import { ArrowLeft, UserPlus, Trash2, Shield, User, Edit } from 'lucide-react';
+import { ArrowLeft, UserPlus, Trash2, Shield, User, Edit, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -17,7 +17,8 @@ const TeamSquad: React.FC = () => {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlayerId, setEditingPlayerId] = useState<number | null>(null);
-  const [newPlayer, setNewPlayer] = useState({ name: '', role: 'BATSMAN' as PlayerRole, jerseyNumber: '', isCaptain: false, isViceCaptain: false, battingStyle: '', bowlingStyle: '' });
+  const [newPlayer, setNewPlayer] = useState({ name: '', role: 'BATSMAN' as PlayerRole, jerseyNumber: '', isCaptain: false, isViceCaptain: false, battingStyle: '', bowlingStyle: '', playerImage: '' });
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (teamId) {
@@ -51,7 +52,8 @@ const TeamSquad: React.FC = () => {
       isCaptain: player.isCaptain || false,
       isViceCaptain: player.isViceCaptain || false,
       battingStyle: player.battingStyle || '',
-      bowlingStyle: player.bowlingStyle || ''
+      bowlingStyle: player.bowlingStyle || '',
+      playerImage: player.playerImage || ''
     });
     setIsModalOpen(true);
   };
@@ -59,7 +61,24 @@ const TeamSquad: React.FC = () => {
   const closeForm = () => {
     setIsModalOpen(false);
     setEditingPlayerId(null);
-    setNewPlayer({ name: '', role: 'BATSMAN', jerseyNumber: '', isCaptain: false, isViceCaptain: false, battingStyle: '', bowlingStyle: '' });
+    setNewPlayer({ name: '', role: 'BATSMAN', jerseyNumber: '', isCaptain: false, isViceCaptain: false, battingStyle: '', bowlingStyle: '', playerImage: '' });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Please upload a valid image'); return; }
+    
+    setUploading(true);
+    try {
+      const res = await UploadService.uploadImage(file);
+      setNewPlayer(prev => ({ ...prev, playerImage: res.data.url }));
+      toast.success('Image uploaded successfully');
+    } catch (err) {
+      toast.error('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSavePlayer = async (e: React.FormEvent) => {
@@ -75,6 +94,7 @@ const TeamSquad: React.FC = () => {
         isViceCaptain: newPlayer.isViceCaptain,
         battingStyle: newPlayer.battingStyle,
         bowlingStyle: newPlayer.bowlingStyle,
+        playerImage: newPlayer.playerImage,
         team: team
       };
       
@@ -168,9 +188,13 @@ const TeamSquad: React.FC = () => {
                   width: '50px', height: '50px', borderRadius: '50%', 
                   background: 'var(--bg-lighter)', display: 'flex', alignItems: 'center', 
                   justifyContent: 'center', border: `2px solid ${getRoleColor(player.role)}`,
-                  fontSize: '1.2rem', fontWeight: 'bold'
+                  fontSize: '1.2rem', fontWeight: 'bold', overflow: 'hidden'
                 }}>
-                  {player.jerseyNumber || '-'}
+                  {player.playerImage ? (
+                    <img src={player.playerImage} alt={player.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <>{player.jerseyNumber || '-'}</>
+                  )}
                 </div>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', margin: 0 }}>
@@ -195,9 +219,24 @@ const TeamSquad: React.FC = () => {
 
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
             <h2 className="modal-title">{editingPlayerId ? 'Edit Player' : 'Register Player'}</h2>
             <form onSubmit={handleSavePlayer}>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+                 <div style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem', border: '1px dashed var(--glass-border)' }}>
+                     {newPlayer.playerImage ? (
+                         <img src={newPlayer.playerImage} alt="Profile Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                     ) : (
+                         <User size={32} color="#64748b" />
+                     )}
+                 </div>
+                 <input type="file" id="player-image-upload" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                 <label htmlFor="player-image-upload" style={{ cursor: 'pointer', color: 'var(--primary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '4px', position: 'relative', zIndex: 100 }}>
+                     <Upload size={14} /> {uploading ? 'Uploading...' : (newPlayer.playerImage ? 'Change Image (Optional)' : 'Upload Profile (Optional)')}
+                 </label>
+              </div>
+
               <div className="form-group">
                 <label className="form-label">Full Name</label>
                 <input type="text" className="form-input" required 
@@ -257,7 +296,7 @@ const TeamSquad: React.FC = () => {
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-secondary" onClick={closeForm}>Cancel</button>
-                <button type="submit" className="btn btn-primary">{editingPlayerId ? 'Update Player' : 'Save Player'}</button>
+                <button type="submit" className="btn btn-primary" disabled={uploading}>{editingPlayerId ? 'Update Player' : 'Save Player'}</button>
               </div>
             </form>
           </div>

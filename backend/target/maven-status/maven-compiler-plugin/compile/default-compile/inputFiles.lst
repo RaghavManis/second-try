@@ -5,6 +5,7 @@ C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\j
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\security\SecurityConfig.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\model\BallEvent.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\MatchRepository.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\GalleryImageRepository.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\ScorecardBattingRepository.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\service\PointsService.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\BallEventRepository.java
@@ -12,8 +13,10 @@ C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\j
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\PlayerController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\model\ScorecardBatting.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\ScorecardBowlingRepository.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\service\CloudinaryService.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\dto\BallSubmissionDto.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\ScoreRepository.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\GalleryController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\ScoreController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\CricketTournamentApplication.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\AuthController.java
@@ -26,9 +29,12 @@ C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\j
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\MatchScoringController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\service\MatchScoringService.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\service\PlayerService.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\config\CloudinaryConfig.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\TeamRepository.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\PointsController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\model\Score.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\UploadController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\model\Team.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\model\GalleryImage.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\model\Match.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\dto\LiveMatchDetailsDto.java

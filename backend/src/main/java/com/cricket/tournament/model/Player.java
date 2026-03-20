@@ -203,4 +203,10 @@ public class Player {
 
     public Double getBowlingStrikeRate() { return bowlingStrikeRate; }
     public void setBowlingStrikeRate(Double bowlingStrikeRate) { this.bowlingStrikeRate = bowlingStrikeRate; }
+
+    @Column(name = "player_image", length = 1024)
+    private String playerImage;
+
+    public String getPlayerImage() { return playerImage; }
+    public void setPlayerImage(String playerImage) { this.playerImage = playerImage; }
 }

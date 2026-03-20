@@ -13,6 +13,7 @@ import AdminLogin from './pages/AdminLogin';
 import LiveMatch from './pages/LiveMatch';
 import AdminScoringPanel from './pages/AdminScoringPanel';
 import MatchScorecard from './pages/MatchScorecard';
+import Gallery from './pages/Gallery';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
@@ -41,6 +42,7 @@ const App: React.FC = () => {
               <Route path="/matches/:matchId/scorecard" element={<MatchScorecard />} />
               <Route path="/live-match" element={<LiveMatch />} />
               <Route path="/points-table" element={<PointsTable />} />
+              <Route path="/gallery" element={<Gallery />} />
             </Routes>
           </main>
         </div>

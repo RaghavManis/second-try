@@ -1,6 +1,7 @@
 export interface Team {
   id?: number;
   teamName: string;
+  teamLogo?: string;
   coachName: string;
 }
 
@@ -16,6 +17,7 @@ export interface Player {
   team: Team;
   
   // Basic Info
+  playerImage?: string;
   battingStyle?: string;
   bowlingStyle?: string;
 
@@ -61,6 +63,11 @@ export interface Match {
   playingXiTeamA?: Player[];
   playingXiTeamB?: Player[];
   result?: string;
+  manOfTheMatch?: Player;
+  currentScore?: number;
+  currentWickets?: number;
+  firstInningsScore?: number;
+  firstInningsWickets?: number;
 }
 
 export interface LiveMatchSetupDto {
@@ -97,14 +104,15 @@ export interface LiveMatchDetailsDto {
   currentNonStriker?: Player;
   currentBowler?: Player;
   previousBowlerId?: number;
-  strikerRuns: number;
-  strikerBalls: number;
-  nonStrikerRuns: number;
-  nonStrikerBalls: number;
-  bowlerOvers: number;
-  bowlerRuns: number;
-  bowlerWickets: number;
-  lastSixBalls: string[];
+  strikerRuns?: number;
+  strikerBalls?: number;
+  nonStrikerRuns?: number;
+  nonStrikerBalls?: number;
+  bowlerOvers?: number;
+  bowlerRuns?: number;
+  bowlerWickets?: number;
+  recentBalls: string[];
+  thisOverBalls: string[];
 }
 
 export interface ScorecardBatting {
@@ -153,4 +161,10 @@ export interface PointsTableEntry {
   ties: number;
   points: number;
   netRunRate?: number;
+}
+
+export interface GalleryImage {
+  id?: number;
+  imageUrl: string;
+  uploadedAt?: string;
 }

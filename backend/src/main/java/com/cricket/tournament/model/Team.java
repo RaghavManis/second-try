@@ -49,4 +49,15 @@ public class Team {
     public void setCoachName(String coachName) {
         this.coachName = coachName;
     }
+
+    @Column(name = "team_logo", length = 1024)
+    private String teamLogo;
+
+    public String getTeamLogo() {
+        return teamLogo;
+    }
+
+    public void setTeamLogo(String teamLogo) {
+        this.teamLogo = teamLogo;
+    }
 }

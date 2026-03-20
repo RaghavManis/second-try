@@ -28,4 +28,14 @@ public class TeamService {
     public Team getTeamById(Long id) {
         return teamRepository.findById(id).orElseThrow(() -> new RuntimeException("Team not found"));
     }
+
+    public Team updateTeam(Long id, Team updatedTeam) {
+        Team existingTeam = getTeamById(id);
+        
+        if (updatedTeam.getTeamName() != null) existingTeam.setTeamName(updatedTeam.getTeamName());
+        if (updatedTeam.getCoachName() != null) existingTeam.setCoachName(updatedTeam.getCoachName());
+        if (updatedTeam.getTeamLogo() != null) existingTeam.setTeamLogo(updatedTeam.getTeamLogo());
+        
+        return teamRepository.save(existingTeam);
+    }
 }

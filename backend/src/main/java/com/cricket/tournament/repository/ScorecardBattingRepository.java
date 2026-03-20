@@ -12,4 +12,13 @@ public interface ScorecardBattingRepository extends JpaRepository<ScorecardBatti
     List<ScorecardBatting> findByMatchId(Long matchId);
     Optional<ScorecardBatting> findByMatchIdAndInningsAndPlayerId(Long matchId, Integer innings, Long playerId);
     List<ScorecardBatting> findByMatchIdAndInnings(Long matchId, Integer innings);
+    
+    @org.springframework.data.jpa.repository.Query(value = "SELECT p.name AS playerName, t.team_name AS teamName, SUM(s.runs) AS totalRuns " +
+           "FROM scorecard_batting s " +
+           "JOIN players p ON s.player_id = p.id " +
+           "JOIN teams t ON s.team_id = t.id " +
+           "GROUP BY s.player_id, p.name, t.team_name " +
+           "ORDER BY totalRuns DESC " +
+           "LIMIT 5", nativeQuery = true)
+    List<java.util.Map<String, Object>> getTopRunScorers();
 }

@@ -12,4 +12,13 @@ public interface ScorecardBowlingRepository extends JpaRepository<ScorecardBowli
     List<ScorecardBowling> findByMatchId(Long matchId);
     Optional<ScorecardBowling> findByMatchIdAndInningsAndPlayerId(Long matchId, Integer innings, Long playerId);
     List<ScorecardBowling> findByMatchIdAndInnings(Long matchId, Integer innings);
+    
+    @org.springframework.data.jpa.repository.Query(value = "SELECT p.name AS playerName, t.team_name AS teamName, CAST(SUM(s.wickets) AS SIGNED) AS totalWickets " +
+           "FROM scorecard_bowling s " +
+           "JOIN players p ON s.player_id = p.id " +
+           "JOIN teams t ON s.team_id = t.id " +
+           "GROUP BY s.player_id, p.name, t.team_name " +
+           "ORDER BY totalWickets DESC " +
+           "LIMIT 5", nativeQuery = true)
+    List<java.util.Map<String, Object>> getTopWicketTakers();
 }

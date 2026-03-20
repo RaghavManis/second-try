@@ -65,6 +65,12 @@ public class Match {
     @Column(name = "current_wickets")
     private Integer currentWickets = 0;
 
+    @Column(name = "first_innings_score")
+    private Integer firstInningsScore;
+
+    @Column(name = "first_innings_wickets")
+    private Integer firstInningsWickets;
+
     @Column(name = "current_balls")
     private Integer currentBalls = 0;
 
@@ -98,6 +104,10 @@ public class Match {
 
     @Column(name = "result")
     private String result;
+
+    @ManyToOne
+    @JoinColumn(name = "man_of_the_match_id")
+    private Player manOfTheMatch;
 
     public enum MatchStatus {
         SCHEDULED,
@@ -244,6 +254,22 @@ public class Match {
         this.currentBalls = currentBalls;
     }
 
+    public Integer getFirstInningsScore() {
+        return firstInningsScore;
+    }
+
+    public void setFirstInningsScore(Integer firstInningsScore) {
+        this.firstInningsScore = firstInningsScore;
+    }
+
+    public Integer getFirstInningsWickets() {
+        return firstInningsWickets;
+    }
+
+    public void setFirstInningsWickets(Integer firstInningsWickets) {
+        this.firstInningsWickets = firstInningsWickets;
+    }
+
     public Player getCurrentStriker() {
         return currentStriker;
     }
@@ -290,5 +316,13 @@ public class Match {
 
     public void setResult(String result) {
         this.result = result;
+    }
+
+    public Player getManOfTheMatch() {
+        return manOfTheMatch;
+    }
+
+    public void setManOfTheMatch(Player manOfTheMatch) {
+        this.manOfTheMatch = manOfTheMatch;
     }
 }

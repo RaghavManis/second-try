@@ -20,4 +20,9 @@ public class PointsController {
     public List<Map<String, Object>> getPointsTable() {
         return pointsService.getPointsTable();
     }
+
+    @GetMapping("/top-performers")
+    public Map<String, Object> getTopPerformers() {
+        return pointsService.getTopPerformers();
+    }
 }

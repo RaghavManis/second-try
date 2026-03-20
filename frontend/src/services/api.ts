@@ -56,6 +56,7 @@ export const ScoreService = {
 
 export const PointsService = {
   getPointsTable: () => api.get<PointsTableEntry[]>('/points'),
+  getTopPerformers: () => api.get<{topRunScorers: any[], topWicketTakers: any[]}>('/points/top-performers'),
 };
 
 export const MatchScoringService = {
@@ -68,8 +69,24 @@ export const MatchScoringService = {
   updateBowler: (matchId: number, bowlerId: number) => api.patch<Match>(`/scoring/${matchId}/bowler?bowlerId=${bowlerId}`),
   endInnings: (matchId: number, params: { strikerId: number, nonStrikerId: number, bowlerId: number, targetScore: number }) => 
     api.post<Match>(`/scoring/${matchId}/end-innings`, null, { params }),
-  completeMatch: (matchId: number, winnerTeamId?: number) => 
-    api.post<Match>(`/scoring/${matchId}/complete`, null, { params: { winnerTeamId } }),
+  completeMatch: (matchId: number, winnerTeamId?: number, manOfTheMatchId?: number) => 
+    api.post<Match>(`/scoring/${matchId}/complete`, null, { params: { winnerTeamId, manOfTheMatchId } }),
+};
+
+export const UploadService = {
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.post<{url: string}>('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+};
+
+export const GalleryService = {
+  getAllImages: () => api.get<any[]>('/gallery'),
+  addImage: (data: { imageUrl: string }) => api.post<any>('/gallery', data),
+  deleteImage: (id: number) => api.delete(`/gallery/${id}`)
 };
 
 export default api;

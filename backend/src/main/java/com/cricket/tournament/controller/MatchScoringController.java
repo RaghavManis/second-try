@@ -42,8 +42,8 @@ public class MatchScoringController {
     }
 
     @PostMapping("/{matchId}/complete")
-    public ResponseEntity<Match> completeMatch(@PathVariable Long matchId, @RequestParam(required = false) Long winnerTeamId) {
-        return ResponseEntity.ok(matchScoringService.completeMatch(matchId, winnerTeamId));
+    public ResponseEntity<Match> completeMatch(@PathVariable Long matchId, @RequestParam(required = false) Long winnerTeamId, @RequestParam(required = false) Long manOfTheMatchId) {
+        return ResponseEntity.ok(matchScoringService.completeMatch(matchId, winnerTeamId, manOfTheMatchId));
     }
 
     @DeleteMapping("/{matchId}/last-ball")

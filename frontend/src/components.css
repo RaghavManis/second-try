@@ -148,3 +148,51 @@
   border-radius: 8px;
   display: inline-block;
 }
+
+/* Mobile Stacked Table Strategy */
+@media (max-width: 768px) {
+  .mobile-card-table, .mobile-card-table tbody, .mobile-card-table tr, .mobile-card-table td {
+    display: block;
+    width: 100%;
+  }
+  
+  .mobile-card-table thead {
+    display: none;
+  }
+  
+  .mobile-card-table tr {
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  
+  .mobile-card-table td {
+    padding: 0.5rem 0 !important;
+    text-align: right !important;
+    border: none !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .mobile-card-table td::before {
+    content: attr(data-label);
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+  
+  .mobile-card-table td:first-child {
+    justify-content: flex-start;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    margin-bottom: 0.5rem;
+    padding-bottom: 1rem !important;
+  }
+  
+  .mobile-card-table td:first-child::before {
+    display: none;
+  }
+}

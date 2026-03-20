@@ -60,7 +60,19 @@ public class MatchScoringService {
             match.setPlayingXiTeamB(new HashSet<>(playerRepository.findAllById(setup.getPlayingXiTeamBIds())));
         }
         
-        return matchRepository.save(match);
+        match = matchRepository.save(match);
+        
+        // Ensure scorecards are generated immediately for the openers so they appear on the frontend.
+        ScorecardBatting strikerCard = createBattingCard(match, match.getCurrentStriker());
+        scorecardBattingRepository.save(strikerCard);
+        
+        ScorecardBatting nonStrikerCard = createBattingCard(match, match.getCurrentNonStriker());
+        scorecardBattingRepository.save(nonStrikerCard);
+        
+        ScorecardBowling bowlerCard = createBowlingCard(match, match.getCurrentBowler());
+        scorecardBowlingRepository.save(bowlerCard);
+        
+        return match;
     }
 
     private ScorecardBatting createBattingCard(Match match, Player player) {
@@ -256,13 +268,19 @@ public class MatchScoringService {
         boolean targetChased = match.getCurrentInnings() == 2 && match.getTargetScore() != null && match.getCurrentScore() >= match.getTargetScore();
 
         if (targetChased && saveEvent) {
-            // Target chased -> Complete Match
-            completeMatch(matchId, match.getBattingTeam().getId());
-            return matchRepository.findById(matchId).orElseThrow();
+            // Target chased -> Complete Match internally if needed, or leave to UI
+            // Better to let admin officially complete match to select MOM
+            // For now, we just auto end 2nd innings without marking Match COMPLETE (UI completes it).
+            match.setCurrentStriker(null);
+            match.setCurrentNonStriker(null);
+            match.setCurrentBowler(null);
         } else if ((isAllOut || maxOversReached) && saveEvent) {
             if (match.getCurrentInnings() == 1) {
                 // Auto End 1st Innings
                 // The admin will select the new batsman/bowlers from the UI to resume, so we just set the target and swap teams here.
+                match.setFirstInningsScore(match.getCurrentScore());
+                match.setFirstInningsWickets(match.getCurrentWickets());
+                
                 match.setCurrentInnings(2);
                 match.setTargetScore(match.getCurrentScore() + 1);
                 match.setCurrentScore(0);
@@ -277,12 +295,10 @@ public class MatchScoringService {
                 match.setCurrentNonStriker(null);
                 match.setCurrentBowler(null);
             } else if (match.getCurrentInnings() == 2) {
-                // 2nd innings out of resources but didn't chase target -> Bowling Team wins (or Tie if scores are level)
-                Long winnerId = match.getCurrentScore().equals(match.getTargetScore() - 1) 
-                    ? null // TIE
-                    : match.getBowlingTeam().getId();
-                completeMatch(matchId, winnerId);
-                return matchRepository.findById(matchId).orElseThrow();
+                // 2nd innings out of resources but didn't chase target -> waiting for UI to complete match
+                match.setCurrentStriker(null);
+                match.setCurrentNonStriker(null);
+                match.setCurrentBowler(null);
             }
         }
 
@@ -397,6 +413,9 @@ public class MatchScoringService {
     public Match endInnings(Long matchId, Long newStrikerId, Long newNonStrikerId, Long newBowlerId, Integer targetScore) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         if (match.getCurrentInnings() == 1) {
+            match.setFirstInningsScore(match.getCurrentScore());
+            match.setFirstInningsWickets(match.getCurrentWickets());
+            
             match.setCurrentInnings(2);
             match.setTargetScore(targetScore);
             match.setCurrentScore(0);
@@ -410,12 +429,24 @@ public class MatchScoringService {
             match.setCurrentStriker(playerRepository.findById(newStrikerId).orElse(null));
             match.setCurrentNonStriker(playerRepository.findById(newNonStrikerId).orElse(null));
             match.setCurrentBowler(playerRepository.findById(newBowlerId).orElse(null));
-            return matchRepository.save(match);
+            match = matchRepository.save(match);
+            
+            if (match.getCurrentStriker() != null) scorecardBattingRepository.save(createBattingCard(match, match.getCurrentStriker()));
+            if (match.getCurrentNonStriker() != null) scorecardBattingRepository.save(createBattingCard(match, match.getCurrentNonStriker()));
+            if (match.getCurrentBowler() != null) scorecardBowlingRepository.save(createBowlingCard(match, match.getCurrentBowler()));
+            
+            return match;
         } else if (match.getCurrentInnings() == 2 && match.getCurrentStriker() == null) {
             match.setCurrentStriker(playerRepository.findById(newStrikerId).orElse(null));
             match.setCurrentNonStriker(playerRepository.findById(newNonStrikerId).orElse(null));
             match.setCurrentBowler(playerRepository.findById(newBowlerId).orElse(null));
-            return matchRepository.save(match);
+            match = matchRepository.save(match);
+            
+            if (match.getCurrentStriker() != null) scorecardBattingRepository.save(createBattingCard(match, match.getCurrentStriker()));
+            if (match.getCurrentNonStriker() != null) scorecardBattingRepository.save(createBattingCard(match, match.getCurrentNonStriker()));
+            if (match.getCurrentBowler() != null) scorecardBowlingRepository.save(createBowlingCard(match, match.getCurrentBowler()));
+            
+            return match;
         }
         return match;
     }
@@ -471,6 +502,17 @@ public class MatchScoringService {
             });
         }
         
+        // Rule 16 Fallbacks: if they haven't been fetched yet but they exist in match, default to zero
+        if (match.getCurrentStriker() != null && dto.getStrikerRuns() == null) {
+            dto.setStrikerRuns(0); dto.setStrikerBalls(0);
+        }
+        if (match.getCurrentNonStriker() != null && dto.getNonStrikerRuns() == null) {
+            dto.setNonStrikerRuns(0); dto.setNonStrikerBalls(0);
+        }
+        if (match.getCurrentBowler() != null && dto.getBowlerRuns() == null) {
+            dto.setBowlerRuns(0); dto.setBowlerWickets(0); dto.setBowlerOvers(0.0);
+        }
+        
         // Rule 16: Last six balls display
         List<BallEvent> events = ballEventRepository.findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(matchId, match.getCurrentInnings());
         
@@ -478,9 +520,12 @@ public class MatchScoringService {
             dto.setPreviousBowlerId(events.get(events.size() - 1).getBowler().getId());
         }
 
-        List<String> lastSix = new ArrayList<>();
-        int start = Math.max(0, events.size() - 6);
-        for (int i = start; i < events.size(); i++) {
+        List<String> recentBalls = new ArrayList<>();
+        List<String> thisOverBalls = new ArrayList<>();
+        
+        int activeOverNumber = legalBalls / 6;
+
+        for (int i = 0; i < events.size(); i++) {
             BallEvent e = events.get(i);
             String evStr;
             if (Boolean.TRUE.equals(e.getIsWicket())) {
@@ -496,15 +541,26 @@ public class MatchScoringService {
             } else {
                 evStr = String.valueOf(e.getRuns());
             }
-            lastSix.add(evStr);
+            
+            if (e.getOverNumber() != null && e.getOverNumber() == activeOverNumber) {
+                thisOverBalls.add(evStr);
+            } else {
+                recentBalls.add(evStr);
+            }
         }
-        dto.setLastSixBalls(lastSix);
+        
+        if (recentBalls.size() > 10) {
+            recentBalls = recentBalls.subList(recentBalls.size() - 10, recentBalls.size());
+        }
+        
+        dto.setRecentBalls(recentBalls);
+        dto.setThisOverBalls(thisOverBalls);
 
         return dto;
     }
 
     @Transactional
-    public Match completeMatch(Long matchId, Long winnerTeamId) {
+    public Match completeMatch(Long matchId, Long winnerTeamId, Long manOfTheMatchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         match.setStatus(Match.MatchStatus.COMPLETED);
         if (winnerTeamId != null) {
@@ -522,6 +578,10 @@ public class MatchScoringService {
             }
         } else {
             match.setResult("Match Tied");
+        }
+        
+        if (manOfTheMatchId != null) {
+            match.setManOfTheMatch(playerRepository.findById(manOfTheMatchId).orElse(null));
         }
         
         // Apply to Global Player Lifetime Stats

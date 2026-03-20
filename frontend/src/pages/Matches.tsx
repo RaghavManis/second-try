@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { MatchService, TeamService, PlayerService } from '../services/api';
-import type { Match, Team, Player } from '../types';
+import { MatchService, TeamService } from '../services/api';
+import type { Match, Team } from '../types';
 import { CalendarPlus, MapPin, Clock, Edit } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -94,7 +94,38 @@ const Matches: React.FC = () => {
 
   const getRandomLogo = (id: number) => `https://api.dicebear.com/7.x/identicon/svg?seed=Team${id}&backgroundColor=1e293b`;
 
-  const MatchCard = ({ match, showActions = false }: { match: Match; showActions?: boolean }) => (
+  const MatchCard = ({ match, showActions = false }: { match: Match; showActions?: boolean }) => {
+    let team1 = match.teamA;
+    let team2 = match.teamB;
+    let team1Info = null;
+    let team2Info = null;
+    
+    // Innings Order Display Logic
+    if (match.status !== 'SCHEDULED' && match.battingTeam && match.bowlingTeam) {
+       if (match.currentInnings === 1) {
+           team1 = match.battingTeam;
+           team2 = match.bowlingTeam;
+           team1Info = `${match.currentScore}/${match.currentWickets}`;
+           team2Info = `Yet to bat`;
+       } else {
+           // Innings 2 or Completed
+           // The team that is CURRENTLY bowling was the batting team in Innings 1.
+           // So team1 (first to bat) = bowlingTeam
+           team1 = match.bowlingTeam;
+           team2 = match.battingTeam;
+           
+           if (match.firstInningsScore !== undefined && match.firstInningsWickets !== undefined) {
+               team1Info = `${match.firstInningsScore}/${match.firstInningsWickets}`;
+           } else if (match.targetScore !== undefined) {
+               // Fallback if data is missing
+               team1Info = `${match.targetScore - 1}`;
+           }
+           
+           team2Info = `${match.currentScore}/${match.currentWickets}`;
+       }
+    }
+
+    return (
     <div className="glass-panel hover-lift" style={{ padding: '1.5rem', position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ position: 'absolute', top: '1rem', right: '1rem', 
         background: `${getStatusColor(match.status)}20`, 
@@ -105,15 +136,31 @@ const Matches: React.FC = () => {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '1.5rem' }}>
         <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-          <img src={getRandomLogo(match.teamA.id || 0)} alt={match.teamA.teamName} style={{ width: 48, height: 48, borderRadius: '50%' }} />
-          <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{match.teamA.teamName}</h3>
+          <img src={team1.teamLogo || getRandomLogo(team1.id || 0)} alt={team1.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+          <h3 className="gradient-text" style={{ fontSize: '1.1rem', margin: 0 }}>{team1.teamName}</h3>
+          {(match.status === 'COMPLETED' || match.status === 'ONGOING') && (
+             <div style={{ fontWeight: 'bold', fontSize: '1rem', color: '#fff', marginTop: '0.2rem' }}>
+                {team1Info}
+             </div>
+          )}
         </div>
         <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-secondary)', padding: '0 1rem' }}>VS</div>
         <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-          <img src={getRandomLogo(match.teamB.id || 0)} alt={match.teamB.teamName} style={{ width: 48, height: 48, borderRadius: '50%' }} />
-          <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{match.teamB.teamName}</h3>
+          <img src={team2.teamLogo || getRandomLogo(team2.id || 0)} alt={team2.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+          <h3 className="gradient-text" style={{ fontSize: '1.1rem', margin: 0 }}>{team2.teamName}</h3>
+          {(match.status === 'COMPLETED' || match.status === 'ONGOING') && (
+             <div style={{ fontWeight: 'bold', fontSize: '1rem', color: '#fff', marginTop: '0.2rem' }}>
+                {team2Info}
+             </div>
+          )}
         </div>
       </div>
+      
+      {match.status === 'COMPLETED' && match.result && (
+        <div style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.5rem', borderRadius: '8px', marginBottom: '1rem', color: '#10b981', fontSize: '0.9rem', fontWeight: 'bold' }}>
+          {match.result}
+        </div>
+      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
@@ -150,6 +197,7 @@ const Matches: React.FC = () => {
       )}
     </div>
   );
+};
 
   const completedOrOngoing = matches.filter(m => m.status === 'COMPLETED');
   const upcoming = matches.filter(m => m.status === 'SCHEDULED');
@@ -164,7 +212,7 @@ const Matches: React.FC = () => {
       }}>
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem' }}>
-          <h1 className="gradient-text" style={{ fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
+          <h1 className="gradient-text" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
             Tournament Matches
           </h1>
           <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
