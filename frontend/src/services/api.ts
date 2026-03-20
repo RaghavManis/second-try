@@ -1,8 +1,8 @@
 import axios from 'axios';
 import type { Team, Match, Score, PointsTableEntry, Player, LiveMatchSetupDto, BallSubmissionDto, LiveMatchDetailsDto, ScorecardBatting, ScorecardBowling } from '../types';
 
-const API_URL = 'http://localhost:8080/api';
-
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+console.log("API URL:", API_URL);
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -21,7 +21,7 @@ api.interceptors.request.use((config) => {
 });
 
 export const AuthService = {
-  login: (username: string, password: string) => api.post<{token: string}>('/auth/login', { username, password }),
+  login: (username: string, password: string) => api.post<{ token: string }>('/auth/login', { username, password }),
 };
 
 export const TeamService = {
@@ -56,7 +56,7 @@ export const ScoreService = {
 
 export const PointsService = {
   getPointsTable: () => api.get<PointsTableEntry[]>('/points'),
-  getTopPerformers: () => api.get<{topRunScorers: any[], topWicketTakers: any[]}>('/points/top-performers'),
+  getTopPerformers: () => api.get<{ topRunScorers: any[], topWicketTakers: any[] }>('/points/top-performers'),
 };
 
 export const MatchScoringService = {
@@ -67,9 +67,9 @@ export const MatchScoringService = {
   recordBall: (matchId: number, ballDto: BallSubmissionDto) => api.post<Match>(`/scoring/${matchId}/ball`, ballDto),
   undoLastBall: (matchId: number) => api.delete<Match>(`/scoring/${matchId}/last-ball`),
   updateBowler: (matchId: number, bowlerId: number) => api.patch<Match>(`/scoring/${matchId}/bowler?bowlerId=${bowlerId}`),
-  endInnings: (matchId: number, params: { strikerId: number, nonStrikerId: number, bowlerId: number, targetScore: number }) => 
+  endInnings: (matchId: number, params: { strikerId: number, nonStrikerId: number, bowlerId: number, targetScore: number }) =>
     api.post<Match>(`/scoring/${matchId}/end-innings`, null, { params }),
-  completeMatch: (matchId: number, winnerTeamId?: number, manOfTheMatchId?: number) => 
+  completeMatch: (matchId: number, winnerTeamId?: number, manOfTheMatchId?: number) =>
     api.post<Match>(`/scoring/${matchId}/complete`, null, { params: { winnerTeamId, manOfTheMatchId } }),
 };
 
@@ -77,7 +77,7 @@ export const UploadService = {
   uploadImage: (file: File) => {
     const formData = new FormData();
     formData.append('image', file);
-    return api.post<{url: string}>('/upload', formData, {
+    return api.post<{ url: string }>('/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   }

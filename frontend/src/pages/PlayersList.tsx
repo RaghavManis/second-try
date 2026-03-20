@@ -4,6 +4,7 @@ import { PlayerService } from '../services/api';
 import type { Player } from '../types';
 import { User, Shield, Star } from 'lucide-react';
 import { AnimatedSection } from '../components/AnimatedSection';
+import { AutoScrollContainer } from '../components/AutoScrollContainer';
 
 const PlayersList: React.FC = () => {
   const navigate = useNavigate();
@@ -100,70 +101,70 @@ const PlayersList: React.FC = () => {
         </div>
       </div>
 
-      <div id="players-content" className="page-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <div id="players-content" className="dashboard-sections">
         
         {/* SECTION 2: STAR PLAYERS */}
         {starPlayers.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-2">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Featured Stars</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Athletes making headlines right now.</p>
-          <div className="horizontal-scroller">
+          <AutoScrollContainer className="horizontal-scroller">
             {starPlayers.map(player => (
-              <div key={player.id} style={{ width: '300px', flex: '0 0 auto' }}>
+              <div key={player.id} style={{ height: '100%' }}>
                 <PlayerCard player={player} />
               </div>
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 3: ROLE BASED (BATSMEN) */}
         {batsmen.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-3">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Top Batsmen</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The run machines of the tournament.</p>
-          <div className="horizontal-scroller">
+          <AutoScrollContainer className="horizontal-scroller">
             {batsmen.map(player => (
-              <div key={player.id} style={{ width: '280px', flex: '0 0 auto' }}>
+              <div key={player.id} style={{ height: '100%' }}>
                 <PlayerCard player={player} />
               </div>
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 3.5: ROLE BASED (BOWLERS) */}
         {bowlers.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-4">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Key Bowlers</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Taking wickets and restricting runs.</p>
-          <div className="horizontal-scroller">
+          <AutoScrollContainer className="horizontal-scroller">
             {bowlers.map(player => (
-              <div key={player.id} style={{ width: '280px', flex: '0 0 auto' }}>
+              <div key={player.id} style={{ height: '100%' }}>
                 <PlayerCard player={player} />
               </div>
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 3.75: ROLE BASED (ALL ROUNDERS) */}
         {allRounders.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-5">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>All Rounders</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The ultimate match winners.</p>
-          <div className="horizontal-scroller">
+          <AutoScrollContainer className="horizontal-scroller">
             {allRounders.map(player => (
-              <div key={player.id} style={{ width: '280px', flex: '0 0 auto' }}>
+              <div key={player.id} style={{ height: '100%' }}>
                 <PlayerCard player={player} />
               </div>
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 4: ALL PLAYERS DIRECTORY */}
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-1">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Full Directory</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Every registered player in the database.</p>
           

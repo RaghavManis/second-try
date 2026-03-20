@@ -6,6 +6,7 @@ import { CalendarPlus, MapPin, Clock, Edit } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { AnimatedSection } from '../components/AnimatedSection';
+import { AutoScrollContainer } from '../components/AutoScrollContainer';
 
 const Matches: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -224,40 +225,40 @@ const Matches: React.FC = () => {
         </div>
       </div>
 
-      <div id="matches-content" className="page-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <div id="matches-content" className="dashboard-sections">
         
         {/* SECTION 2: MATCH HIGHLIGHTS */}
         {completedOrOngoing.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-2">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Match Highlights</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Latest completed and ongoing matches.</p>
-          <div className="horizontal-scroller">
+          <AutoScrollContainer className="horizontal-scroller">
             {completedOrOngoing.slice(0, 10).map(match => (
-              <div key={match.id} style={{ width: '320px', flex: '0 0 auto' }}>
+              <div key={match.id} style={{ height: '100%' }}>
                 <MatchCard match={match} />
               </div>
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 3: UPCOMING FIXTURES */}
         {upcoming.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-3">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Upcoming Fixtures</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Scheduled matches eagerly awaited.</p>
-          <div className="horizontal-scroller">
+          <AutoScrollContainer className="horizontal-scroller">
             {upcoming.slice(0, 10).map(match => (
-              <div key={match.id} style={{ width: '320px', flex: '0 0 auto' }}>
+              <div key={match.id} style={{ height: '100%' }}>
                 <MatchCard match={match} />
               </div>
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 4: ALL MATCHES */}
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-4">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>All Matches</h2>

@@ -4,6 +4,7 @@ import { TeamService, MatchService, PlayerService, PointsService } from '../serv
 import { Users, Calendar, Trophy, ArrowRight, Shield, MapPin, Clock } from 'lucide-react';
 import type { Team, Match, Player, PointsTableEntry } from '../types';
 import { AnimatedSection } from '../components/AnimatedSection';
+import { AutoScrollContainer } from '../components/AutoScrollContainer';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -94,10 +95,10 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="page-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <div className="dashboard-sections">
         
         {/* SECTION 2: TOURNAMENT STATS */}
-        <AnimatedSection id="stats-section">
+        <AnimatedSection id="stats-section" className="bg-section-1">
           <h2 className="scroll-section-title gradient-text">Tournament at a Glance</h2>
           <p className="scroll-section-subtitle">Key metrics driving the competition right now.</p>
           
@@ -130,7 +131,7 @@ const Dashboard: React.FC = () => {
 
         {/* SECTION 3: RECENT MATCHES CAROUSEL */}
         {recentMatches.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-2">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>Action Center</h2>
@@ -139,8 +140,32 @@ const Dashboard: React.FC = () => {
             <NavLink to="/matches" className="btn btn-secondary hover-lift">View All <ArrowRight size={16}/></NavLink>
           </div>
           
-          <div className="horizontal-scroller">
-            {recentMatches.map(match => (
+          <AutoScrollContainer className="horizontal-scroller">
+            {recentMatches.map(match => {
+              let team1 = match.teamA;
+              let team2 = match.teamB;
+              let team1Info = null;
+              let team2Info = null;
+
+              if (match.status !== 'SCHEDULED' && match.battingTeam && match.bowlingTeam) {
+                if (match.currentInnings === 1) {
+                  team1 = match.battingTeam;
+                  team2 = match.bowlingTeam;
+                  team1Info = `${match.currentScore}/${match.currentWickets}`;
+                  team2Info = `Yet to bat`;
+                } else {
+                  team1 = match.bowlingTeam;
+                  team2 = match.battingTeam;
+                  if (match.firstInningsScore !== undefined && match.firstInningsWickets !== undefined) {
+                      team1Info = `${match.firstInningsScore}/${match.firstInningsWickets}`;
+                  } else if (match.targetScore !== undefined) {
+                      team1Info = `${match.targetScore - 1}`;
+                  }
+                  team2Info = `${match.currentScore}/${match.currentWickets}`;
+                }
+              }
+
+              return (
               <div key={match.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ position: 'absolute', top: '1rem', right: '1rem', 
                   background: `${getStatusColor(match.status)}20`, color: getStatusColor(match.status), 
@@ -150,15 +175,31 @@ const Dashboard: React.FC = () => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem', marginBottom: '1.5rem' }}>
                   <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                    <img src={match.teamA.teamLogo || getRandomLogo(match.teamA.id || 0)} alt={match.teamA.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
-                    <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{match.teamA.teamName}</h3>
+                    <img src={team1.teamLogo || getRandomLogo(team1.id || 0)} alt={team1.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+                    <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{team1.teamName}</h3>
+                    {(match.status === 'COMPLETED' || match.status === 'ONGOING') && (
+                       <div style={{ fontWeight: 'bold', fontSize: '1rem', color: '#fff', marginTop: '0.2rem' }}>
+                          {team1Info}
+                       </div>
+                    )}
                   </div>
                   <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-secondary)', padding: '0 1rem' }}>VS</div>
                   <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                    <img src={match.teamB.teamLogo || getRandomLogo(match.teamB.id || 0)} alt={match.teamB.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
-                    <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{match.teamB.teamName}</h3>
+                    <img src={team2.teamLogo || getRandomLogo(team2.id || 0)} alt={team2.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+                    <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{team2.teamName}</h3>
+                    {(match.status === 'COMPLETED' || match.status === 'ONGOING') && (
+                       <div style={{ fontWeight: 'bold', fontSize: '1rem', color: '#fff', marginTop: '0.2rem' }}>
+                          {team2Info}
+                       </div>
+                    )}
                   </div>
                 </div>
+
+                {match.status === 'COMPLETED' && match.result && (
+                  <div style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.5rem', borderRadius: '8px', marginBottom: '1rem', color: '#10b981', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                    {match.result}
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: 'auto' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
@@ -169,14 +210,15 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+              );
+            })}
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 4: TEAMS OVERVIEW */}
         {teams.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-3">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>The Contenders</h2>
@@ -185,7 +227,7 @@ const Dashboard: React.FC = () => {
             <NavLink to="/teams" className="btn btn-secondary hover-lift">View All <ArrowRight size={16}/></NavLink>
           </div>
 
-          <div className="horizontal-scroller">
+          <AutoScrollContainer className="horizontal-scroller">
             {teams.map(team => (
               <div key={team.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer' }} onClick={() => navigate(`/teams/${team.id}`)}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
@@ -199,13 +241,13 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 5: STAR PLAYERS */}
         {players.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-4">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>Star Athletes</h2>
@@ -214,9 +256,9 @@ const Dashboard: React.FC = () => {
             <NavLink to="/players" className="btn btn-secondary hover-lift">View All <ArrowRight size={16}/></NavLink>
           </div>
 
-          <div className="horizontal-scroller">
+          <AutoScrollContainer className="horizontal-scroller">
             {players.map(player => (
-              <div key={player.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', width: '280px' }} onClick={() => navigate(`/players/${player.id}`)}>
+              <div key={player.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem' }} onClick={() => navigate(`/players/${player.id}`)}>
                 <img src={player.playerImage || getRandomAvatar(player.id || 0)} alt={player.name} style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', objectFit: 'cover' }} />
                 <div>
                   <h3 style={{ fontSize: '1.1rem', margin: '0 0 0.25rem 0' }}>{player.name}</h3>
@@ -225,13 +267,13 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 6: STANDINGS PREVIEW */}
         {standings.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-5">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>Leaderboard</h2>

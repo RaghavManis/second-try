@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { AnimatedSection } from '../components/AnimatedSection';
+import { AutoScrollContainer } from '../components/AutoScrollContainer';
 
 const Teams: React.FC = () => {
   const navigate = useNavigate();
@@ -109,14 +110,14 @@ const Teams: React.FC = () => {
         </div>
       </div>
 
-      <div id="teams-content" className="page-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <div id="teams-content" className="dashboard-sections">
         
         {/* SECTION 2: FEATURED TEAMS */}
         {featuredTeams.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-2">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Featured Franchises</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The top contenders drawing the crowds.</p>
-          <div className="horizontal-scroller">
+          <AutoScrollContainer className="horizontal-scroller">
             {featuredTeams.map(team => (
               <div key={team.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }} onClick={() => navigate(`/teams/${team.id}`)}>
                 <img src={getLogo(team)} alt={team.teamName} style={{ width: 80, height: 80, borderRadius: '16px', marginBottom: '1rem', objectFit: 'cover' }} />
@@ -126,12 +127,12 @@ const Teams: React.FC = () => {
                 </div>
               </div>
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 3: TEAM GALLERY */}
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-3">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>Team Roster</h2>

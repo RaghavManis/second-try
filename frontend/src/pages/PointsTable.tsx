@@ -3,6 +3,7 @@ import { PointsService, TeamService } from '../services/api';
 import type { PointsTableEntry, Team } from '../types';
 import { Trophy } from 'lucide-react';
 import { AnimatedSection } from '../components/AnimatedSection';
+import { AutoScrollContainer } from '../components/AutoScrollContainer';
 
 const PointsTable: React.FC = () => {
   const [points, setPoints] = useState<PointsTableEntry[]>([]);
@@ -46,7 +47,7 @@ const PointsTable: React.FC = () => {
     const teamObj = teams.find(t => t.id === pt.teamId);
     return (
       <div className="glass-panel hover-lift" style={{ 
-        padding: '1.5rem', width: '280px', flex: '0 0 auto', 
+        padding: '1.5rem', 
         display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative',
         borderTop: `4px solid ${color}`
       }}>
@@ -87,23 +88,23 @@ const PointsTable: React.FC = () => {
         </div>
       </div>
 
-      <div id="standings-content" className="page-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <div id="standings-content" className="dashboard-sections">
         
         {/* SECTION 2: TOP TEAMS PODIUM */}
         {topTeams.length > 0 && (
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-2">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Table Topper</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '3.5rem' }}>The number one team leading the charge.</p>
-          <div className="horizontal-scroller" style={{ paddingTop: '16px' }}>
+          <AutoScrollContainer className="horizontal-scroller" style={{ paddingTop: '16px' }}>
             {topTeams.map((pt, index) => (
               <PodiumCard key={pt.teamId} pt={pt} rank={index + 1} />
             ))}
-          </div>
+          </AutoScrollContainer>
         </AnimatedSection>
         )}
 
         {/* SECTION 3: FULL POINTS TABLE */}
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-3">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Full Standings</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Comprehensive breakdown of all participating teams.</p>
           
@@ -150,7 +151,7 @@ const PointsTable: React.FC = () => {
         </AnimatedSection>
         
         {/* SECTION 4: TOURNAMENT LEADERS */}
-        <AnimatedSection>
+        <AnimatedSection className="bg-section-4">
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', marginTop: '3rem' }}>
                
                {/* ORANGE CAP */}
