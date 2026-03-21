@@ -439,6 +439,67 @@ const AdminScoringPanel: React.FC = () => {
             </button>
           </div>
           
+          {/* BALL BY BALL: THIS OVER DETAILS */}
+          <div style={{ 
+              background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--glass-border)', 
+              borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem',
+              display: 'flex', alignItems: 'center', flexWrap: 'wrap' 
+          }}>
+            <h4 style={{ margin: 0, fontSize: '1rem', color: '#94a3b8', marginRight: '1rem', minWidth: '80px' }}>This Over: </h4>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              {details.thisOverBalls.length === 0 ? <span style={{ color: '#64748b', fontStyle: 'italic', fontSize: '0.9rem' }}>New Over Started</span> : null}
+              {details.thisOverBalls.map((b, i) => {
+                let bgColor = '#1e293b'; // dot ball
+                if (b === 'W') bgColor = '#ef4444'; // wicket red
+                else if (b === '4') bgColor = '#3b82f6'; // four blue
+                else if (b === '6') bgColor = '#8b5cf6'; // six purple
+                else if (b !== '0' && b.length === 1) bgColor = '#10b981'; // runs green
+                else if (b.length > 1) bgColor = '#f59e0b'; // extras warning
+                
+                return (
+                  <div key={i} style={{ 
+                    flexShrink: 0, width: '36px', height: '36px', borderRadius: '50%', backgroundColor: bgColor, 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
+                    fontSize: b.length > 3 ? '0.65rem' : b.length > 2 ? '0.75rem' : '0.95rem',
+                    lineHeight: 1, padding: '2px', boxSizing: 'border-box', overflow: 'hidden', textAlign: 'center',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)'
+                  }}>
+                    {b}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* RECENT FORM (TIMELINE) */}
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1.5rem', padding: '0 1rem' }}>
+            <h4 style={{ margin: 0, fontSize: '1rem', color: '#94a3b8', marginRight: '1rem', minWidth: '80px' }}>Recent: </h4>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              {details.recentBalls.length === 0 ? <span style={{ color: '#64748b', fontSize: '0.9rem' }}>No recent balls</span> : null}
+              {details.recentBalls.map((b, i) => {
+                let bgColor = 'rgba(255,255,255,0.05)'; // default muted
+                let color = '#94a3b8';
+                if (b === 'W') { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
+                else if (b === '4') { bgColor = 'rgba(59, 130, 246, 0.2)'; color = '#3b82f6'; }
+                else if (b === '6') { bgColor = 'rgba(139, 92, 246, 0.2)'; color = '#8b5cf6'; }
+                else if (b !== '0' && b.length === 1) { bgColor = 'rgba(16, 185, 129, 0.2)'; color = '#10b981'; }
+                else if (b.length > 1) { bgColor = 'rgba(245, 158, 11, 0.2)'; color = '#f59e0b'; }
+                
+                return (
+                  <div key={i} style={{ 
+                    flexShrink: 0, width: '30px', height: '30px', borderRadius: '50%', backgroundColor: bgColor, color: color,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
+                    fontSize: b.length > 3 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.85rem',
+                    lineHeight: 1, padding: '2px', boxSizing: 'border-box', overflow: 'hidden', textAlign: 'center',
+                    border: `1px solid ${color}40`
+                  }}>
+                    {b}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+          
           <p className="text-center" style={{ color: '#ef4444', fontWeight: 'bold' }}>Caution: Actions are permanent.</p>
 
           {showForceBowler && (

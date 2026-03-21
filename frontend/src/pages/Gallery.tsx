@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { GalleryImage } from '../types';
 import { GalleryService, UploadService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { AnimatedSection } from '../components/AnimatedSection';
+
 import { Image as ImageIcon, Trash2, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -111,25 +111,31 @@ const Gallery: React.FC = () => {
             No images in the gallery yet.
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {images.map(img => (
-              <AnimatedSection key={img.id}>
-                <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', aspectRatio: '4/3', border: '1px solid var(--glass-border)' }}>
-                  <img src={img.imageUrl} alt="Gallery Match Moment" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease' }} 
-                       onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                       onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-                  />
-                  {isAuthenticated && (
-                    <button 
-                      onClick={() => handleDelete(img.id!)}
-                      style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
-                      title="Delete Image"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  )}
-                </div>
-              </AnimatedSection>
+          <div className="gallery-masonry" style={{ padding: '0 0.5rem' }}>
+            {images.map((img, i) => (
+              <div 
+                key={img.id} 
+                className="gallery-masonry-item animate-slide-up hover-lift" 
+                style={{ 
+                  animationDelay: `${(i % 10) * 100}ms`,
+                  position: 'relative', borderRadius: '12px', overflow: 'hidden', 
+                  border: '1px solid var(--glass-border)', cursor: 'pointer', background: 'rgba(255,255,255,0.05)'
+                }}
+              >
+                <img src={img.imageUrl} alt="Gallery Match Moment" style={{ width: '100%', display: 'block', transition: 'transform 0.5s ease' }} 
+                     onMouseOver={e => e.currentTarget.style.transform = 'scale(1.08)'}
+                     onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                />
+                {isAuthenticated && (
+                  <button 
+                    onClick={() => handleDelete(img.id!)}
+                    style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
+                    title="Delete Image"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         )}

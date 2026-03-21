@@ -92,7 +92,7 @@ const PointsTable: React.FC = () => {
         
         {/* SECTION 2: TOP TEAMS PODIUM */}
         {topTeams.length > 0 && (
-        <AnimatedSection className="bg-section-2">
+        <AnimatedSection className="bg-section-2 theme-light">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Table Topper</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '3.5rem' }}>The number one team leading the charge.</p>
           <AutoScrollContainer className="horizontal-scroller" style={{ paddingTop: '16px' }}>
@@ -104,7 +104,7 @@ const PointsTable: React.FC = () => {
         )}
 
         {/* SECTION 3: FULL POINTS TABLE */}
-        <AnimatedSection className="bg-section-3">
+        <AnimatedSection className="bg-section-3 theme-dark">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Full Standings</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Comprehensive breakdown of all participating teams.</p>
           
@@ -151,59 +151,63 @@ const PointsTable: React.FC = () => {
         </AnimatedSection>
         
         {/* SECTION 4: TOURNAMENT LEADERS */}
-        <AnimatedSection className="bg-section-4">
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', marginTop: '3rem' }}>
+        <AnimatedSection className="bg-section-4 theme-light">
+           <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', marginTop: '3rem' }}>
                
                {/* ORANGE CAP */}
                <div className="glass-panel hover-lift" style={{ padding: '0', overflow: 'hidden' }}>
-                   <div style={{ background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%)', padding: '1.5rem', borderBottom: '1px solid rgba(249, 115, 22, 0.3)' }}>
-                      <h3 style={{ margin: 0, color: '#f97316', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.4rem' }}>
-                         🟠 Orange Cap (Top Scorers)
+                   <div style={{ background: '#0f172a', padding: '1.5rem', borderBottom: '2px solid rgba(249, 115, 22, 0.8)' }}>
+                      <h3 style={{ margin: 0, color: '#ffedd5', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.4rem' }}>
+                         Top Scorer 🟠
                       </h3>
                    </div>
-                   <table className="data-table" style={{ background: 'transparent' }}>
-                       <thead>
-                           <tr><th>Rank</th><th>Player</th><th>Team</th><th style={{textAlign: 'right'}}>Runs</th></tr>
-                       </thead>
-                       <tbody>
-                           {topScorers.length === 0 ? <tr><td colSpan={4} className="text-center">No runs recorded</td></tr> : 
-                             topScorers.map((ts, i) => (
-                                 <tr key={i} style={{ background: i === 0 ? 'rgba(249, 115, 22, 0.05)' : 'transparent' }}>
-                                     <td>{i + 1}</td>
-                                     <td className="font-bold" style={{ color: i === 0 ? '#f97316' : '#fff' }}>{ts.playerName}</td>
-                                     <td style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{ts.teamName}</td>
-                                     <td style={{ textAlign: 'right', fontWeight: 'bold', fontSize: '1.1rem', color: '#f97316' }}>{ts.totalRuns}</td>
-                                 </tr>
-                             ))
-                           }
-                       </tbody>
-                   </table>
+                   <div style={{ overflowX: 'auto', width: '100%', background: 'rgba(15, 23, 42, 0.6)' }}>
+                     <table className="data-table" style={{ background: 'transparent', width: '100%', minWidth: '400px' }}>
+                         <thead>
+                             <tr><th style={{color: '#fdba74', padding: '1rem'}}>Rank</th><th style={{color: '#fdba74'}}>Player</th><th style={{color: '#fdba74'}}>Team</th><th style={{textAlign: 'right', color: '#fdba74', paddingRight: '1rem'}}>Runs</th></tr>
+                         </thead>
+                         <tbody>
+                             {topScorers.length === 0 ? <tr><td colSpan={4} className="text-center" style={{color: '#fff', padding: '1rem'}}>No runs recorded</td></tr> : 
+                               topScorers.map((ts, i) => (
+                                   <tr key={i} style={{ background: i === 0 ? 'rgba(249, 115, 22, 0.15)' : 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                       <td style={{color: '#cbd5e1', padding: '1rem'}}>{i + 1}</td>
+                                       <td className="font-bold" style={{ color: i === 0 ? '#ffedd5' : '#ffffff', fontSize: i === 0 ? '1.1rem' : '1rem' }}>{ts.playerName}</td>
+                                       <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{ts.teamName}</td>
+                                       <td style={{ textAlign: 'right', fontWeight: 'bold', fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#f97316' : '#fed7aa', paddingRight: '1rem' }}>{ts.totalRuns}</td>
+                                   </tr>
+                               ))
+                             }
+                         </tbody>
+                     </table>
+                   </div>
                </div>
 
                {/* PURPLE CAP */}
                <div className="glass-panel hover-lift" style={{ padding: '0', overflow: 'hidden' }}>
-                   <div style={{ background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0.05) 100%)', padding: '1.5rem', borderBottom: '1px solid rgba(168, 85, 247, 0.3)' }}>
-                      <h3 style={{ margin: 0, color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.4rem' }}>
-                         🟣 Purple Cap (Top Wickets)
+                   <div style={{ background: '#0f172a', padding: '1.5rem', borderBottom: '2px solid rgba(168, 85, 247, 0.8)' }}>
+                      <h3 style={{ margin: 0, color: '#f3e8ff', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.4rem' }}>
+                         Top Wicket Taker 🟣
                       </h3>
                    </div>
-                   <table className="data-table" style={{ background: 'transparent' }}>
-                       <thead>
-                           <tr><th>Rank</th><th>Player</th><th>Team</th><th style={{textAlign: 'right'}}>Wickets</th></tr>
-                       </thead>
-                       <tbody>
-                           {topWickets.length === 0 ? <tr><td colSpan={4} className="text-center">No wickets recorded</td></tr> : 
-                             topWickets.map((tw, i) => (
-                                 <tr key={i} style={{ background: i === 0 ? 'rgba(168, 85, 247, 0.05)' : 'transparent' }}>
-                                     <td>{i + 1}</td>
-                                     <td className="font-bold" style={{ color: i === 0 ? '#a855f7' : '#fff' }}>{tw.playerName}</td>
-                                     <td style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{tw.teamName}</td>
-                                     <td style={{ textAlign: 'right', fontWeight: 'bold', fontSize: '1.1rem', color: '#a855f7' }}>{tw.totalWickets}</td>
-                                 </tr>
-                             ))
-                           }
-                       </tbody>
-                   </table>
+                   <div style={{ overflowX: 'auto', width: '100%', background: 'rgba(15, 23, 42, 0.6)' }}>
+                     <table className="data-table" style={{ background: 'transparent', width: '100%', minWidth: '400px' }}>
+                         <thead>
+                             <tr><th style={{color: '#d8b4fe', padding: '1rem'}}>Rank</th><th style={{color: '#d8b4fe'}}>Player</th><th style={{color: '#d8b4fe'}}>Team</th><th style={{textAlign: 'right', color: '#d8b4fe', paddingRight: '1rem'}}>Wickets</th></tr>
+                         </thead>
+                         <tbody>
+                             {topWickets.length === 0 ? <tr><td colSpan={4} className="text-center" style={{color: '#fff', padding: '1rem'}}>No wickets recorded</td></tr> : 
+                               topWickets.map((tw, i) => (
+                                   <tr key={i} style={{ background: i === 0 ? 'rgba(168, 85, 247, 0.15)' : 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                       <td style={{color: '#cbd5e1', padding: '1rem'}}>{i + 1}</td>
+                                       <td className="font-bold" style={{ color: i === 0 ? '#f3e8ff' : '#ffffff', fontSize: i === 0 ? '1.1rem' : '1rem' }}>{tw.playerName}</td>
+                                       <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{tw.teamName}</td>
+                                       <td style={{ textAlign: 'right', fontWeight: 'bold', fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#a855f7' : '#e9d5ff', paddingRight: '1rem' }}>{tw.totalWickets}</td>
+                                   </tr>
+                               ))
+                             }
+                         </tbody>
+                     </table>
+                   </div>
                </div>
 
            </div>

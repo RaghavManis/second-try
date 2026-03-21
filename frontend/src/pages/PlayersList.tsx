@@ -15,10 +15,19 @@ const PlayersList: React.FC = () => {
     fetchPlayers();
   }, []);
 
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+
   const fetchPlayers = async () => {
     try {
       const res = await PlayerService.getAllPlayers();
-      setPlayers(res.data);
+      setPlayers(shuffleArray(res.data));
     } catch (error) {
       console.error('Failed to fetch players', error);
     } finally {
@@ -105,8 +114,8 @@ const PlayersList: React.FC = () => {
         
         {/* SECTION 2: STAR PLAYERS */}
         {starPlayers.length > 0 && (
-        <AnimatedSection className="bg-section-2">
-          <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Featured Stars</h2>
+        <AnimatedSection className="bg-section-2 theme-light">
+          <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Star Players</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Athletes making headlines right now.</p>
           <AutoScrollContainer className="horizontal-scroller">
             {starPlayers.map(player => (
@@ -118,9 +127,9 @@ const PlayersList: React.FC = () => {
         </AnimatedSection>
         )}
 
-        {/* SECTION 3: ROLE BASED (BATSMEN) */}
+        {/* SECTION 3: TOP BATSMEN */}
         {batsmen.length > 0 && (
-        <AnimatedSection className="bg-section-3">
+        <AnimatedSection className="bg-section-3 theme-dark">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Top Batsmen</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The run machines of the tournament.</p>
           <AutoScrollContainer className="horizontal-scroller">
@@ -133,9 +142,9 @@ const PlayersList: React.FC = () => {
         </AnimatedSection>
         )}
 
-        {/* SECTION 3.5: ROLE BASED (BOWLERS) */}
+        {/* SECTION 4: KEY BOWLERS */}
         {bowlers.length > 0 && (
-        <AnimatedSection className="bg-section-4">
+        <AnimatedSection className="bg-section-4 theme-light">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Key Bowlers</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Taking wickets and restricting runs.</p>
           <AutoScrollContainer className="horizontal-scroller">
@@ -148,10 +157,10 @@ const PlayersList: React.FC = () => {
         </AnimatedSection>
         )}
 
-        {/* SECTION 3.75: ROLE BASED (ALL ROUNDERS) */}
+        {/* SECTION 5: ALL-ROUNDERS */}
         {allRounders.length > 0 && (
-        <AnimatedSection className="bg-section-5">
-          <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>All Rounders</h2>
+        <AnimatedSection className="bg-section-5 theme-dark">
+          <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Game Changers</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The ultimate match winners.</p>
           <AutoScrollContainer className="horizontal-scroller">
             {allRounders.map(player => (
@@ -163,10 +172,12 @@ const PlayersList: React.FC = () => {
         </AnimatedSection>
         )}
 
-        {/* SECTION 4: ALL PLAYERS DIRECTORY */}
-        <AnimatedSection className="bg-section-1">
-          <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Full Directory</h2>
-          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Every registered player in the database.</p>
+        {/* SECTION 6: FULL DIRECTORY */}
+        <AnimatedSection className="bg-section-1 theme-dark">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Full Directory</h2>
+            <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '0' }}>Every registered player in the database.</p>
+          </div>
           
           <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
             {players.length === 0 ? (

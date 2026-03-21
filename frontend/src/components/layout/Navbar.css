@@ -88,10 +88,24 @@
   }
   
   .nav-link {
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
   .nav-link span {
-    display: none;
+    display: block;
+    font-size: 0.7rem;
+    line-height: 1;
+    text-align: center;
   }
+}
+
+@keyframes liveBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.9); }
+}
+
+.live-blink {
+  animation: liveBlink 1.5s ease-in-out infinite;
 }

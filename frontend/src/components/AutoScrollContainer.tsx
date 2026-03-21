@@ -3,31 +3,41 @@ import React, { useRef, useState, useEffect } from 'react';
 export const AutoScrollContainer: React.FC<{ children: React.ReactNode; className?: string; style?: React.CSSProperties }> = ({ children, className = '', style }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const directionRef = useRef<1 | -1>(1);
 
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
 
     let animationFrameId: number;
-    // VERY slow and smooth: 0.03 pixels per ms (approx 1.8px per frame at 60fps)
-    const speed = 0.5; 
+    let lastTimestamp = 0;
+    const speed = 0.03; // pixels per ms
     let accumulatedScroll = 0;
 
-    const scroll = () => {
+    const scroll = (timestamp: number) => {
       if (!isPaused && container) {
-        accumulatedScroll += speed;
+        if (!lastTimestamp) lastTimestamp = timestamp;
+        const delta = timestamp - lastTimestamp;
+        
+        accumulatedScroll += delta * speed;
         
         if (accumulatedScroll >= 1) {
-            container.scrollLeft += Math.floor(accumulatedScroll);
-            accumulatedScroll -= Math.floor(accumulatedScroll);
+            const pixels = Math.floor(accumulatedScroll);
+            container.scrollLeft += (pixels * directionRef.current);
+            accumulatedScroll -= pixels;
         }
 
-        // When we scrolled past the first set of children (half the total scroll width)
-        // Reset to 0 for a seamless infinite loop
-        if (container.scrollLeft >= container.scrollWidth / 2) {
-          container.scrollLeft = 0;
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        
+        // Bounce back behavior
+        if (container.scrollLeft >= maxScroll - 1 && directionRef.current === 1) {
+          directionRef.current = -1;
+        } else if (container.scrollLeft <= 0 && directionRef.current === -1) {
+          directionRef.current = 1;
         }
       }
+      lastTimestamp = timestamp;
+
       animationFrameId = requestAnimationFrame(scroll);
     };
 
@@ -38,7 +48,7 @@ export const AutoScrollContainer: React.FC<{ children: React.ReactNode; classNam
 
   return (
     <div 
-      className={`auto-scroll-container ${className}`}
+      className={`horizontal-scroll-container ${className}`}
       ref={scrollRef}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -56,12 +66,10 @@ export const AutoScrollContainer: React.FC<{ children: React.ReactNode; classNam
       }}
     >
       <style>{`
-        .auto-scroll-container::-webkit-scrollbar {
+        .horizontal-scroll-container::-webkit-scrollbar {
           display: none;
         }
       `}</style>
-      {children}
-      {/* Duplicate children to create the infinite scroll illusion */}
       {children}
     </div>
   );

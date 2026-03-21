@@ -114,7 +114,7 @@ const Teams: React.FC = () => {
         
         {/* SECTION 2: FEATURED TEAMS */}
         {featuredTeams.length > 0 && (
-        <AnimatedSection className="bg-section-2">
+        <AnimatedSection className="bg-section-2 theme-light">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Featured Franchises</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The top contenders drawing the crowds.</p>
           <AutoScrollContainer className="horizontal-scroller">
@@ -131,8 +131,8 @@ const Teams: React.FC = () => {
         </AnimatedSection>
         )}
 
-        {/* SECTION 3: TEAM GALLERY */}
-        <AnimatedSection className="bg-section-3">
+        {/* SECTION 3: ALL TEAMS DIRECTORY */}
+        <AnimatedSection className="bg-section-3 theme-dark">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>Team Roster</h2>

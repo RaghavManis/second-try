@@ -11,6 +11,7 @@ const LiveMatch: React.FC = () => {
   const [battingCards, setBattingCards] = useState<ScorecardBatting[]>([]);
   const [bowlingCards, setBowlingCards] = useState<ScorecardBowling[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
 
   // Poll for live matches
   useEffect(() => {
@@ -81,10 +82,11 @@ const LiveMatch: React.FC = () => {
   const currentBattingTeam = details.match.currentInnings === 1 ? details.match.battingTeam : details.match.battingTeam; // Handled by backend accurately
   
   const currentInningsBatting = battingCards.filter(c => c.innings === details.match.currentInnings);
-  const currentInningsBowling = bowlingCards.filter(c => c.innings === details.match.currentInnings);
 
-  const previousInningsBatting = battingCards.filter(c => c.innings === 1);
-  const previousInningsBowling = bowlingCards.filter(c => c.innings === 1);
+  const firstInningsBatting = battingCards.filter(c => c.innings === 1);
+  const firstInningsBowling = bowlingCards.filter(c => c.innings === 1);
+  const secondInningsBatting = battingCards.filter(c => c.innings === 2);
+  const secondInningsBowling = bowlingCards.filter(c => c.innings === 2);
   
   // Derive "Yet to bat"
   const battingSquad: Player[] = currentBattingTeam?.id === details.match.teamA.id 
@@ -102,9 +104,71 @@ const LiveMatch: React.FC = () => {
     });
 
     const getRandomLogo = (id: number) => `https://api.dicebear.com/7.x/identicon/svg?seed=Team${id}&backgroundColor=1e293b`;
-    const getAvatar = (player: Player | undefined) => {
-      if (!player) return '';
-      return player.playerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf`;
+
+
+    const renderTimeline = () => {
+      if (!details) return null;
+      return (
+        <AnimatedSection>
+          <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.25rem' }}>
+            
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+              <h3 className="gradient-text" style={{ margin: 0, fontSize: '1.2rem', marginRight: '1rem', minWidth: '100px' }}>This Over: </h3>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                {details.thisOverBalls.length === 0 ? <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>New Over Started</span> : null}
+                {details.thisOverBalls.map((b, i) => {
+                  let bgColor = '#1e293b'; // dot ball
+                  if (b === 'W') bgColor = '#ef4444'; // wicket red
+                  else if (b === '4') bgColor = '#3b82f6'; // four blue
+                  else if (b === '6') bgColor = '#8b5cf6'; // six purple
+                  else if (b !== '0' && b.length === 1) bgColor = '#10b981'; // runs green
+                  else if (b.length > 1) bgColor = '#f59e0b'; // extras warning
+                  
+                  return (
+                    <div key={i} style={{ 
+                      flexShrink: 0, width: '40px', height: '40px', borderRadius: '50%', backgroundColor: bgColor, 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
+                      fontSize: b.length > 3 ? '0.7rem' : b.length > 2 ? '0.8rem' : '1.1rem',
+                      lineHeight: 1, padding: '2px', boxSizing: 'border-box', overflow: 'hidden', textAlign: 'center',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '2px solid rgba(255,255,255,0.1)'
+                    }}>
+                      {b}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', borderTop: '1px solid var(--glass-border)', paddingTop: '1.5rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', color: '#94a3b8', marginRight: '1rem', minWidth: '100px' }}>Recent: </h3>
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                {details.recentBalls.length === 0 ? <span style={{ color: '#64748b', fontSize: '0.9rem' }}>No recent balls</span> : null}
+                {details.recentBalls.map((b, i) => {
+                  let bgColor = 'rgba(255,255,255,0.05)'; // default muted
+                  let color = '#94a3b8';
+                  if (b === 'W') { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
+                  else if (b === '4') { bgColor = 'rgba(59, 130, 246, 0.2)'; color = '#3b82f6'; }
+                  else if (b === '6') { bgColor = 'rgba(139, 92, 246, 0.2)'; color = '#8b5cf6'; }
+                  else if (b !== '0' && b.length === 1) { bgColor = 'rgba(16, 185, 129, 0.2)'; color = '#10b981'; }
+                  else if (b.length > 1) { bgColor = 'rgba(245, 158, 11, 0.2)'; color = '#f59e0b'; }
+                  
+                  return (
+                    <div key={i} style={{ 
+                      flexShrink: 0, width: '32px', height: '32px', borderRadius: '50%', backgroundColor: bgColor, color: color,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
+                      fontSize: b.length > 3 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.9rem',
+                      lineHeight: 1, padding: '2px', boxSizing: 'border-box', overflow: 'hidden', textAlign: 'center',
+                      border: `1px solid ${color}40`
+                    }}>
+                      {b}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </AnimatedSection>
+      );
     };
 
   return (
@@ -112,24 +176,26 @@ const LiveMatch: React.FC = () => {
       
       {/* SECTION 1: LIVE HERO SCOREBOARD */}
       <div className="parallax-hero" style={{ 
-        height: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+        minHeight: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
         backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop")',
-        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '-80px'
+        backgroundSize: 'cover', backgroundPosition: 'center', paddingTop: '100px', paddingBottom: '2rem'
       }}>
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem', width: '100%', maxWidth: '800px' }}>
           
-          {details.match.status === 'COMPLETED' ? (
-            <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '0.4rem 1rem', borderRadius: '30px', fontWeight: 'bold', marginBottom: '1.5rem', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
-              MATCH COMPLETED
-            </div>
-          ) : (
-            <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '30px', fontWeight: 'bold', marginBottom: '1.5rem', border: '1px solid rgba(239, 68, 68, 0.4)' }}>
-              <Circle size={12} className="animate-pulse" style={{ fill: '#ef4444', marginRight: '8px' }} /> LIVE
-            </div>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', width: '100%', zIndex: 10 }}>
+            {details.match.status === 'COMPLETED' ? (
+              <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '0.4rem 1rem', borderRadius: '30px', fontWeight: 'bold', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+                MATCH COMPLETED
+              </div>
+            ) : (
+              <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '30px', fontWeight: 'bold', border: '1px solid rgba(239, 68, 68, 0.4)' }}>
+                <Circle size={10} className="animate-pulse" style={{ fill: '#ef4444', marginRight: '6px' }} /> LIVE
+              </div>
+            )}
+          </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.5rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.5rem', marginBottom: '0.5rem', marginTop: '1.5rem' }}>
              <img src={details.match.teamA.teamLogo || getRandomLogo(details.match.teamA.id || 0)} alt={details.match.teamA.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
              <h3 style={{ fontSize: '1.2rem', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '2px', margin: 0 }}>
                {details.match.teamA.teamName} vs {details.match.teamB.teamName}
@@ -137,34 +203,53 @@ const LiveMatch: React.FC = () => {
              <img src={details.match.teamB.teamLogo || getRandomLogo(details.match.teamB.id || 0)} alt={details.match.teamB.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
           </div>
 
+          {details.match.tossWinner && details.match.tossDecision && (
+             <div style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: '1rem', fontStyle: 'italic' }}>
+               {details.match.tossWinner.teamName} won the toss and elected to {details.match.tossDecision.toLowerCase().replace('batting', 'bat').replace('bowling', 'bowl')}
+             </div>
+          )}
+
           {details.match.status === 'COMPLETED' && details.match.result && (
               <h2 style={{ fontSize: '1.5rem', color: 'var(--primary)', marginBottom: '1rem', fontWeight: 800 }}>
                   {details.match.result}
               </h2>
           )}
 
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '24px', padding: '2.5rem 2rem', backdropFilter: 'blur(10px)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <div style={{ flex: 1, textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1rem' }}>
-                <h2 style={{ fontSize: '2rem', margin: 0 }}>{currentBattingTeam?.teamName}</h2>
+          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '1.25rem', backdropFilter: 'blur(10px)', width: '100%', boxSizing: 'border-box' }}>
+            
+            {details.match.currentInnings === 2 && details.match.bowlingTeam && (
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.75rem' }}>
+                  <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>1st Innings: <span style={{color: '#cbd5e1'}}>{details.match.bowlingTeam.teamName}</span></div>
+                  <div style={{ color: '#94a3b8', fontSize: '1.05rem', fontWeight: 'bold' }}>
+                    {details.match.firstInningsScore ?? (details.targetScore ? details.targetScore - 1 : 0)}-{details.match.firstInningsWickets ?? 'x'}
+                  </div>
+               </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ textAlign: 'left', flex: 1 }}>
+                <h2 style={{ fontSize: '1.3rem', margin: 0, color: details.match.currentInnings === 2 ? '#fff' : 'inherit' }}>{currentBattingTeam?.teamName}</h2>
+                {details.match.currentInnings === 2 && (
+                   <div style={{ fontSize: '0.85rem', color: '#fbbf24', marginTop: '4px', fontWeight: 'bold' }}>
+                      Target: {details.targetScore}
+                   </div>
+                )}
               </div>
-              <div style={{ padding: '0 2rem' }}>
-                <div style={{ fontSize: '4.5rem', fontWeight: 800, color: 'var(--primary)', lineHeight: 1 }}>
-                  {details.currentScore}<span style={{fontSize: '2.5rem', color: '#cbd5e1'}}>-{details.currentWickets}</span>
+              
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary)', lineHeight: 1 }}>
+                  {details.currentScore}<span style={{fontSize: '1.4rem', color: '#cbd5e1'}}>-{details.currentWickets}</span>
                 </div>
-              </div>
-              <div style={{ flex: 1, textAlign: 'left' }}>
-                <p style={{ fontSize: '1.2rem', color: '#94a3b8', margin: 0 }}>({details.currentOvers} Overs)</p>
+                <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '4px' }}>
+                  Overs: <span style={{color: '#cbd5e1', fontWeight: 'bold'}}>{details.currentOvers}</span>
+                </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', color: '#94a3b8', fontSize: '1.1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.9rem', marginTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', flexWrap: 'wrap', gap: '8px' }}>
               <div>CRR: <span style={{color: '#fff', fontWeight: 'bold'}}>{details.currentRunRate.toFixed(2)}</span></div>
               {details.targetScore && (
-                <>
-                  <div>REQ: <span style={{color: '#fff', fontWeight: 'bold'}}>{details.requiredRunRate?.toFixed(2)}</span></div>
-                  <div>TARGET: <span style={{color: '#fff', fontWeight: 'bold'}}>{details.targetScore}</span></div>
-                </>
+                <div>REQ: <span style={{color: '#fff', fontWeight: 'bold'}}>{details.requiredRunRate?.toFixed(2)}</span></div>
               )}
             </div>
           </div>
@@ -173,26 +258,7 @@ const LiveMatch: React.FC = () => {
 
       <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', marginTop: '2rem' }}>
         
-        {/* STICKY MOBILE INFO BAR */}
-        <div className="glass-panel sticky-top mobile-only" style={{ marginBottom: '1.5rem', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong style={{ color: 'var(--primary)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <img src={currentBattingTeam?.teamLogo || getRandomLogo(currentBattingTeam?.id || 0)} alt="Team" style={{width: 24, height: 24, borderRadius: '50%', objectFit: 'cover'}}/>
-                    {currentBattingTeam?.teamName} {details.currentScore}-{details.currentWickets} <span style={{fontSize: '0.9rem', color: '#94a3b8'}}>({details.currentOvers})</span>
-                </strong>
-                <span style={{ fontSize: '0.9rem' }}>CRR: {details.currentRunRate.toFixed(2)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#cbd5e1', marginTop: '0.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <img src={getAvatar(details.currentStriker as Player | undefined)} alt="Batter" style={{width: 20, height: 20, borderRadius: '50%', objectFit: 'cover'}} />
-                    Bat: {details.currentStriker?.name} {details.strikerRuns}({details.strikerBalls})
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <img src={getAvatar(details.currentBowler as Player | undefined)} alt="Bowler" style={{width: 20, height: 20, borderRadius: '50%', objectFit: 'cover'}} />
-                    Bowl: {details.currentBowler?.name} {details.bowlerRuns}-{details.bowlerWickets}
-                </div>
-            </div>
-        </div>
+        {/* STICKY MOBILE INFO BAR REMOVED TO PREVENT DUPLICATION */}
         
         {/* MATCH SELECTOR IF MULTIPLE */}
         {liveMatches.length > 1 && (
@@ -209,20 +275,66 @@ const LiveMatch: React.FC = () => {
           </div>
         )}
 
-        {/* PLAYING XI SECTION */}
-        {(details.match.playingXiTeamA?.length || details.match.playingXiTeamB?.length) ? (
+        {/* TABS NAVIGATION */}
+        <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingTop: '0.2rem', paddingBottom: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          {['Match Info', '1st Innings', '2nd Innings', 'Playing XI'].map(tab => (
+            <button 
+              key={tab} 
+              onClick={() => setActiveTab(activeTab === tab ? null : tab)} 
+              className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-secondary'}`} 
+              style={{ flexShrink: 0, borderRadius: '20px', padding: '0.3rem 0.8rem', fontSize: '0.8rem', minHeight: '32px', lineHeight: '1' }}>
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* TAB: Match Info */}
+        {activeTab === 'Match Info' && (
+          <AnimatedSection>
+            <div className="glass-panel" style={{ padding: '1.5rem', width: '100%', marginBottom: '2rem' }}>
+               <h3 className="gradient-text" style={{ fontSize: '1.2rem', marginBottom: '1.25rem' }}>Match Information</h3>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', color: '#cbd5e1' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: '#94a3b8' }}>Tournament</span>
+                     <span>Cricket Tournament League</span>
+                  </div>
+                  <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: '#94a3b8' }}>Format</span>
+                     <span>{details.match.overs} Overs</span>
+                  </div>
+                  <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: '#94a3b8' }}>Toss</span>
+                     <span>{details.match.tossWinner?.teamName || 'TBA'} {details.match.tossDecision ? `(${details.match.tossDecision})` : ''}</span>
+                  </div>
+                  <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: '#94a3b8' }}>Date & Time</span>
+                     <span>{new Date(details.match.matchDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                  </div>
+                  <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: '#94a3b8' }}>{details.match.teamA.teamName} Captain</span>
+                     <span>{details.match.teamA.coachName || 'TBA'}</span>
+                  </div>
+                  <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: '#94a3b8' }}>{details.match.teamB.teamName} Captain</span>
+                     <span>{details.match.teamB.coachName || 'TBA'}</span>
+                  </div>
+               </div>
+            </div>
+          </AnimatedSection>
+        )}
+
+        {/* TAB: Playing XI */}
+        {activeTab === 'Playing XI' && (details.match.playingXiTeamA?.length || details.match.playingXiTeamB?.length) ? (
           <AnimatedSection>
             <div className="glass-panel" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1rem' }}
-                   onClick={(e) => {
-                     const el = e.currentTarget.nextElementSibling as HTMLElement;
-                     if (el) el.style.display = el.style.display === 'none' ? 'grid' : 'none';
-                   }}>
-                 <h3 className="gradient-text" style={{ margin: 0 }}>Playing XI</h3>
-                 <span style={{ color: 'var(--primary)', fontSize: '0.9rem' }}>Show / Hide</span>
-              </div>
+              <h3 className="gradient-text" style={{ margin: 0, borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1rem' }}>Playing XI</h3>
               
-              <div style={{ display: 'none', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
                  <div>
                     <h4 style={{ color: 'var(--primary)', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>{details.match.teamA.teamName}</h4>
                     <ul style={{ listStyleType: 'none', padding: 0, margin: 0, color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -246,19 +358,21 @@ const LiveMatch: React.FC = () => {
           </AnimatedSection>
         ) : null}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '100%' }}>
           
-          {/* PREVIOUS INNINGS (1st INNINGS) IF CURRENTLY 2ND INNINGS */}
-          {details.match.currentInnings === 2 && previousInningsBatting.length > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '1rem', opacity: 0.8 }}>
+          {/* TAB: 1st Innings */}
+          {activeTab === '1st Innings' && firstInningsBatting.length > 0 && (
+            <div style={{ marginBottom: '1rem', opacity: 0.8, width: '100%', maxWidth: '100%' }}>
                 <AnimatedSection>
-                    <div className="glass-panel" style={{ padding: '1.5rem', overflowX: 'auto' }}>
-                        <h3 className="gradient-text" style={{ fontSize: '1.2rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                            <span>1st Innings - {details.match.bowlingTeam?.teamName} Batting</span>
+                    <div className="glass-panel" style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', width: '100%', maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+                        <h3 className="gradient-text" style={{ fontSize: 'clamp(1rem, 3.5vw, 1.2rem)', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <span>1st Innings - {details.match.currentInnings === 2 ? details.match.bowlingTeam?.teamName : details.match.battingTeam?.teamName} Batting</span>
+
                             {details.targetScore ? <span>Total: {details.targetScore - 1}</span> : null}
                         </h3>
-                        <table className="mobile-card-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '100%' }}>
-                            <thead>
+                        <div style={{ overflowX: 'auto', width: '100%' }}>
+                          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '400px' }}>
+                              <thead>
                                 <tr style={{ color: '#94a3b8', fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)' }}>
                                     <th style={{ paddingBottom: '0.5rem', paddingLeft: '0.5rem' }}>Batter</th>
                                     <th style={{ paddingBottom: '0.5rem' }}></th>
@@ -270,7 +384,7 @@ const LiveMatch: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {previousInningsBatting.map(card => (
+                                {firstInningsBatting.map(card => (
                                     <tr key={card.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                         <td style={{ padding: '0.5rem', color: '#fff' }}>{card.player.name} {card.howOut === 'not out' ? '*' : ''}</td>
                                         <td data-label="Status" style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>{card.howOut}</td>
@@ -297,32 +411,45 @@ const LiveMatch: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {previousInningsBowling.map(card => (
+                                {firstInningsBowling.map(card => (
                                     <tr key={card.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                         <td style={{ padding: '0.5rem', color: '#fff' }}>{card.player.name}</td>
                                         <td style={{ textAlign: 'center' }}>{card.overs}</td>
                                         <td style={{ textAlign: 'center' }}>{card.maidens}</td>
                                         <td style={{ textAlign: 'center' }}>{card.runs}</td>
                                         <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{card.wickets}</td>
+                                        <td style={{ textAlign: 'center' }}>{card.wickets}</td>
                                         <td style={{ textAlign: 'right', paddingRight: '0.5rem' }}>{card.overs > 0 ? (card.runs / ((Math.floor(card.overs) * 6 + Math.round((card.overs % 1)*10)) / 6)).toFixed(1) : '0.0'}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
+                      </div>
                     </div>
                 </AnimatedSection>
+                {details.match.currentInnings === 1 && renderTimeline()}
             </div>
           )}
 
-          {/* CURRENT INNINGS BATSMEN STATS */}
-          <AnimatedSection>
-            <div className="glass-panel hover-lift" style={{ padding: '1.5rem', overflowX: 'auto' }}>
-              <h3 className="gradient-text" style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                <span>{details.match.currentInnings === 2 ? '2nd Innings - ' : '1st Innings - '} {currentBattingTeam?.teamName} Batting</span>
-                <span>{details.currentScore}-{details.currentWickets} ({details.currentOvers})</span>
-              </h3>
-              <table className="mobile-card-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '100%' }}>
-                <thead>
+          {/* TAB: 2nd Innings */}
+          {activeTab === '2nd Innings' && (
+             details.match.currentInnings === 1 ? (
+                <AnimatedSection>
+                  <div className="glass-panel text-center" style={{ padding: '3rem 1rem', color: '#cbd5e1', fontSize: '1.2rem' }}>
+                     Second innings yet to begin.
+                  </div>
+                </AnimatedSection>
+             ) : (
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                  <AnimatedSection>
+                    <div className="glass-panel hover-lift" style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', width: '100%', maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+                      <h3 className="gradient-text" style={{ fontSize: 'clamp(1rem, 3.5vw, 1.4rem)', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <span>2nd Innings - {currentBattingTeam?.teamName} Batting</span>
+                        <span>{details.currentScore}-{details.currentWickets} ({details.currentOvers})</span>
+                      </h3>
+              <div style={{ overflowX: 'auto', width: '100%' }}>
+                <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '400px' }}>
+                  <thead>
                   <tr style={{ color: '#94a3b8', fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)' }}>
                     <th style={{ paddingBottom: '0.5rem', paddingLeft: '0.5rem' }}>Batter</th>
                     <th style={{ paddingBottom: '0.5rem' }}></th>
@@ -334,7 +461,7 @@ const LiveMatch: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentInningsBatting.map(card => {
+                  {secondInningsBatting.map(card => {
                       const isStriker = details.currentStriker?.id === card.player.id;
                       const isNonStriker = details.currentNonStriker?.id === card.player.id;
                       const isAtCrease = isStriker || isNonStriker;
@@ -357,6 +484,7 @@ const LiveMatch: React.FC = () => {
                   })}
                 </tbody>
               </table>
+             </div>
 
               {yetToBat.length > 0 && (
                   <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--glass-border)' }}>
@@ -370,15 +498,16 @@ const LiveMatch: React.FC = () => {
                       </div>
                   </div>
               )}
-            </div>
+              </div>
           </AnimatedSection>
 
           {/* BOWLER STATS */}
           <AnimatedSection>
-            <div className="glass-panel hover-lift" style={{ padding: '1.5rem', overflowX: 'auto' }}>
-              <h3 className="gradient-text" style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1rem' }}>Bowling</h3>
-              <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '400px' }}>
-                <thead>
+            <div className="glass-panel hover-lift" style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', width: '100%', maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+              <h3 className="gradient-text" style={{ fontSize: 'clamp(1rem, 3.5vw, 1.4rem)', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1rem' }}>Bowling</h3>
+              <div style={{ overflowX: 'auto', width: '100%' }}>
+                <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '400px' }}>
+                  <thead>
                   <tr style={{ color: '#94a3b8', fontSize: '0.9rem', borderBottom: '1px solid var(--glass-border)' }}>
                     <th style={{ paddingBottom: '0.5rem', paddingLeft: '0.5rem' }}>Bowler</th>
                     <th style={{ paddingBottom: '0.5rem', textAlign: 'center' }}>O</th>
@@ -389,7 +518,7 @@ const LiveMatch: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentInningsBowling.map(card => {
+                  {secondInningsBowling.map(card => {
                       const isBowling = details.currentBowler?.id === card.player.id;
                       return (
                         <tr key={card.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: isBowling ? 'rgba(245, 158, 11, 0.05)' : 'transparent' }}>
@@ -406,69 +535,16 @@ const LiveMatch: React.FC = () => {
                   })}
                 </tbody>
               </table>
+             </div>
             </div>
           </AnimatedSection>
+          {details.match.currentInnings === 2 && renderTimeline()}
+         </div>
+         ))}
 
         </div>
 
 
-
-        {/* RECENT FORM (TIMELINE) */}
-        <AnimatedSection>
-          <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.25rem' }}>
-            
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-              <h3 className="gradient-text" style={{ margin: 0, fontSize: '1.2rem', marginRight: '1rem', minWidth: '100px' }}>This Over: </h3>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                {details.thisOverBalls.length === 0 ? <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>New Over Started</span> : null}
-                {details.thisOverBalls.map((b, i) => {
-                  let bgColor = '#1e293b'; // dot ball
-                  if (b === 'W') bgColor = '#ef4444'; // wicket red
-                  else if (b === '4') bgColor = '#3b82f6'; // four blue
-                  else if (b === '6') bgColor = '#8b5cf6'; // six purple
-                  else if (b !== '0' && b.length === 1) bgColor = '#10b981'; // runs green
-                  else if (b.length > 1) bgColor = '#f59e0b'; // extras warning
-                  
-                  return (
-                    <div key={i} style={{ 
-                      width: '40px', height: '40px', borderRadius: '50%', backgroundColor: bgColor, 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.1rem',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '2px solid rgba(255,255,255,0.1)'
-                    }}>
-                      {b}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', borderTop: '1px solid var(--glass-border)', paddingTop: '1.5rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', color: '#94a3b8', marginRight: '1rem', minWidth: '100px' }}>Recent: </h3>
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                {details.recentBalls.length === 0 ? <span style={{ color: '#64748b', fontSize: '0.9rem' }}>No recent balls</span> : null}
-                {details.recentBalls.map((b, i) => {
-                  let bgColor = 'rgba(255,255,255,0.05)'; // default muted
-                  let color = '#94a3b8';
-                  if (b === 'W') { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
-                  else if (b === '4') { bgColor = 'rgba(59, 130, 246, 0.2)'; color = '#3b82f6'; }
-                  else if (b === '6') { bgColor = 'rgba(139, 92, 246, 0.2)'; color = '#8b5cf6'; }
-                  else if (b !== '0' && b.length === 1) { bgColor = 'rgba(16, 185, 129, 0.2)'; color = '#10b981'; }
-                  else if (b.length > 1) { bgColor = 'rgba(245, 158, 11, 0.2)'; color = '#f59e0b'; }
-                  
-                  return (
-                    <div key={i} style={{ 
-                      width: '32px', height: '32px', borderRadius: '50%', backgroundColor: bgColor, color: color,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.9rem',
-                      border: `1px solid ${color}40`
-                    }}>
-                      {b}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        </AnimatedSection>
       </div>
     </div>
   );

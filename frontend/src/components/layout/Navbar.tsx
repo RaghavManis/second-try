@@ -1,6 +1,6 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { Trophy, Users, Calendar, BarChart2, LogIn, LogOut, User, Radio, Image as ImageIcon } from 'lucide-react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Trophy, Users, Calendar, BarChart2, LogIn, LogOut, User, Circle, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { MatchScoringService } from '../../services/api';
 import './Navbar.css';
@@ -8,6 +8,8 @@ import './Navbar.css';
 const Navbar: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isOnLivePage = location.pathname === '/live-match';
 
   const [hasLiveMatch, setHasLiveMatch] = React.useState(false);
 
@@ -43,6 +45,14 @@ const Navbar: React.FC = () => {
             <span>Dashboard</span>
           </NavLink>
         </li>
+        {hasLiveMatch && (
+          <li>
+            <NavLink to="/live-match" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ color: '#ef4444', fontWeight: 'bold' }}>
+              <Circle size={16} fill="#ef4444" strokeWidth={0} className={!isOnLivePage ? "live-blink" : ""} />
+              <span>LIVE</span>
+            </NavLink>
+          </li>
+        )}
         <li>
           <NavLink to="/teams" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <Users size={20} />
@@ -73,14 +83,6 @@ const Navbar: React.FC = () => {
             <span>Gallery</span>
           </NavLink>
         </li>
-        {hasLiveMatch && (
-          <li>
-            <NavLink to="/live-match" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} style={{ color: '#ef4444', fontWeight: 'bold' }}>
-              <Radio size={20} className="animate-pulse" />
-              <span>LIVE</span>
-            </NavLink>
-          </li>
-        )}
         <li>
           {isAuthenticated ? (
             <button className="nav-link" onClick={handleLogout} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', width: '100%', textAlign: 'left' }}>

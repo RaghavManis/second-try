@@ -72,22 +72,26 @@ const PlayerProfile: React.FC = () => {
     <div className="page-container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
       
       {/* Profile Header */}
-      <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+      <div className="glass-panel profile-header" style={{ padding: '2rem', marginBottom: '2rem', position: 'relative' }}>
         <button onClick={() => navigate(-1)} style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <ArrowLeft size={16} /> Back
         </button>
         
-        <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `3px solid ${getRoleColor(player.role)}` }}>
-            <User size={64} color="var(--text-secondary)" />
+        <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `3px solid ${getRoleColor(player.role)}`, overflow: 'hidden', flexShrink: 0 }}>
+            {player.playerImage ? (
+                <img src={player.playerImage} alt={player.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+                <User size={48} color="var(--text-secondary)" />
+            )}
         </div>
         
-        <div style={{ flex: 1 }}>
-            <h1 className="gradient-text" style={{ fontSize: '2.5rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="profile-header-info" style={{ flex: 1 }}>
+            <h1 className="gradient-text profile-header-text" style={{ fontSize: '2rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               {player.name}
               {player.isCaptain && <span style={{color: 'var(--primary)', fontSize: '1.2rem'}}>(C)</span>}
               {player.isViceCaptain && <span style={{color: 'var(--text-secondary)', fontSize: '1.2rem'}}>(VC)</span>}
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <p className="profile-header-text" style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <Shield size={18} color="var(--primary)" /> {player.team.teamName} &nbsp;|&nbsp; 
               <span style={{ color: getRoleColor(player.role), fontWeight: 'bold' }}>{player.role.replace('_', ' ')}</span> &nbsp;|&nbsp;
               Jersey: {player.jerseyNumber || 'N/A'}
@@ -95,9 +99,11 @@ const PlayerProfile: React.FC = () => {
         </div>
         
         {isAuthenticated && (
-           <button className="btn btn-secondary" onClick={() => setIsEditModalOpen(true)}>
-             <Edit3 size={18} /> Update Stats
-           </button>
+           <div style={{ alignSelf: 'center' }}>
+             <button className="btn btn-secondary" onClick={() => setIsEditModalOpen(true)}>
+               <Edit3 size={18} /> Update Stats
+             </button>
+           </div>
         )}
       </div>
 
@@ -122,83 +128,112 @@ const PlayerProfile: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="glass-panel" style={{ padding: '2rem', overflowX: 'auto' }}>
+      <div className="glass-panel" style={{ padding: 'clamp(1rem, 3vw, 2rem)' }}>
         
         {activeTab === 'info' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-            <div>
-              <h3 style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '1rem', color: 'var(--primary)' }}>Basic Details</h3>
-              <p><strong>Full Name:</strong> {player.name}</p>
-              <p><strong>Team:</strong> {player.team.teamName}</p>
-              <p><strong>Role:</strong> {player.role.replace('_', ' ')}</p>
-              <p><strong>Jersey Number:</strong> {player.jerseyNumber || 'Unassigned'}</p>
+          <div className="profile-info-grid">
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px' }}>
+              <h3 style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '1.25rem', color: 'var(--primary)' }}>Basic Details</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Full Name</span>
+                <span style={{ fontWeight: '600' }}>{player.name}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Team</span>
+                <span style={{ fontWeight: '600' }}>{player.team.teamName}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Role</span>
+                <span style={{ fontWeight: '600' }}>{player.role.replace('_', ' ')}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Jersey Number</span>
+                <span style={{ fontWeight: '600' }}>{player.jerseyNumber || 'Unassigned'}</span>
+              </div>
             </div>
-            <div>
-              <h3 style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '1rem', color: 'var(--primary)' }}>Style</h3>
-              <p><strong>Batting Style:</strong> {player.battingStyle || 'Unknown'}</p>
-              <p><strong>Bowling Style:</strong> {player.bowlingStyle || 'Unknown'}</p>
+            
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px' }}>
+              <h3 style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '1.25rem', color: 'var(--primary)' }}>Style</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Batting Style</span>
+                <span style={{ fontWeight: '600' }}>{player.battingStyle || 'Unknown'}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Bowling Style</span>
+                <span style={{ fontWeight: '600' }}>{player.bowlingStyle || 'Unknown'}</span>
+              </div>
             </div>
           </div>
         )}
 
         {activeTab === 'batting' && (
-          <table className="table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
-                <th style={{ padding: '1rem' }}>Matches</th>
-                <th>Innings</th>
-                <th>Runs</th>
-                <th>Balls</th>
-                <th>HS</th>
-                <th>Avg</th>
-                <th>SR</th>
-                <th>50s</th>
-                <th>100s</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ padding: '1rem' }}>{player.matchesPlayed || 0}</td>
-                <td>{player.inningsPlayed || 0}</td>
-                <td>{player.runsScored || 0}</td>
-                <td>{player.ballsFaced || 0}</td>
-                <td>{player.highestScore || 0}</td>
-                <td>{(player.battingAverage || 0).toFixed(2)}</td>
-                <td>{(player.strikeRate || 0).toFixed(2)}</td>
-                <td>{player.fifties || 0}</td>
-                <td>{player.hundreds || 0}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div>
+            <h3 style={{ color: 'var(--primary)', marginBottom: '1rem', marginTop: '0.5rem' }}>Batting Stats</h3>
+            <div style={{ overflowX: 'auto', width: '100%' }}>
+              <table className="table stats-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '600px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
+                    <th>Matches</th>
+                    <th>Innings</th>
+                    <th>Runs</th>
+                    <th>Balls</th>
+                    <th>HS</th>
+                    <th>Avg</th>
+                    <th>SR</th>
+                    <th>50s</th>
+                    <th>100s</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{player.matchesPlayed || 0}</td>
+                    <td>{player.inningsPlayed || 0}</td>
+                    <td>{player.runsScored || 0}</td>
+                    <td>{player.ballsFaced || 0}</td>
+                    <td>{player.highestScore || 0}</td>
+                    <td>{(player.battingAverage || 0).toFixed(2)}</td>
+                    <td>{(player.strikeRate || 0).toFixed(2)}</td>
+                    <td>{player.fifties || 0}</td>
+                    <td>{player.hundreds || 0}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
         {activeTab === 'bowling' && (
-           <table className="table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-           <thead>
-             <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
-               <th style={{ padding: '1rem' }}>Matches</th>
-               <th>Overs</th>
-               <th>Runs</th>
-               <th>Wickets</th>
-               <th>Best</th>
-               <th>Avg</th>
-               <th>Econ</th>
-               <th>SR</th>
-             </tr>
-           </thead>
-           <tbody>
-             <tr>
-               <td style={{ padding: '1rem' }}>{player.matchesPlayed || 0}</td>
-               <td>{(player.oversBowled || 0).toFixed(1)}</td>
-               <td>{player.runsConceded || 0}</td>
-               <td>{player.wickets || 0}</td>
-               <td>{player.bestBowling || '-'}</td>
-               <td>{(player.bowlingAverage || 0).toFixed(2)}</td>
-               <td>{(player.economyRate || 0).toFixed(2)}</td>
-               <td>{(player.bowlingStrikeRate || 0).toFixed(2)}</td>
-             </tr>
-           </tbody>
-         </table>
+          <div>
+            <h3 style={{ color: 'var(--primary)', marginBottom: '1rem', marginTop: '0.5rem' }}>Bowling Stats</h3>
+            <div style={{ overflowX: 'auto', width: '100%' }}>
+              <table className="table stats-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '600px' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
+                  <th>Matches</th>
+                  <th>Overs</th>
+                  <th>Runs</th>
+                  <th>Wickets</th>
+                  <th>Best</th>
+                  <th>Avg</th>
+                  <th>Econ</th>
+                  <th>SR</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{player.matchesPlayed || 0}</td>
+                  <td>{(player.oversBowled || 0).toFixed(1)}</td>
+                  <td>{player.runsConceded || 0}</td>
+                  <td>{player.wickets || 0}</td>
+                  <td>{player.bestBowling || '-'}</td>
+                  <td>{(player.bowlingAverage || 0).toFixed(2)}</td>
+                  <td>{(player.economyRate || 0).toFixed(2)}</td>
+                  <td>{(player.bowlingStrikeRate || 0).toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+           </div>
+         </div>
         )}
 
       </div>

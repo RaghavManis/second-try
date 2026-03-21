@@ -229,7 +229,7 @@ const Matches: React.FC = () => {
         
         {/* SECTION 2: MATCH HIGHLIGHTS */}
         {completedOrOngoing.length > 0 && (
-        <AnimatedSection className="bg-section-2">
+        <AnimatedSection className="bg-section-2 theme-light">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Match Highlights</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Latest completed and ongoing matches.</p>
           <AutoScrollContainer className="horizontal-scroller">
@@ -244,7 +244,7 @@ const Matches: React.FC = () => {
 
         {/* SECTION 3: UPCOMING FIXTURES */}
         {upcoming.length > 0 && (
-        <AnimatedSection className="bg-section-3">
+        <AnimatedSection className="bg-section-3 theme-dark">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Upcoming Fixtures</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Scheduled matches eagerly awaited.</p>
           <AutoScrollContainer className="horizontal-scroller">
@@ -258,7 +258,7 @@ const Matches: React.FC = () => {
         )}
 
         {/* SECTION 4: ALL MATCHES */}
-        <AnimatedSection className="bg-section-4">
+        <AnimatedSection className="bg-section-4 theme-light">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>All Matches</h2>

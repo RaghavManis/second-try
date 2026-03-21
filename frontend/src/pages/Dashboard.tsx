@@ -20,11 +20,12 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [teamsRes, matchesRes, playersRes, pointsRes] = await Promise.all([
+        const [teamsRes, matchesRes, playersRes, pointsRes, perfRes] = await Promise.all([
           TeamService.getAllTeams(),
           MatchService.getAllMatches(),
           PlayerService.getAllPlayers(),
-          PointsService.getPointsTable()
+          PointsService.getPointsTable(),
+          PointsService.getTopPerformers()
         ]);
         
         const allMatches = matchesRes.data;
@@ -39,8 +40,30 @@ const Dashboard: React.FC = () => {
         // Slice previews
         setTeams(teamsRes.data.slice(0, 5)); // top 5 teams
         setRecentMatches(allMatches.slice(0, 5)); // up to 5 recent matches
-        setPlayers(playersRes.data.slice(0, 8)); // up to 8 players for preview
         setStandings(pointsRes.data.slice(0, 4)); // top 4 standings
+        
+        // Compute Star Athletes (Orange & Purple cap mix, shuffled)
+        const allPlayers = playersRes.data as Player[];
+        const topScorers = perfRes.data.topRunScorers || [];
+        const topWickets = perfRes.data.topWicketTakers || [];
+        
+        // We might only have player names in the perf array. We map names back to Player objects.
+        const perfNames = new Set([
+          ...topScorers.map((p: any) => p.playerName),
+          ...topWickets.map((p: any) => p.playerName)
+        ]);
+
+        let starSubset = allPlayers.filter(p => perfNames.has(p.name));
+        // Fallback: if no matches or no perf data, just take the first 8
+        if (starSubset.length === 0) starSubset = allPlayers.slice(0, 8);
+        
+        // Shuffle the stars array
+        for (let i = starSubset.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [starSubset[i], starSubset[j]] = [starSubset[j], starSubset[i]];
+        }
+        
+        setPlayers(starSubset.slice(0, 8)); // lock to max 8 random stars
         
       } catch (error) {
         console.error('Failed to load dashboard data', error);
@@ -98,7 +121,7 @@ const Dashboard: React.FC = () => {
       <div className="dashboard-sections">
         
         {/* SECTION 2: TOURNAMENT STATS */}
-        <AnimatedSection id="stats-section" className="bg-section-1">
+        <AnimatedSection id="stats-section" className="bg-section-1 theme-dark">
           <h2 className="scroll-section-title gradient-text">Tournament at a Glance</h2>
           <p className="scroll-section-subtitle">Key metrics driving the competition right now.</p>
           
@@ -131,7 +154,7 @@ const Dashboard: React.FC = () => {
 
         {/* SECTION 3: RECENT MATCHES CAROUSEL */}
         {recentMatches.length > 0 && (
-        <AnimatedSection className="bg-section-2">
+        <AnimatedSection className="bg-section-2 theme-light">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>Action Center</h2>
@@ -218,7 +241,7 @@ const Dashboard: React.FC = () => {
 
         {/* SECTION 4: TEAMS OVERVIEW */}
         {teams.length > 0 && (
-        <AnimatedSection className="bg-section-3">
+        <AnimatedSection className="bg-section-3 theme-dark">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
             <div>
               <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>The Contenders</h2>

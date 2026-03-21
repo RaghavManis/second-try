@@ -7,7 +7,7 @@ export const AnimatedSection: React.FC<{ children: React.ReactNode; className?: 
     <div 
       id={id}
       ref={ref as any} 
-      className={`scroll-section transition-all duration-1000 ${isIntersecting ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} ${className}`}
+      className={`scroll-section transition-all duration-1000 ${isIntersecting ? 'opacity-100 translate-y-0 is-visible' : 'opacity-0 translate-y-10'} ${className}`}
     >
       <div className="scroll-section-content">
         {children}
