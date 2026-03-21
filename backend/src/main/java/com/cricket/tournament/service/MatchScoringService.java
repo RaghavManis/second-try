@@ -189,7 +189,7 @@ public class MatchScoringService {
         }
 
         // Update ScorecardBatting for Striker
-        ScorecardBatting strikerCard = scorecardBattingRepository.findByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentStriker().getId())
+        ScorecardBatting strikerCard = scorecardBattingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentStriker().getId())
             .orElseGet(() -> createBattingCard(match, match.getCurrentStriker()));
         strikerCard.setRuns(strikerCard.getRuns() + batsmanCreditRuns);
         if (fitsBatsmanBalls) strikerCard.setBalls(strikerCard.getBalls() + 1);
@@ -205,7 +205,7 @@ public class MatchScoringService {
             if (ballDto.getPlayerOutId().equals(strikerCard.getPlayer().getId())) {
                 outCard = strikerCard;
             } else {
-                outCard = scorecardBattingRepository.findByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), ballDto.getPlayerOutId())
+                outCard = scorecardBattingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), ballDto.getPlayerOutId())
                     .orElseGet(() -> createBattingCard(match, playerRepository.findById(ballDto.getPlayerOutId()).get()));
             }
             outCard.setHowOut(ballDto.getWicketType() + (Arrays.asList("BOWLED", "LBW").contains(ballDto.getWicketType()) ? " b " : " ") + match.getCurrentBowler().getName());
@@ -213,7 +213,7 @@ public class MatchScoringService {
         }
 
         // Update ScorecardBowling for Bowler
-        ScorecardBowling bowlerCard = scorecardBowlingRepository.findByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentBowler().getId())
+        ScorecardBowling bowlerCard = scorecardBowlingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentBowler().getId())
             .orElseGet(() -> createBowlingCard(match, match.getCurrentBowler()));
         bowlerCard.setRuns(bowlerCard.getRuns() + bowlerCreditRuns);
         
@@ -240,7 +240,7 @@ public class MatchScoringService {
             }
             // Ensure the new batsman also has an initialized card
             if (nextBat != null) {
-                ScorecardBatting nextCard = scorecardBattingRepository.findByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), nextBat.getId())
+                ScorecardBatting nextCard = scorecardBattingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), nextBat.getId())
                     .orElseGet(() -> createBattingCard(match, nextBat));
                 scorecardBattingRepository.save(nextCard);
             }
@@ -490,19 +490,19 @@ public class MatchScoringService {
         }
 
         if (match.getCurrentStriker() != null) {
-            scorecardBattingRepository.findByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentStriker().getId()).ifPresent(s -> {
+            scorecardBattingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentStriker().getId()).ifPresent(s -> {
                 dto.setStrikerRuns(s.getRuns());
                 dto.setStrikerBalls(s.getBalls());
             });
         }
         if (match.getCurrentNonStriker() != null) {
-            scorecardBattingRepository.findByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentNonStriker().getId()).ifPresent(s -> {
+            scorecardBattingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentNonStriker().getId()).ifPresent(s -> {
                 dto.setNonStrikerRuns(s.getRuns());
                 dto.setNonStrikerBalls(s.getBalls());
             });
         }
         if (match.getCurrentBowler() != null) {
-            scorecardBowlingRepository.findByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentBowler().getId()).ifPresent(s -> {
+            scorecardBowlingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), match.getCurrentBowler().getId()).ifPresent(s -> {
                 dto.setBowlerRuns(s.getRuns());
                 dto.setBowlerWickets(s.getWickets());
                 dto.setBowlerOvers(s.getOvers());

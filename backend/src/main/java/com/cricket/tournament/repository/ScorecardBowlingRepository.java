@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface ScorecardBowlingRepository extends JpaRepository<ScorecardBowling, Long> {
     List<ScorecardBowling> findByMatchId(Long matchId);
-    Optional<ScorecardBowling> findByMatchIdAndInningsAndPlayerId(Long matchId, Integer innings, Long playerId);
+    Optional<ScorecardBowling> findFirstByMatchIdAndInningsAndPlayerId(Long matchId, Integer innings, Long playerId);
     List<ScorecardBowling> findByMatchIdAndInnings(Long matchId, Integer innings);
     
     @org.springframework.data.jpa.repository.Query(value = "SELECT p.name AS playerName, t.team_name AS teamName, CAST(SUM(s.wickets) AS SIGNED) AS totalWickets " +
