@@ -451,8 +451,14 @@ public class MatchScoringService {
         return match;
     }
 
+    @Transactional(readOnly = true)
     public LiveMatchDetailsDto getLiveDetails(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
+        
+        // Force initialize lazy collections to prevent LazyInitializationException during JSON serialization
+        if (match.getPlayingXiTeamA() != null) match.getPlayingXiTeamA().size();
+        if (match.getPlayingXiTeamB() != null) match.getPlayingXiTeamB().size();
+        
         LiveMatchDetailsDto dto = new LiveMatchDetailsDto();
         dto.setMatch(match);
         dto.setTargetScore(match.getTargetScore());
@@ -474,9 +480,10 @@ public class MatchScoringService {
             dto.setCurrentRunRate(0.0);
         }
 
-        if (match.getCurrentInnings() == 2 && match.getTargetScore() != null) {
+        if (match.getCurrentInnings() != null && match.getCurrentInnings() == 2 && match.getTargetScore() != null) {
             int runsNeeded = Math.max(0, match.getTargetScore() - runs);
-            int ballsRemaining = (match.getOvers() * 6) - legalBalls;
+            int totalOvers = match.getOvers() != null ? match.getOvers() : 20; // Safe unboxing guard
+            int ballsRemaining = (totalOvers * 6) - legalBalls;
             if (ballsRemaining > 0) {
                 dto.setRequiredRunRate((runsNeeded * 6.0) / ballsRemaining);
             }
@@ -516,7 +523,7 @@ public class MatchScoringService {
         // Rule 16: Last six balls display
         List<BallEvent> events = ballEventRepository.findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(matchId, match.getCurrentInnings());
         
-        if (!events.isEmpty()) {
+        if (!events.isEmpty() && events.get(events.size() - 1).getBowler() != null) { // Safe previous bowler guard
             dto.setPreviousBowlerId(events.get(events.size() - 1).getBowler().getId());
         }
 
@@ -635,6 +642,7 @@ public class MatchScoringService {
         return matchRepository.save(match);
     }
     
+    @Transactional(readOnly = true)
     public Map<String, Object> getCompleteScorecard(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         Map<String, Object> response = new HashMap<>();
