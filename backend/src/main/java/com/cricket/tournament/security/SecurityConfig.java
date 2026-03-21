@@ -48,8 +48,8 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Exact explicit origins provided by user
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://192.168.31.96:5173"));
+        // Use origins dynamically from application.properties / environment variables
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(
