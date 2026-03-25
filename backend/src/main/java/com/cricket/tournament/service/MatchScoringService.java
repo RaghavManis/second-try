@@ -521,7 +521,9 @@ public class MatchScoringService {
         }
         
         // Rule 16: Last six balls display
-        List<BallEvent> events = ballEventRepository.findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(matchId, match.getCurrentInnings());
+        List<BallEvent> eventsDb = ballEventRepository.findTop20ByMatchIdAndInningsOrderByOverNumberDescBallNumberDescIdDesc(matchId, match.getCurrentInnings());
+        List<BallEvent> events = new ArrayList<>(eventsDb);
+        Collections.reverse(events);
         
         if (!events.isEmpty() && events.get(events.size() - 1).getBowler() != null) { // Safe previous bowler guard
             dto.setPreviousBowlerId(events.get(events.size() - 1).getBowler().getId());

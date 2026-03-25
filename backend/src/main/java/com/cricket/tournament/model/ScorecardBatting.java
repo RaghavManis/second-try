@@ -3,7 +3,9 @@ package com.cricket.tournament.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "scorecard_batting")
+@Table(name = "scorecard_batting", indexes = {
+    @Index(name = "idx_batting_match_innings_player", columnList = "match_id, innings, player_id")
+})
 public class ScorecardBatting {
 
     @Id

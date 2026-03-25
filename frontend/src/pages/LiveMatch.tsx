@@ -37,27 +37,39 @@ const LiveMatch: React.FC = () => {
   useEffect(() => {
     if (!selectedMatchId) return;
     
-    const fetchDetails = async () => {
+    const fetchLiveDetails = async () => {
       try {
         const res = await MatchScoringService.getLiveDetails(selectedMatchId);
         setDetails(res.data);
-        
-        try {
-            const cardRes = await MatchScoringService.getCompleteScorecard(selectedMatchId);
-            setBattingCards(cardRes.data.batting);
-            setBowlingCards(cardRes.data.bowling);
-        } catch (cardErr) {
-            console.error('Failed fetching scorecard components', cardErr);
-        }
-
-        setLoading(false);
       } catch (err) {
         console.error(err);
       }
     };
-    fetchDetails();
-    const interval = setInterval(fetchDetails, 5000); // 5s fast poll for live details
-    return () => clearInterval(interval);
+
+    const fetchScorecards = async () => {
+      try {
+        const cardRes = await MatchScoringService.getCompleteScorecard(selectedMatchId);
+        setBattingCards(cardRes.data.batting);
+        setBowlingCards(cardRes.data.bowling);
+      } catch (err) {
+        console.error('Failed fetching scorecard components', err);
+      }
+    };
+
+    const initData = async () => {
+      await fetchLiveDetails();
+      await fetchScorecards();
+      setLoading(false);
+    };
+    
+    initData();
+    const detailsInterval = setInterval(fetchLiveDetails, 5000); // 5s fast poll for live details
+    const scorecardInterval = setInterval(fetchScorecards, 15000); // 15s slow poll for full scorecard
+    
+    return () => {
+        clearInterval(detailsInterval);
+        clearInterval(scorecardInterval);
+    };
   }, [selectedMatchId]);
 
   if (loading) return <div className="loader" style={{ textAlign: 'center', marginTop: '20vh' }}>Loading Live Feed...</div>;
