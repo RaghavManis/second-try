@@ -60,4 +60,16 @@ public class Team {
     public void setTeamLogo(String teamLogo) {
         this.teamLogo = teamLogo;
     }
+
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<Player> players = new java.util.ArrayList<>();
+
+    public java.util.List<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(java.util.List<Player> players) {
+        this.players = players;
+    }
 }

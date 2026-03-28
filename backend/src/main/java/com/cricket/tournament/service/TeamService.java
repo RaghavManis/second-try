@@ -21,7 +21,14 @@ public class TeamService {
         return teamRepository.save(team);
     }
 
+    @Autowired
+    private com.cricket.tournament.repository.MatchRepository matchRepository;
+
+    @org.springframework.transaction.annotation.Transactional
     public void deleteTeam(Long id) {
+        if (matchRepository.existsByTeamAIdOrTeamBId(id, id)) {
+            throw new RuntimeException("This team is used in matches. Please delete those matches first.");
+        }
         teamRepository.deleteById(id);
     }
 

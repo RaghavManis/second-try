@@ -52,4 +52,10 @@ public class MatchController {
         Match updatedMatch = matchService.saveMatch(match);
         return new ResponseEntity<>(updatedMatch, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMatch(@PathVariable Long id) {
+        matchService.deleteMatch(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -12,6 +12,7 @@ public interface ScorecardBattingRepository extends JpaRepository<ScorecardBatti
     List<ScorecardBatting> findByMatchId(Long matchId);
     Optional<ScorecardBatting> findFirstByMatchIdAndInningsAndPlayerId(Long matchId, Integer innings, Long playerId);
     List<ScorecardBatting> findByMatchIdAndInnings(Long matchId, Integer innings);
+    void deleteByMatchId(Long matchId);
     
     @org.springframework.data.jpa.repository.Query(value = "SELECT p.name AS playerName, t.team_name AS teamName, SUM(s.runs) AS totalRuns " +
            "FROM scorecard_batting s " +

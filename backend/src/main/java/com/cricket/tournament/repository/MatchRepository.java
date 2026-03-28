@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findByStatus(Match.MatchStatus status);
+    boolean existsByTeamAIdOrTeamBId(Long teamAId, Long teamBId);
 }

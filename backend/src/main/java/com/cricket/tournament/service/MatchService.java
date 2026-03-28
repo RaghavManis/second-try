@@ -13,6 +13,15 @@ public class MatchService {
     @Autowired
     private MatchRepository matchRepository;
 
+    @Autowired
+    private com.cricket.tournament.repository.BallEventRepository ballEventRepository;
+
+    @Autowired
+    private com.cricket.tournament.repository.ScorecardBattingRepository scorecardBattingRepository;
+
+    @Autowired
+    private com.cricket.tournament.repository.ScorecardBowlingRepository scorecardBowlingRepository;
+
     public List<Match> getAllMatches() {
         return matchRepository.findAll();
     }
@@ -40,5 +49,20 @@ public class MatchService {
 
     public Match saveMatch(Match match) {
         return matchRepository.save(match);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteMatch(Long id) {
+        // Explicitly clear dependencies to avoid FK violation and orphan records
+        ballEventRepository.deleteByMatchId(id);
+        scorecardBattingRepository.deleteByMatchId(id);
+        scorecardBowlingRepository.deleteByMatchId(id);
+
+        Match match = getMatchById(id);
+        if (match.getPlayingXiTeamA() != null) match.getPlayingXiTeamA().clear();
+        if (match.getPlayingXiTeamB() != null) match.getPlayingXiTeamB().clear();
+        matchRepository.save(match);
+
+        matchRepository.delete(match);
     }
 }

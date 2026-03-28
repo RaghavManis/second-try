@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { MatchService, TeamService } from '../services/api';
 import type { Match, Team } from '../types';
-import { CalendarPlus, MapPin, Clock, Edit } from 'lucide-react';
+import { CalendarPlus, MapPin, Clock, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { AnimatedSection } from '../components/AnimatedSection';
@@ -84,6 +84,20 @@ const Matches: React.FC = () => {
     }
   };
 
+  const handleDeleteMatch = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this match? All related scorecards, ball events, and playing XI will be deleted permanently. This action cannot be undone.")) {
+      try {
+        await MatchService.deleteMatch(id);
+        toast.success("Match deleted successfully!");
+        fetchData();
+      } catch (error: any) {
+        console.error('Failed to delete match', error);
+        toast.error(error.response?.data?.message || "Failed to delete match.");
+      }
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch(status) {
       case 'SCHEDULED': return '#3b82f6';
@@ -95,7 +109,7 @@ const Matches: React.FC = () => {
 
   const getRandomLogo = (id: number) => `https://api.dicebear.com/7.x/identicon/svg?seed=Team${id}&backgroundColor=1e293b`;
 
-  const MatchCard = ({ match, showActions = false }: { match: Match; showActions?: boolean }) => {
+  const MatchCard = ({ match, showActions = false, onDelete }: { match: Match; showActions?: boolean, onDelete?: (e: React.MouseEvent, id: number) => void }) => {
     let team1 = match.teamA;
     let team2 = match.teamB;
     let team1Info = null;
@@ -128,11 +142,22 @@ const Matches: React.FC = () => {
 
     return (
     <div className="glass-panel hover-lift" style={{ padding: '1.5rem', position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ position: 'absolute', top: '1rem', right: '1rem', 
-        background: `${getStatusColor(match.status)}20`, 
-        color: getStatusColor(match.status), 
-        padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
-        {match.status}
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 10 }}>
+        <div style={{ 
+          background: `${getStatusColor(match.status)}20`, 
+          color: getStatusColor(match.status), 
+          padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
+          {match.status}
+        </div>
+        {showActions && isAuthenticated && onDelete && (
+          <button 
+            onClick={(e) => onDelete(e, match.id!)}
+            style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', cursor: 'pointer', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            title="Delete Match"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '1.5rem' }}>
@@ -281,7 +306,7 @@ const Matches: React.FC = () => {
               </div>
             ) : (
               matches.map((match) => (
-                <MatchCard key={match.id} match={match} showActions={true} />
+                <MatchCard key={match.id} match={match} showActions={true} onDelete={handleDeleteMatch} />
               ))
             )}
           </div>

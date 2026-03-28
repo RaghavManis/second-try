@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TeamService, UploadService } from '../services/api';
 import type { Team } from '../types';
-import { UserPlus, Shield, Users, Edit, Upload } from 'lucide-react';
+import { UserPlus, Shield, Users, Edit, Upload, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -69,6 +69,20 @@ const Teams: React.FC = () => {
     } catch (error) {
       console.error('Failed to save team', error);
       toast.error('Failed to save team.');
+    }
+  };
+
+  const handleDeleteTeam = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this team? All its players will be deleted permanently. This action cannot be undone.")) {
+      try {
+        await TeamService.deleteTeam(id);
+        toast.success("Team deleted successfully!");
+        fetchTeams();
+      } catch (error: any) {
+        console.error('Failed to delete team', error);
+        toast.error(error.response?.data?.message || "Failed to delete team! This team is likely used in matches.");
+      }
     }
   };
 
@@ -158,13 +172,22 @@ const Teams: React.FC = () => {
               teams.map((team) => (
                 <div key={team.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
                   {isAuthenticated && (
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); openEditModal(team); }}
-                      style={{ position: 'absolute', top: '10px', right: '10px', background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
-                      title="Edit Team"
-                    >
-                      <Edit size={18} />
-                    </button>
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px', zIndex: 10 }}>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); openEditModal(team); }}
+                        style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                        title="Edit Team"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button 
+                        onClick={(e) => handleDeleteTeam(e, team.id!)}
+                        style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                        title="Delete Team"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   )}
                   <img src={getLogo(team)} alt={team.teamName} style={{ width: 64, height: 64, borderRadius: '12px', marginBottom: '1rem', objectFit: 'cover' }} />
                   <h3 className="gradient-text" style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem', marginBottom: '1rem', width: '100%' }}>
