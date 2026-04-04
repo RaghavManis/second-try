@@ -17,7 +17,7 @@ public class PointsController {
     private PointsService pointsService;
 
     @GetMapping
-    public List<Map<String, Object>> getPointsTable() {
+    public Map<String, List<Map<String, Object>>> getPointsTable() {
         return pointsService.getPointsTable();
     }
 

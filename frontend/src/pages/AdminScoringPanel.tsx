@@ -433,10 +433,10 @@ const AdminScoringPanel: React.FC = () => {
               <select className="form-input" value={manOfTheMatchId} onChange={e => setManOfTheMatchId(Number(e.target.value))}>
                  <option value="">-- Choose Player --</option>
                  <optgroup label={match.teamA.teamName}>
-                   {teamASquad.filter(p => match.playingXiTeamA?.some(xi => xi.id === p.id)).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                   {teamASquad.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                  </optgroup>
                  <optgroup label={match.teamB.teamName}>
-                   {teamBSquad.filter(p => match.playingXiTeamB?.some(xi => xi.id === p.id)).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                   {teamBSquad.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                  </optgroup>
               </select>
             </div>

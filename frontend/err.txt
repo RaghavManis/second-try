@@ -1,0 +1,6 @@
+src/pages/PlayerProfile.tsx(5,34): error TS6133: 'Shield' is declared but its value is never read.
+src/pages/PlayerProfile.tsx(30,18): error TS2345: Argument of type 'Player' is not assignable to parameter of type 'SetStateAction<PlayerProfileDto | null>'.
+src/pages/PlayersList.tsx(5,16): error TS6133: 'Shield' is declared but its value is never read.
+src/pages/PointsTable.tsx(29,34): error TS2339: Property 'topRunScorers' does not exist on type '{ TOURNAMENT: { topRunScorers: any[]; topWicketTakers: any[]; }; PRACTICE: { topRunScorers: any[]; topWicketTakers: any[]; }; }'.
+src/pages/PointsTable.tsx(30,34): error TS2339: Property 'topWicketTakers' does not exist on type '{ TOURNAMENT: { topRunScorers: any[]; topWicketTakers: any[]; }; PRACTICE: { topRunScorers: any[]; topWicketTakers: any[]; }; }'.
+src/pages/TeamSquad.tsx(99,9): error TS2353: Object literal may only specify known properties, and 'team' does not exist in type 'Player'.

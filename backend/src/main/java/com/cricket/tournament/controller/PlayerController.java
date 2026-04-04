@@ -1,5 +1,6 @@
 package com.cricket.tournament.controller;
 
+import com.cricket.tournament.dto.PlayerProfileDto;
 import com.cricket.tournament.model.Player;
 import com.cricket.tournament.service.PlayerService;
 import jakarta.validation.Valid;
@@ -41,8 +42,8 @@ public class PlayerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Player> getPlayerById(@PathVariable Long id) {
-        return ResponseEntity.ok(playerService.getPlayerById(id));
+    public ResponseEntity<PlayerProfileDto> getPlayerById(@PathVariable Long id) {
+        return ResponseEntity.ok(playerService.getPlayerProfile(id));
     }
 
     @PutMapping("/{id}")
@@ -50,8 +51,4 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.updatePlayerBasicInfo(id, player));
     }
 
-    @PatchMapping("/{id}/stats")
-    public ResponseEntity<Player> updatePlayerStats(@PathVariable Long id, @RequestBody Player statsUpdate) {
-        return ResponseEntity.ok(playerService.updatePlayerStats(id, statsUpdate));
-    }
 }

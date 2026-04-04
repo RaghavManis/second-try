@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { TeamService, PlayerService, UploadService } from '../services/api';
-import type { Team, Player, PlayerRole } from '../types';
-import { ArrowLeft, UserPlus, Trash2, Shield, User, Edit, Upload } from 'lucide-react';
+import { TeamService, PlayerService } from '../services/api';
+import type { Team, Player } from '../types';
+import { ArrowLeft, Trash2, Shield, User, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -15,11 +15,11 @@ const TeamSquad: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPlayerId, setEditingPlayerId] = useState<number | null>(null);
-  const [newPlayer, setNewPlayer] = useState({ name: '', role: 'BATSMAN' as PlayerRole, jerseyNumber: '', isCaptain: false, isViceCaptain: false, battingStyle: '', bowlingStyle: '', playerImage: '' });
-  const [uploading, setUploading] = useState(false);
+  // Manage Squad Modal State
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [globalPlayers, setGlobalPlayers] = useState<Player[]>([]);
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState<number[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (teamId) {
@@ -44,88 +44,54 @@ const TeamSquad: React.FC = () => {
     }
   };
 
-  const openEditModal = (player: Player) => {
-    setEditingPlayerId(player.id || null);
-    setNewPlayer({
-      name: player.name,
-      role: player.role,
-      jerseyNumber: player.jerseyNumber ? player.jerseyNumber.toString() : '',
-      isCaptain: player.isCaptain || false,
-      isViceCaptain: player.isViceCaptain || false,
-      battingStyle: player.battingStyle || '',
-      bowlingStyle: player.bowlingStyle || '',
-      playerImage: player.playerImage || ''
-    });
-    setIsModalOpen(true);
-  };
-
-  const closeForm = () => {
-    setIsModalOpen(false);
-    setEditingPlayerId(null);
-    setNewPlayer({ name: '', role: 'BATSMAN', jerseyNumber: '', isCaptain: false, isViceCaptain: false, battingStyle: '', bowlingStyle: '', playerImage: '' });
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { toast.error('Please upload a valid image'); return; }
-    
-    setUploading(true);
+  const openManageModal = async () => {
     try {
-      const res = await UploadService.uploadImage(file);
-      setNewPlayer(prev => ({ ...prev, playerImage: res.data.url }));
-      toast.success('Image uploaded successfully');
+      const res = await PlayerService.getAllPlayers();
+      setGlobalPlayers(res.data);
+      setSelectedPlayerIds(players.map(p => p.id!));
+      setIsManageModalOpen(true);
     } catch (err) {
-      toast.error('Failed to upload image');
-    } finally {
-      setUploading(false);
+      toast.error('Failed to load global players');
     }
   };
 
-  const handleSavePlayer = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveSquad = async () => {
     if (!team) return;
-
+    setIsSaving(true);
     try {
-      const playerData: Player = {
-        name: newPlayer.name,
-        role: newPlayer.role,
-        jerseyNumber: newPlayer.jerseyNumber ? parseInt(newPlayer.jerseyNumber as string) : undefined,
-        isCaptain: newPlayer.isCaptain,
-        isViceCaptain: newPlayer.isViceCaptain,
-        battingStyle: newPlayer.battingStyle,
-        bowlingStyle: newPlayer.bowlingStyle,
-        playerImage: newPlayer.playerImage,
-        team: team
-      };
-      
-      if (editingPlayerId) {
-        const res = await PlayerService.updatePlayer(editingPlayerId, playerData);
-        setPlayers(players.map(p => p.id === editingPlayerId ? res.data : p));
-        toast.success('Player updated successfully!');
-      } else {
-        const res = await PlayerService.addPlayer(playerData);
-        setPlayers([...players, res.data]);
-        toast.success('Player added successfully!');
-      }
-      closeForm();
+      const res = await TeamService.assignPlayers(team.id!, selectedPlayerIds);
+      toast.success('Squad updated successfully!');
+      setIsManageModalOpen(false);
+      setPlayers(res.data.players || []); // Assuming the API returns the updated team with players
+      // Re-fetch to be safe
+      fetchTeamAndPlayers(team.id!);
     } catch (err) {
-      console.error('Failed to save player', err);
-      toast.error('Failed to save player.');
+      console.error('Failed to save squad', err);
+      toast.error('Failed to update squad.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleRemovePlayer = async (playerId: number) => {
+    if (!team) return;
     if (window.confirm("Remove this player from the squad?")) {
       try {
-        await PlayerService.removePlayer(playerId);
+        const updatedPlayerIds = players.filter(p => p.id !== playerId).map(p => p.id!);
+        await TeamService.assignPlayers(team.id!, updatedPlayerIds);
         setPlayers(players.filter(p => p.id !== playerId));
-        toast.success('Player removed.');
+        toast.success('Player removed from squad.');
       } catch (err) {
         console.error('Failed to remove player', err);
         toast.error('Failed to remove player.');
       }
     }
+  };
+
+  const togglePlayerSelection = (playerId: number) => {
+    setSelectedPlayerIds(prev => 
+      prev.includes(playerId) ? prev.filter(id => id !== playerId) : [...prev, playerId]
+    );
   };
 
   const getRoleColor = (role: string) => {
@@ -157,8 +123,8 @@ const TeamSquad: React.FC = () => {
             <p className="page-subtitle" style={{ color: '#cbd5e1' }}>Coach: {team.coachName} | Captain: {captainDisplay}</p>
           </div>
           {isAuthenticated && (
-            <button className="btn btn-primary hover-lift" onClick={() => { setEditingPlayerId(null); setIsModalOpen(true); }}>
-              <UserPlus size={18} /> Add Player
+            <button className="btn btn-primary hover-lift" onClick={openManageModal}>
+              <Users size={18} /> Manage Squad
             </button>
           )}
         </div>
@@ -168,16 +134,13 @@ const TeamSquad: React.FC = () => {
         {players.length === 0 ? (
           <div className="glass-panel" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem' }}>
             <User size={48} color="var(--text-secondary)" style={{marginBottom: '1rem', opacity: 0.5}}/>
-            <h3 style={{color: 'var(--text-secondary)'}}>No players registered yet.</h3>
+            <h3 style={{color: 'var(--text-secondary)'}}>No players assigned yet.</h3>
           </div>
         ) : (
           players.map((player, idx) => (
             <div key={player.id} className={`glass-panel hover-lift delay-${(idx % 3 + 1) * 100}`} style={{ position: 'relative', overflow: 'hidden' }}>
               {isAuthenticated && (
                 <div style={{ position: 'absolute', top: 0, right: 0, padding: '1rem', display: 'flex', gap: '0.5rem' }}>
-                   <button className="btn btn-secondary" style={{padding: '0.3rem', background: '#3b82f620', color: '#3b82f6'}} onClick={() => openEditModal(player)}>
-                     <Edit size={16} />
-                   </button>
                    <button className="btn btn-secondary" style={{padding: '0.3rem', background: '#ef444420', color: '#ef4444'}} onClick={() => player.id && handleRemovePlayer(player.id)}>
                      <Trash2 size={16} />
                    </button>
@@ -218,88 +181,66 @@ const TeamSquad: React.FC = () => {
         )}
       </div>
 
-      {isModalOpen && createPortal(
+      {isManageModalOpen && createPortal(
         <div className="modal-overlay">
-          <div className="modal-content">
-            <h2 className="modal-title">{editingPlayerId ? 'Edit Player' : 'Register Player'}</h2>
-            <form onSubmit={handleSavePlayer}>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
-                 <div style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem', border: '1px dashed var(--glass-border)' }}>
-                     {newPlayer.playerImage ? (
-                         <img src={newPlayer.playerImage} alt="Profile Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                     ) : (
-                         <User size={32} color="#64748b" />
-                     )}
-                 </div>
-                 <input type="file" id="player-image-upload" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
-                 <label htmlFor="player-image-upload" style={{ cursor: 'pointer', color: 'var(--primary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '4px', position: 'relative', zIndex: 100 }}>
-                     <Upload size={14} /> {uploading ? 'Uploading...' : (newPlayer.playerImage ? 'Change Image (Optional)' : 'Upload Profile (Optional)')}
-                 </label>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Full Name</label>
-                <input type="text" className="form-input" required 
-                  value={newPlayer.name} onChange={e => setNewPlayer({...newPlayer, name: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Role</label>
-                <select className="form-input" required 
-                  value={newPlayer.role} onChange={e => setNewPlayer({...newPlayer, role: e.target.value as PlayerRole})}>
-                  <option value="BATSMAN">Batsman</option>
-                  <option value="BOWLER">Bowler</option>
-                  <option value="ALL_ROUNDER">All-Rounder</option>
-                  <option value="WICKETKEEPER">Wicketkeeper</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Jersey Number (Optional)</label>
-                <input type="number" className="form-input" 
-                  value={newPlayer.jerseyNumber} onChange={e => setNewPlayer({...newPlayer, jerseyNumber: e.target.value})} />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Batting Style</label>
-                  <select className="form-input" value={newPlayer.battingStyle} onChange={e => setNewPlayer({...newPlayer, battingStyle: e.target.value})}>
-                    <option value="">Select Style</option>
-                    <option value="Right Hand Bat">Right Hand Bat</option>
-                    <option value="Left Hand Bat">Left Hand Bat</option>
-                  </select>
+          <div className="modal-content" style={{ maxWidth: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <h2 className="modal-title">Manage {team.teamName} Squad</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+              Select players from the global player pool to assign to this team.
+            </p>
+            
+            <div style={{ overflowY: 'auto', flex: 1, paddingRight: '0.5rem', marginBottom: '1.5rem' }}>
+              {globalPlayers.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                  No players found in the database. Please add players from the Tournament Players page first.
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Bowling Style</label>
-                  <select className="form-input" value={newPlayer.bowlingStyle} onChange={e => setNewPlayer({...newPlayer, bowlingStyle: e.target.value})}>
-                    <option value="">Select Style</option>
-                    <option value="Right Arm Fast">Right Arm Fast</option>
-                    <option value="Right Arm Medium">Right Arm Medium</option>
-                    <option value="Right Arm Offbreak">Right Arm Offbreak</option>
-                    <option value="Right Arm Legbreak">Right Arm Legbreak</option>
-                    <option value="Left Arm Fast">Left Arm Fast</option>
-                    <option value="Left Arm Orthodox">Left Arm Orthodox</option>
-                    <option value="Left Arm Chinaman">Left Arm Chinaman</option>
-                  </select>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {globalPlayers.map(p => {
+                    const isSelected = selectedPlayerIds.includes(p.id!);
+                    return (
+                      <div 
+                        key={p.id} 
+                        onClick={() => togglePlayerSelection(p.id!)}
+                        style={{ 
+                          display: 'flex', alignItems: 'center', padding: '0.75rem 1rem', 
+                          background: isSelected ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-lighter)', 
+                          border: `1px solid ${isSelected ? '#3b82f6' : 'var(--glass-border)'}`,
+                          borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
+                        }}
+                      >
+                        <input 
+                          type="checkbox" 
+                          checked={isSelected} 
+                          onChange={() => {}} // handled by parent div click
+                          style={{ marginRight: '1rem', cursor: 'pointer', width: '18px', height: '18px' }}
+                        />
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', background: 'var(--background)' }}>
+                            {p.playerImage ? (
+                              <img src={p.playerImage} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <User size={20} style={{ margin: '6px' }} color="var(--text-secondary)" />
+                            )}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 'bold' }}>{p.name}</div>
+                            <div style={{ fontSize: '0.75rem', color: getRoleColor(p.role) }}>{p.role.replace('_', ' ')}</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              )}
+            </div>
 
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={newPlayer.isCaptain} 
-                    onChange={e => setNewPlayer({...newPlayer, isCaptain: e.target.checked})} />
-                  Is Captain
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={newPlayer.isViceCaptain} 
-                    onChange={e => setNewPlayer({...newPlayer, isViceCaptain: e.target.checked})} />
-                  Is Vice Captain
-                </label>
-              </div>
-              <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={closeForm}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={uploading}>{editingPlayerId ? 'Update Player' : 'Save Player'}</button>
-              </div>
-            </form>
+            <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--glass-border)' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setIsManageModalOpen(false)}>Cancel</button>
+              <button type="button" className="btn btn-primary" onClick={handleSaveSquad} disabled={isSaving}>
+                {isSaving ? 'Saving...' : `Save Squad (${selectedPlayerIds.length})`}
+              </button>
+            </div>
           </div>
         </div>,
         document.body

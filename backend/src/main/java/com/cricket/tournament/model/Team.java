@@ -11,6 +11,14 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public enum TeamType {
+        TOURNAMENT, PRACTICE
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "team_type", nullable = false)
+    private TeamType teamType = TeamType.TOURNAMENT;
+
     @NotBlank(message = "Team name is required")
     @Column(name = "team_name", nullable = false, unique = true)
     private String teamName;
@@ -61,9 +69,22 @@ public class Team {
         this.teamLogo = teamLogo;
     }
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "team_players",
+        joinColumns = @JoinColumn(name = "team_id"),
+        inverseJoinColumns = @JoinColumn(name = "player_id")
+    )
     @com.fasterxml.jackson.annotation.JsonIgnore
     private java.util.List<Player> players = new java.util.ArrayList<>();
+
+    public TeamType getTeamType() {
+        return teamType;
+    }
+
+    public void setTeamType(TeamType teamType) {
+        this.teamType = teamType;
+    }
 
     public java.util.List<Player> getPlayers() {
         return players;

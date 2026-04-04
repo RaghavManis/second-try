@@ -15,7 +15,7 @@ const Teams: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
-  const [newTeam, setNewTeam] = useState<{ teamName: string, coachName: string, teamLogo?: string }>({ teamName: '', coachName: '' });
+  const [newTeam, setNewTeam] = useState<{ teamName: string, coachName: string, teamType: 'TOURNAMENT' | 'PRACTICE', teamLogo?: string }>({ teamName: '', coachName: '', teamType: 'TOURNAMENT' });
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -64,7 +64,7 @@ const Teams: React.FC = () => {
       }
       setShowModal(false);
       setEditingTeam(null);
-      setNewTeam({ teamName: '', coachName: '', teamLogo: '' });
+      setNewTeam({ teamName: '', coachName: '', teamType: 'TOURNAMENT', teamLogo: '' });
       fetchTeams();
     } catch (error) {
       console.error('Failed to save team', error);
@@ -88,19 +88,19 @@ const Teams: React.FC = () => {
 
   const openEditModal = (t: Team) => {
     setEditingTeam(t);
-    setNewTeam({ teamName: t.teamName, coachName: t.coachName, teamLogo: t.teamLogo || '' });
+    setNewTeam({ teamName: t.teamName, coachName: t.coachName, teamType: t.teamType || 'TOURNAMENT', teamLogo: t.teamLogo || '' });
     setShowModal(true);
   };
 
   const openRegisterModal = () => {
     setEditingTeam(null);
-    setNewTeam({ teamName: '', coachName: '', teamLogo: '' });
+    setNewTeam({ teamName: '', coachName: '', teamType: 'TOURNAMENT', teamLogo: '' });
     setShowModal(true);
   };
 
   if (loading) return <div className="loader" style={{ textAlign: 'center', marginTop: '20vh' }}>Loading teams...</div>;
 
-  const featuredTeams = teams.slice(0, 5);
+  const featuredTeams = teams.filter(t => t.teamType === 'TOURNAMENT' || t.teamType == null).slice(0, 5);
 
   return (
     <div className="dashboard-wrapper">
@@ -241,6 +241,13 @@ const Teams: React.FC = () => {
                 <input required type="text" className="form-input" 
                   value={newTeam.coachName} onChange={e => setNewTeam({...newTeam, coachName: e.target.value})} 
                   placeholder="Coach Full Name" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Team Type</label>
+                <select className="form-input" value={newTeam.teamType} onChange={e => setNewTeam({...newTeam, teamType: e.target.value as 'TOURNAMENT' | 'PRACTICE'})}>
+                  <option value="TOURNAMENT">Tournament Team</option>
+                  <option value="PRACTICE">Practice Team</option>
+                </select>
               </div>
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} style={{ flex: 1 }}>Cancel</button>

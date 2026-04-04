@@ -30,6 +30,9 @@ public class MatchScoringService {
     @Autowired
     private ScorecardBowlingRepository scorecardBowlingRepository;
 
+    @Autowired
+    private PlayerMatchStatsRepository playerMatchStatsRepository;
+
     @Transactional
     public Match startLiveScoring(Long matchId, LiveMatchSetupDto setup) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
@@ -635,53 +638,42 @@ public class MatchScoringService {
             match.setManOfTheMatch(playerRepository.findById(manOfTheMatchId).orElse(null));
         }
         
-        // Apply to Global Player Lifetime Stats
+        // Save PlayerMatchStats
         List<ScorecardBatting> battingCards = scorecardBattingRepository.findByMatchId(matchId);
         List<ScorecardBowling> bowlingCards = scorecardBowlingRepository.findByMatchId(matchId);
         
-        Set<Long> playersCreditedMatch = new HashSet<>();
+        Map<Long, PlayerMatchStats> statsMap = new HashMap<>();
 
         battingCards.forEach(b -> {
             Player p = b.getPlayer();
-            if (playersCreditedMatch.add(p.getId())) {
-                p.setMatchesPlayed((p.getMatchesPlayed() == null ? 0 : p.getMatchesPlayed()) + 1);
+            PlayerMatchStats stats = statsMap.computeIfAbsent(p.getId(), k -> new PlayerMatchStats(p, match, match.getMatchType()));
+            stats.setRunsScored(stats.getRunsScored() + b.getRuns());
+            stats.setBallsFaced(stats.getBallsFaced() + b.getBalls());
+            stats.setFours(stats.getFours() + b.getFours());
+            stats.setSixes(stats.getSixes() + b.getSixes());
+            if (!"Not Out".equals(b.getHowOut()) && !"Yet to bat".equals(b.getHowOut()) && b.getHowOut() != null && !b.getHowOut().isEmpty()) {
+                stats.setOut(true);
             }
-            // Update batting stats
-            p.setInningsPlayed((p.getInningsPlayed() == null ? 0 : p.getInningsPlayed()) + 1);
-            p.setRunsScored((p.getRunsScored() == null ? 0 : p.getRunsScored()) + b.getRuns());
-            p.setBallsFaced((p.getBallsFaced() == null ? 0 : p.getBallsFaced()) + b.getBalls());
-            
-            p.setHighestScore(Math.max(p.getHighestScore() == null ? 0 : p.getHighestScore(), b.getRuns()));
-            if (b.getRuns() >= 100) p.setHundreds((p.getHundreds() == null ? 0 : p.getHundreds()) + 1);
-            else if (b.getRuns() >= 50) p.setFifties((p.getFifties() == null ? 0 : p.getFifties()) + 1);
-            
-            if (p.getBallsFaced() > 0) p.setStrikeRate((p.getRunsScored() * 100.0) / p.getBallsFaced());
-            if (p.getInningsPlayed() > 0) p.setBattingAverage((double) p.getRunsScored() / p.getInningsPlayed());
-            
-            playerRepository.save(p);
         });
 
         bowlingCards.forEach(b -> {
             Player p = b.getPlayer();
-            if (playersCreditedMatch.add(p.getId())) {
-                p.setMatchesPlayed((p.getMatchesPlayed() == null ? 0 : p.getMatchesPlayed()) + 1);
-            }
-            // Update bowling stats
-            int ballsBowled = (int) Math.floor(b.getOvers() == null ? 0 : b.getOvers()) * 6 + (int) Math.round(((b.getOvers() == null ? 0 : b.getOvers()) - Math.floor(b.getOvers() == null ? 0 : b.getOvers())) * 10);
+            PlayerMatchStats stats = statsMap.computeIfAbsent(p.getId(), k -> new PlayerMatchStats(p, match, match.getMatchType()));
             
-            int currentBalls = (int) (Math.floor(p.getOversBowled() == null ? 0 : p.getOversBowled()) * 6) + (int) Math.round(((p.getOversBowled() == null ? 0 : p.getOversBowled()) - Math.floor(p.getOversBowled() == null ? 0 : p.getOversBowled())) * 10);
-            int totalBalls = currentBalls + ballsBowled;
-            p.setOversBowled((totalBalls / 6) + ((totalBalls % 6) / 10.0));
+            Double overs = b.getOvers() == null ? 0.0 : b.getOvers();
+            double existingOvers = stats.getOversBowled();
             
-            p.setRunsConceded((p.getRunsConceded() == null ? 0 : p.getRunsConceded()) + b.getRuns());
-            p.setWickets((p.getWickets() == null ? 0 : p.getWickets()) + b.getWickets());
+            int existingBalls = (int) Math.floor(existingOvers) * 6 + (int) Math.round((existingOvers - Math.floor(existingOvers)) * 10);
+            int newBalls = (int) Math.floor(overs) * 6 + (int) Math.round((overs - Math.floor(overs)) * 10);
+            int totalBalls = existingBalls + newBalls;
             
-            if (totalBalls > 0) {
-                p.setEconomyRate((p.getRunsConceded() * 6.0) / totalBalls);
-            }
-            
-            playerRepository.save(p);
+            stats.setOversBowled((totalBalls / 6) + ((totalBalls % 6) / 10.0));
+            stats.setRunsConceded(stats.getRunsConceded() + (b.getRuns() == null ? 0 : b.getRuns()));
+            stats.setWickets(stats.getWickets() + (b.getWickets() == null ? 0 : b.getWickets()));
+            stats.setMaidens(stats.getMaidens() + (b.getMaidens() == null ? 0 : b.getMaidens()));
         });
+        
+        playerMatchStatsRepository.saveAll(statsMap.values());
 
         return matchRepository.save(match);
     }

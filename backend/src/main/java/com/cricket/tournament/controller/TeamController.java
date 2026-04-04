@@ -43,4 +43,9 @@ public class TeamController {
     public ResponseEntity<Team> updateTeam(@PathVariable Long id, @Valid @RequestBody Team team) {
         return ResponseEntity.ok(teamService.updateTeam(id, team));
     }
+    
+    @PostMapping("/{id}/players")
+    public ResponseEntity<Team> assignPlayers(@PathVariable Long id, @RequestBody List<Long> playerIds) {
+        return ResponseEntity.ok(teamService.assignPlayers(id, playerIds));
+    }
 }

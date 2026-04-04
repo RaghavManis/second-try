@@ -6,13 +6,13 @@ import { AnimatedSection } from '../components/AnimatedSection';
 import { AutoScrollContainer } from '../components/AutoScrollContainer';
 
 const PointsTable: React.FC = () => {
-  const [points, setPoints] = useState<PointsTableEntry[]>([]);
+  const [points, setPoints] = useState<Record<'TOURNAMENT' | 'PRACTICE', PointsTableEntry[]>>({ TOURNAMENT: [], PRACTICE: [] });
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [topScorers, setTopScorers] = useState<any[]>([]);
-  const [topWickets, setTopWickets] = useState<any[]>([]);
+  const [perfData, setPerfData] = useState<any>(null);
+  const [leaderboardType, setLeaderboardType] = useState<'TOURNAMENT' | 'PRACTICE'>('TOURNAMENT');
 
   useEffect(() => {
     fetchPoints();
@@ -26,8 +26,7 @@ const PointsTable: React.FC = () => {
          TeamService.getAllTeams()
       ]);
       setPoints(ptRes.data);
-      setTopScorers(perfRes.data.topRunScorers || []);
-      setTopWickets(perfRes.data.topWicketTakers || []);
+      setPerfData(perfRes.data);
       setTeams(teamsRes.data);
       setLoading(false);
     } catch (err) {
@@ -39,7 +38,9 @@ const PointsTable: React.FC = () => {
   if (loading) return <div className="loader" style={{ textAlign: 'center', marginTop: '20vh' }}>Loading standings...</div>;
   if (error) return <div className="error" style={{ textAlign: 'center', marginTop: '20vh' }}>{error}</div>;
 
-  const topTeams = points.slice(0, 1);
+  const currentPoints = points[leaderboardType] || [];
+  const topTeams = currentPoints.length > 0 ? currentPoints.slice(0, 1) : [];
+
   const getRandomLogo = (id: number) => `https://api.dicebear.com/7.x/identicon/svg?seed=Team${id}&backgroundColor=1e293b`;
 
   const PodiumCard = ({ pt, rank }: { pt: PointsTableEntry, rank: number }) => {
@@ -66,6 +67,9 @@ const PointsTable: React.FC = () => {
     );
   };
 
+  const currentTopScorers = perfData?.[leaderboardType]?.topRunScorers || [];
+  const currentTopWickets = perfData?.[leaderboardType]?.topWicketTakers || [];
+
   return (
     <div className="dashboard-wrapper">
       {/* SECTION 1: HERO */}
@@ -80,10 +84,22 @@ const PointsTable: React.FC = () => {
             Tournament Leaderboard
           </h1>
           <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
-            See which teams are dominating the standings.
+            Explore the standings and top performers across all formats.
           </p>
-          <button onClick={() => document.getElementById('standings-content')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary hover-lift" style={{ padding: '1rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px' }}>
-            View Standings <Trophy size={20} style={{ marginLeft: '8px' }}/>
+          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '30px', padding: '6px', maxWidth: '300px', margin: '0 auto 2rem auto', border: '1px solid var(--glass-border)' }}>
+            <button 
+              onClick={() => setLeaderboardType('TOURNAMENT')}
+              style={{ flex: 1, background: leaderboardType === 'TOURNAMENT' ? 'var(--primary)' : 'transparent', color: leaderboardType === 'TOURNAMENT' ? '#fff' : 'var(--text-secondary)', padding: '12px 24px', borderRadius: '30px', border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.3s' }}>
+              Tournament
+            </button>
+            <button 
+              onClick={() => setLeaderboardType('PRACTICE')}
+              style={{ flex: 1, background: leaderboardType === 'PRACTICE' ? 'var(--primary)' : 'transparent', color: leaderboardType === 'PRACTICE' ? '#fff' : 'var(--text-secondary)', padding: '12px 24px', borderRadius: '30px', border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.3s' }}>
+              Practice
+            </button>
+          </div>
+          <button onClick={() => document.getElementById('standings-content')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-secondary hover-lift" style={{ padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)' }}>
+            View Standings <Trophy size={18} style={{ marginLeft: '8px' }}/>
           </button>
         </div>
       </div>
@@ -94,7 +110,7 @@ const PointsTable: React.FC = () => {
         {topTeams.length > 0 && (
         <AnimatedSection className="bg-section-2 theme-light">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Table Topper</h2>
-          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '3.5rem' }}>The number one team leading the charge.</p>
+          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '3.5rem' }}>The number one team leading the {leaderboardType.toLowerCase()} charge.</p>
           <AutoScrollContainer className="horizontal-scroller" style={{ paddingTop: '16px' }}>
             {topTeams.map((pt, index) => (
               <PodiumCard key={pt.teamId} pt={pt} rank={index + 1} />
@@ -105,7 +121,7 @@ const PointsTable: React.FC = () => {
 
         {/* SECTION 3: FULL POINTS TABLE */}
         <AnimatedSection className="bg-section-3 theme-dark">
-          <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Full Standings</h2>
+          <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Full {leaderboardType} Standings</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Comprehensive breakdown of all participating teams.</p>
           
           <div className="glass-panel hover-lift" style={{ padding: '0', overflowX: 'auto' }}>
@@ -123,10 +139,10 @@ const PointsTable: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {points.length === 0 ? (
+                {currentPoints.length === 0 ? (
                   <tr><td colSpan={8} style={{textAlign: 'center', padding: '2rem'}}>No matches played yet.</td></tr>
                 ) : (
-                  points.map((pt, index) => {
+                  currentPoints.map((pt, index) => {
                     const teamObj = teams.find(t => t.id === pt.teamId);
                     return (
                     <tr key={pt.teamId}>
@@ -152,7 +168,10 @@ const PointsTable: React.FC = () => {
         
         {/* SECTION 4: TOURNAMENT LEADERS */}
         <AnimatedSection className="bg-section-4 theme-light">
-           <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', marginTop: '3rem' }}>
+           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginTop: '2rem', marginBottom: '0.25rem' }}>Top {leaderboardType} Performers</h2>
+           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2rem' }}>Stats strictly from {leaderboardType.toLowerCase()} matches.</p>
+           
+           <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))' }}>
                
                {/* ORANGE CAP */}
                <div className="glass-panel hover-lift" style={{ padding: '0', overflow: 'hidden' }}>
@@ -167,12 +186,12 @@ const PointsTable: React.FC = () => {
                              <tr><th style={{color: '#fdba74', padding: '1rem'}}>Rank</th><th style={{color: '#fdba74'}}>Player</th><th style={{color: '#fdba74'}}>Team</th><th style={{textAlign: 'right', color: '#fdba74', paddingRight: '1rem'}}>Runs</th></tr>
                          </thead>
                          <tbody>
-                             {topScorers.length === 0 ? <tr><td colSpan={4} className="text-center" style={{color: '#fff', padding: '1rem'}}>No runs recorded</td></tr> : 
-                               topScorers.map((ts, i) => (
+                             {currentTopScorers.length === 0 ? <tr><td colSpan={4} className="text-center" style={{color: '#fff', padding: '1rem'}}>No runs recorded</td></tr> : 
+                               currentTopScorers.map((ts: any, i: number) => (
                                    <tr key={i} style={{ background: i === 0 ? 'rgba(249, 115, 22, 0.15)' : 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                        <td style={{color: '#cbd5e1', padding: '1rem'}}>{i + 1}</td>
-                                       <td className="font-bold" style={{ color: i === 0 ? '#ffedd5' : '#ffffff', fontSize: i === 0 ? '1.1rem' : '1rem' }}>{ts.playerName}</td>
-                                       <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{ts.teamName}</td>
+                                       <td className="font-bold" style={{ color: i === 0 ? '#ffedd5' : '#ffffff', fontSize: i === 0 ? '1.1rem' : '1rem' }}>{ts.player?.name || ts.playerName || '-'}</td>
+                                       <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{ts.teamName || '-'}</td>
                                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#f97316' : '#fed7aa', paddingRight: '1rem' }}>{ts.totalRuns}</td>
                                    </tr>
                                ))
@@ -195,12 +214,12 @@ const PointsTable: React.FC = () => {
                              <tr><th style={{color: '#d8b4fe', padding: '1rem'}}>Rank</th><th style={{color: '#d8b4fe'}}>Player</th><th style={{color: '#d8b4fe'}}>Team</th><th style={{textAlign: 'right', color: '#d8b4fe', paddingRight: '1rem'}}>Wickets</th></tr>
                          </thead>
                          <tbody>
-                             {topWickets.length === 0 ? <tr><td colSpan={4} className="text-center" style={{color: '#fff', padding: '1rem'}}>No wickets recorded</td></tr> : 
-                               topWickets.map((tw, i) => (
+                             {currentTopWickets.length === 0 ? <tr><td colSpan={4} className="text-center" style={{color: '#fff', padding: '1rem'}}>No wickets recorded</td></tr> : 
+                               currentTopWickets.map((tw: any, i: number) => (
                                    <tr key={i} style={{ background: i === 0 ? 'rgba(168, 85, 247, 0.15)' : 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                        <td style={{color: '#cbd5e1', padding: '1rem'}}>{i + 1}</td>
-                                       <td className="font-bold" style={{ color: i === 0 ? '#f3e8ff' : '#ffffff', fontSize: i === 0 ? '1.1rem' : '1rem' }}>{tw.playerName}</td>
-                                       <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{tw.teamName}</td>
+                                       <td className="font-bold" style={{ color: i === 0 ? '#f3e8ff' : '#ffffff', fontSize: i === 0 ? '1.1rem' : '1rem' }}>{tw.player?.name || tw.playerName || '-'}</td>
+                                       <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{tw.teamName || '-'}</td>
                                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#a855f7' : '#e9d5ff', paddingRight: '1rem' }}>{tw.totalWickets}</td>
                                    </tr>
                                ))

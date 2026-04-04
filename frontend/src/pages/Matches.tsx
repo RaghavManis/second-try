@@ -19,7 +19,8 @@ const Matches: React.FC = () => {
     teamBId: '', 
     matchDate: '', 
     overs: 20,
-    status: 'SCHEDULED' as const
+    status: 'SCHEDULED' as const,
+    matchType: 'TOURNAMENT' as 'TOURNAMENT' | 'PRACTICE'
   });
   
 
@@ -72,10 +73,11 @@ const Matches: React.FC = () => {
         teamB,
         matchDate: dateOnly,
         overs: newMatch.overs,
-        status: newMatch.status
+        status: newMatch.status,
+        matchType: newMatch.matchType
       });
       setShowModal(false);
-      setNewMatch({ teamAId: '', teamBId: '', matchDate: '', overs: 20, status: 'SCHEDULED' });
+      setNewMatch({ teamAId: '', teamBId: '', matchDate: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' });
       toast.success('Match scheduled successfully!');
       fetchData();
     } catch (error) {
@@ -149,6 +151,11 @@ const Matches: React.FC = () => {
           padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
           {match.status}
         </div>
+        {match.matchType === 'PRACTICE' && (
+          <div style={{ background: '#8b5cf620', color: '#8b5cf6', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
+            PRACTICE
+          </div>
+        )}
         {showActions && isAuthenticated && onDelete && (
           <button 
             onClick={(e) => onDelete(e, match.id!)}
@@ -339,6 +346,15 @@ const Matches: React.FC = () => {
                     {teams.map(t => <option key={t.id} value={t.id}>{t.teamName}</option>)}
                   </select>
                 </div>
+              </div>
+
+              <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                <label className="form-label">Match Type</label>
+                <select required className="form-input" 
+                  value={newMatch.matchType} onChange={e => setNewMatch({...newMatch, matchType: e.target.value as 'TOURNAMENT' | 'PRACTICE'})}>
+                  <option value="TOURNAMENT">Tournament (Fixed Teams)</option>
+                  <option value="PRACTICE">Practice (Dynamic Teams)</option>
+                </select>
               </div>
 
 

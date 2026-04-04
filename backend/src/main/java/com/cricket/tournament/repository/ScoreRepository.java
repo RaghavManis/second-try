@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ScoreRepository extends JpaRepository<Score, Long> {
     Optional<Score> findByMatchId(Long matchId);
+    void deleteByMatchId(Long matchId);
 }

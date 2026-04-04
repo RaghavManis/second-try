@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import com.cricket.tournament.dto.PlayerProfileDto;
+import com.cricket.tournament.repository.PlayerMatchStatsRepository;
 
 @Service
 public class PlayerService {
@@ -15,17 +19,12 @@ public class PlayerService {
     private PlayerRepository playerRepository;
 
     @Autowired
+    private PlayerMatchStatsRepository playerMatchStatsRepository;
+
+    @Autowired
     private TeamService teamService;
 
     public Player addPlayer(Player player) {
-        if (player.getTeam() == null || player.getTeam().getId() == null) {
-            throw new IllegalArgumentException("Player must belong to a team");
-        }
-        
-        // Verify team exists
-        Team team = teamService.getTeamById(player.getTeam().getId());
-        player.setTeam(team);
-        
         return playerRepository.save(player);
     }
 
@@ -66,30 +65,28 @@ public class PlayerService {
         return playerRepository.save(existingPlayer);
     }
 
-    public Player updatePlayerStats(Long id, Player statsUpdate) {
-        Player existingPlayer = getPlayerById(id);
-
-        if (statsUpdate.getBattingStyle() != null) existingPlayer.setBattingStyle(statsUpdate.getBattingStyle());
-        if (statsUpdate.getBowlingStyle() != null) existingPlayer.setBowlingStyle(statsUpdate.getBowlingStyle());
-
-        if (statsUpdate.getMatchesPlayed() != null) existingPlayer.setMatchesPlayed(statsUpdate.getMatchesPlayed());
-        if (statsUpdate.getInningsPlayed() != null) existingPlayer.setInningsPlayed(statsUpdate.getInningsPlayed());
-        if (statsUpdate.getRunsScored() != null) existingPlayer.setRunsScored(statsUpdate.getRunsScored());
-        if (statsUpdate.getBallsFaced() != null) existingPlayer.setBallsFaced(statsUpdate.getBallsFaced());
-        if (statsUpdate.getHighestScore() != null) existingPlayer.setHighestScore(statsUpdate.getHighestScore());
-        if (statsUpdate.getBattingAverage() != null) existingPlayer.setBattingAverage(statsUpdate.getBattingAverage());
-        if (statsUpdate.getStrikeRate() != null) existingPlayer.setStrikeRate(statsUpdate.getStrikeRate());
-        if (statsUpdate.getFifties() != null) existingPlayer.setFifties(statsUpdate.getFifties());
-        if (statsUpdate.getHundreds() != null) existingPlayer.setHundreds(statsUpdate.getHundreds());
-
-        if (statsUpdate.getOversBowled() != null) existingPlayer.setOversBowled(statsUpdate.getOversBowled());
-        if (statsUpdate.getRunsConceded() != null) existingPlayer.setRunsConceded(statsUpdate.getRunsConceded());
-        if (statsUpdate.getWickets() != null) existingPlayer.setWickets(statsUpdate.getWickets());
-        if (statsUpdate.getBestBowling() != null) existingPlayer.setBestBowling(statsUpdate.getBestBowling());
-        if (statsUpdate.getEconomyRate() != null) existingPlayer.setEconomyRate(statsUpdate.getEconomyRate());
-        if (statsUpdate.getBowlingAverage() != null) existingPlayer.setBowlingAverage(statsUpdate.getBowlingAverage());
-        if (statsUpdate.getBowlingStrikeRate() != null) existingPlayer.setBowlingStrikeRate(statsUpdate.getBowlingStrikeRate());
-
-        return playerRepository.save(existingPlayer);
+    public PlayerProfileDto getPlayerProfile(Long id) {
+        Player player = getPlayerById(id);
+        
+        Map<String, Object> overall = playerMatchStatsRepository.getOverallAggregatedStatsByPlayer(id);
+        if (overall == null || overall.get("matchesPlayed") == null || ((Number)overall.get("matchesPlayed")).intValue() == 0) {
+            overall = new HashMap<>(); // Empty stats map
+        }
+        
+        List<Map<String, Object>> aggregated = playerMatchStatsRepository.getAggregatedStatsByPlayer(id);
+        Map<String, Object> tournamentStats = new HashMap<>();
+        Map<String, Object> practiceStats = new HashMap<>();
+        
+        for (Map<String, Object> statBreakdown : aggregated) {
+            if ("TOURNAMENT".equals(String.valueOf(statBreakdown.get("matchType")))) {
+                tournamentStats = statBreakdown;
+            } else if ("PRACTICE".equals(String.valueOf(statBreakdown.get("matchType")))) {
+                practiceStats = statBreakdown;
+            }
+        }
+        
+        return new PlayerProfileDto(player, overall, tournamentStats, practiceStats);
     }
+
+
 }

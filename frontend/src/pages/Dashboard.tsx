@@ -30,27 +30,32 @@ const Dashboard: React.FC = () => {
         
         const allMatches = matchesRes.data;
         const completed = allMatches.filter((m: Match) => m.status === 'COMPLETED').length;
+        const tournamentTeams = teamsRes.data.filter((t: Team) => t.teamType === 'TOURNAMENT' || t.teamType == null);
         
         setStats({
-          teams: teamsRes.data.length,
+          teams: tournamentTeams.length,
           matches: allMatches.length,
           completedMatches: completed,
         });
 
         // Slice previews
-        setTeams(teamsRes.data.slice(0, 5)); // top 5 teams
+        setTeams(tournamentTeams.slice(0, 5)); // top 5 tournament teams
         setRecentMatches(allMatches.slice(0, 5)); // up to 5 recent matches
-        setStandings(pointsRes.data.slice(0, 4)); // top 4 standings
+        setStandings((pointsRes.data.TOURNAMENT || []).slice(0, 4)); // top 4 standings
         
-        // Compute Star Athletes (Orange & Purple cap mix, shuffled)
+        // Compute Star Athletes (Shuffled from both Tournament and Practice)
         const allPlayers = playersRes.data as Player[];
-        const topScorers = perfRes.data.topRunScorers || [];
-        const topWickets = perfRes.data.topWicketTakers || [];
+        const tourneyTopScorers = perfRes.data.TOURNAMENT?.topRunScorers || [];
+        const tourneyTopWickets = perfRes.data.TOURNAMENT?.topWicketTakers || [];
+        const pracTopScorers = perfRes.data.PRACTICE?.topRunScorers || [];
+        const pracTopWickets = perfRes.data.PRACTICE?.topWicketTakers || [];
         
-        // We might only have player names in the perf array. We map names back to Player objects.
+        // We only have player names in the perf array. We map names back to Player objects.
         const perfNames = new Set([
-          ...topScorers.map((p: any) => p.playerName),
-          ...topWickets.map((p: any) => p.playerName)
+          ...tourneyTopScorers.map((p: any) => p.playerName),
+          ...tourneyTopWickets.map((p: any) => p.playerName),
+          ...pracTopScorers.map((p: any) => p.playerName),
+          ...pracTopWickets.map((p: any) => p.playerName)
         ]);
 
         let starSubset = allPlayers.filter(p => perfNames.has(p.name));
@@ -286,7 +291,6 @@ const Dashboard: React.FC = () => {
                 <div>
                   <h3 style={{ fontSize: '1.1rem', margin: '0 0 0.25rem 0' }}>{player.name}</h3>
                   <div style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '0.25rem' }}>{player.role.replace('_', ' ')}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{player.team.teamName}</div>
                 </div>
               </div>
             ))}

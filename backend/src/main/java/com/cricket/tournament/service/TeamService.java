@@ -7,11 +7,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import com.cricket.tournament.repository.PlayerRepository;
+import com.cricket.tournament.model.Player;
+
 @Service
 public class TeamService {
 
     @Autowired
     private TeamRepository teamRepository;
+    
+    @Autowired
+    private PlayerRepository playerRepository;
 
     public List<Team> getAllTeams() {
         return teamRepository.findAll();
@@ -42,7 +50,16 @@ public class TeamService {
         if (updatedTeam.getTeamName() != null) existingTeam.setTeamName(updatedTeam.getTeamName());
         if (updatedTeam.getCoachName() != null) existingTeam.setCoachName(updatedTeam.getCoachName());
         if (updatedTeam.getTeamLogo() != null) existingTeam.setTeamLogo(updatedTeam.getTeamLogo());
+        if (updatedTeam.getTeamType() != null) existingTeam.setTeamType(updatedTeam.getTeamType());
         
         return teamRepository.save(existingTeam);
+    }
+    
+    @org.springframework.transaction.annotation.Transactional
+    public Team assignPlayers(Long teamId, List<Long> playerIds) {
+        Team team = getTeamById(teamId);
+        List<Player> selectedPlayers = playerRepository.findAllById(playerIds);
+        team.setPlayers(selectedPlayers);
+        return teamRepository.save(team);
     }
 }

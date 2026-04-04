@@ -12,6 +12,14 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public enum MatchType {
+        TOURNAMENT, PRACTICE
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "match_type", nullable = false)
+    private MatchType matchType = MatchType.TOURNAMENT;
+
     @ManyToOne
     @JoinColumn(name = "team_a_id", nullable = false)
     @NotNull(message = "Team A is required")
@@ -175,6 +183,14 @@ public class Match {
 
     public void setStatus(MatchStatus status) {
         this.status = status;
+    }
+
+    public MatchType getMatchType() {
+        return matchType;
+    }
+
+    public void setMatchType(MatchType matchType) {
+        this.matchType = matchType;
     }
 
     public Team getWinnerTeam() {

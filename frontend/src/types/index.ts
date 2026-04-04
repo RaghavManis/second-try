@@ -1,8 +1,10 @@
 export interface Team {
   id?: number;
+  teamType?: 'TOURNAMENT' | 'PRACTICE';
   teamName: string;
   teamLogo?: string;
   coachName: string;
+  players?: Player[];
 }
 
 export type PlayerRole = 'BATSMAN' | 'BOWLER' | 'ALL_ROUNDER' | 'WICKETKEEPER';
@@ -14,36 +16,23 @@ export interface Player {
   jerseyNumber?: number;
   isCaptain?: boolean;
   isViceCaptain?: boolean;
-  team: Team;
   
   // Basic Info
   playerImage?: string;
   battingStyle?: string;
   bowlingStyle?: string;
+}
 
-  // Batting Stats
-  matchesPlayed?: number;
-  inningsPlayed?: number;
-  runsScored?: number;
-  ballsFaced?: number;
-  highestScore?: number;
-  battingAverage?: number;
-  strikeRate?: number;
-  fifties?: number;
-  hundreds?: number;
-
-  // Bowling Stats
-  oversBowled?: number;
-  runsConceded?: number;
-  wickets?: number;
-  bestBowling?: string;
-  economyRate?: number;
-  bowlingAverage?: number;
-  bowlingStrikeRate?: number;
+export interface PlayerProfileDto {
+  player: Player;
+  overallStats: any;
+  tournamentStats: any;
+  practiceStats: any;
 }
 
 export interface Match {
   id?: number;
+  matchType?: 'TOURNAMENT' | 'PRACTICE';
   teamA: Team;
   teamB: Team;
   matchDate: string;

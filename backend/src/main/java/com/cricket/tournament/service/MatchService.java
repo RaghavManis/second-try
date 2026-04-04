@@ -22,6 +22,12 @@ public class MatchService {
     @Autowired
     private com.cricket.tournament.repository.ScorecardBowlingRepository scorecardBowlingRepository;
 
+    @Autowired
+    private com.cricket.tournament.repository.ScoreRepository scoreRepository;
+    
+    @Autowired
+    private com.cricket.tournament.repository.PlayerMatchStatsRepository playerMatchStatsRepository;
+
     public List<Match> getAllMatches() {
         return matchRepository.findAll();
     }
@@ -57,6 +63,8 @@ public class MatchService {
         ballEventRepository.deleteByMatchId(id);
         scorecardBattingRepository.deleteByMatchId(id);
         scorecardBowlingRepository.deleteByMatchId(id);
+        scoreRepository.deleteByMatchId(id);
+        playerMatchStatsRepository.deleteByMatchId(id);
 
         Match match = getMatchById(id);
         if (match.getPlayingXiTeamA() != null) match.getPlayingXiTeamA().clear();

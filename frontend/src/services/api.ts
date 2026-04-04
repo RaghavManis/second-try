@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Team, Match, Score, PointsTableEntry, Player, LiveMatchSetupDto, BallSubmissionDto, LiveMatchDetailsDto, ScorecardBatting, ScorecardBowling } from '../types';
+import type { Team, Match, Score, PointsTableEntry, Player, LiveMatchSetupDto, BallSubmissionDto, LiveMatchDetailsDto, ScorecardBatting, ScorecardBowling, PlayerProfileDto } from '../types';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 console.log("API URL:", API_URL);
@@ -31,12 +31,12 @@ export const TeamService = {
   createTeam: (team: Team) => api.post<Team>('/teams', team),
   updateTeam: (id: number, team: Team) => api.put<Team>(`/teams/${id}`, team),
   deleteTeam: (id: number) => api.delete(`/teams/${id}`),
+  assignPlayers: (id: number, playerIds: number[]) => api.post<Team>(`/teams/${id}/players`, playerIds),
 };
 
 export const PlayerService = {
   getAllPlayers: () => api.get<Player[]>('/players'),
-  getPlayerById: (id: number) => api.get<Player>(`/players/${id}`),
-  updatePlayerStats: (id: number, stats: Partial<Player>) => api.patch<Player>(`/players/${id}/stats`, stats),
+  getPlayerById: (id: number) => api.get<PlayerProfileDto>(`/players/${id}`),
   updatePlayer: (id: number, player: Player) => api.put<Player>(`/players/${id}`, player),
   addPlayer: (player: Player) => api.post<Player>('/players', player),
   getPlayersByTeam: (teamId: number) => api.get<Player[]>(`/players/team/${teamId}`),
@@ -57,8 +57,8 @@ export const ScoreService = {
 };
 
 export const PointsService = {
-  getPointsTable: () => api.get<PointsTableEntry[]>('/points'),
-  getTopPerformers: () => api.get<{ topRunScorers: any[], topWicketTakers: any[] }>('/points/top-performers'),
+  getPointsTable: () => api.get<Record<'TOURNAMENT' | 'PRACTICE', PointsTableEntry[]>>('/points'),
+  getTopPerformers: () => api.get<{ TOURNAMENT: { topRunScorers: any[], topWicketTakers: any[] }, PRACTICE: { topRunScorers: any[], topWicketTakers: any[] } }>('/points/top-performers'),
 };
 
 export const MatchScoringService = {

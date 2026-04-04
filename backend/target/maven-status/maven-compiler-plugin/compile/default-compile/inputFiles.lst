@@ -9,13 +9,16 @@ C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\j
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\ScorecardBattingRepository.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\service\PointsService.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\BallEventRepository.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\dto\PlayerProfileDto.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\security\JwtAuthenticationFilter.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\PlayerController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\model\ScorecardBatting.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\PlayerMatchStatsRepository.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\ScorecardBowlingRepository.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\service\CloudinaryService.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\dto\BallSubmissionDto.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\repository\ScoreRepository.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\model\PlayerMatchStats.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\GalleryController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\ScoreController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\CricketTournamentApplication.java
