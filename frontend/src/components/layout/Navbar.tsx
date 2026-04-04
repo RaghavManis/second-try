@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Trophy, Users, Calendar, BarChart2, LogIn, LogOut, User, Circle, Image as ImageIcon } from 'lucide-react';
+import { Trophy, Users, Calendar, BarChart2, LogIn, LogOut, User, Circle, Image as ImageIcon, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { MatchScoringService } from '../../services/api';
 import './Navbar.css';
@@ -12,6 +12,14 @@ const Navbar: React.FC = () => {
   const isOnLivePage = location.pathname === '/live-match';
 
   const [hasLiveMatch, setHasLiveMatch] = React.useState(false);
+  const [theme, setTheme] = React.useState<'light'|'dark'>(() => {
+    return (localStorage.getItem('theme') as 'light'|'dark') || 'dark';
+  });
+
+  React.useEffect(() => {
+    document.body.className = `theme-${theme}`;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   React.useEffect(() => {
     const checkLiveMatches = async () => {
@@ -82,6 +90,12 @@ const Navbar: React.FC = () => {
             <ImageIcon size={20} />
             <span>Gallery</span>
           </NavLink>
+        </li>
+        <li>
+          <button className="nav-link" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          </button>
         </li>
         <li>
           {isAuthenticated ? (

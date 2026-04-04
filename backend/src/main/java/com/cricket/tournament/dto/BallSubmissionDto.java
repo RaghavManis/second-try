@@ -7,6 +7,7 @@ public class BallSubmissionDto {
     private Boolean isWicket;
     private String wicketType; // BOWLED, CAUGHT, RUN_OUT, etc.
     private Long playerOutId;
+    private Long fielderId; // For "CAUGHT" wicket
     private Long nextBatsmanId; // For when a wicket falls
     private Long nextBowlerId; // For end of over handling
 
@@ -24,6 +25,8 @@ public class BallSubmissionDto {
     public void setPlayerOutId(Long playerOutId) { this.playerOutId = playerOutId; }
     public Long getNextBatsmanId() { return nextBatsmanId; }
     public void setNextBatsmanId(Long nextBatsmanId) { this.nextBatsmanId = nextBatsmanId; }
+    public Long getFielderId() { return fielderId; }
+    public void setFielderId(Long fielderId) { this.fielderId = fielderId; }
     public Long getNextBowlerId() { return nextBowlerId; }
     public void setNextBowlerId(Long nextBowlerId) { this.nextBowlerId = nextBowlerId; }
 }

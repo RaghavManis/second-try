@@ -60,7 +60,7 @@ const PointsTable: React.FC = () => {
         <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', borderTop: '1px solid var(--glass-border)', paddingTop: '0.75rem', fontSize: '0.9rem' }}>
           <div><span style={{color: 'var(--text-secondary)'}}>W:</span> <span className="text-green">{pt.wins}</span></div>
           <div><span style={{color: 'var(--text-secondary)'}}>L:</span> <span className="text-red">{pt.losses}</span></div>
-          <div><span style={{color: 'var(--text-secondary)'}}>NRR:</span> {pt.netRunRate ? pt.netRunRate.toFixed(2) : '0.00'}</div>
+          <div><span style={{color: 'var(--text-secondary)'}}>NRR:</span> {pt.netRunRate ? pt.netRunRate.toFixed(3) : '0.000'}</div>
         </div>
       </div>
     );
@@ -139,7 +139,7 @@ const PointsTable: React.FC = () => {
                       <td className="text-green">{pt.wins}</td>
                       <td className="text-red">{pt.losses}</td>
                       <td>{pt.ties}</td>
-                      <td>{pt.netRunRate ? pt.netRunRate.toFixed(2) : '0.00'}</td>
+                      <td>{pt.netRunRate ? pt.netRunRate.toFixed(3) : '0.000'}</td>
                       <td className="font-bold text-primary" style={{fontSize: '1.1rem'}}>{pt.points}</td>
                     </tr>
                   )}

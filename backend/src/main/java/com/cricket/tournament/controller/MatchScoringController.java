@@ -36,6 +36,11 @@ public class MatchScoringController {
         return ResponseEntity.ok(matchScoringService.updateBowler(matchId, bowlerId));
     }
 
+    @PostMapping("/{matchId}/swap-batsmen")
+    public ResponseEntity<Match> swapBatsmen(@PathVariable Long matchId) {
+        return ResponseEntity.ok(matchScoringService.swapBatsmen(matchId));
+    }
+
     @PostMapping("/{matchId}/end-innings")
     public ResponseEntity<Match> endInnings(@PathVariable Long matchId, @RequestParam Long strikerId, @RequestParam Long nonStrikerId, @RequestParam Long bowlerId, @RequestParam Integer targetScore) {
         return ResponseEntity.ok(matchScoringService.endInnings(matchId, strikerId, nonStrikerId, bowlerId, targetScore));

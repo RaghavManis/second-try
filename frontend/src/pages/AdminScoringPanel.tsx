@@ -33,6 +33,7 @@ const AdminScoringPanel: React.FC = () => {
   const [isWicket, setIsWicket] = useState<boolean>(false);
   const [wicketType, setWicketType] = useState<string>('BOWLED');
   const [playerOutId, setPlayerOutId] = useState<number | ''>('');
+  const [fielderId, setFielderId] = useState<number | ''>('');
   const [nextBatsmanId, setNextBatsmanId] = useState<number | ''>('');
   const [nextBowlerId, setNextBowlerId] = useState<number | ''>('');
   const [manOfTheMatchId, setManOfTheMatchId] = useState<number | ''>('');
@@ -96,8 +97,11 @@ const AdminScoringPanel: React.FC = () => {
   const submitBall = async () => {
     if (!matchId) return;
     if (isWicket) {
-      if (!wicketType || !playerOutId || !nextBatsmanId) {
-        return toast.error("Validation Error: Wicket Type, Out Batsman, and Next Batsman are all strictly required to record a wicket.");
+      if (!wicketType || !playerOutId || (!nextBatsmanId && details?.currentWickets !== 9)) {
+        return toast.error("Validation Error: Wicket Type, Out Batsman, and Next Batsman are all strictly required to record a wicket (unless it is the 10th wicket).");
+      }
+      if (['CAUGHT', 'RUN_OUT', 'STUMPED'].includes(wicketType) && !fielderId) {
+        return toast.error(`Validation Error: Please select the fielder for ${wicketType.replace('_', ' ')}.`);
       }
     }
     
@@ -108,13 +112,14 @@ const AdminScoringPanel: React.FC = () => {
         isWicket,
         wicketType: isWicket ? wicketType : undefined,
         playerOutId: isWicket ? Number(playerOutId) : undefined,
+        fielderId: (isWicket && ['CAUGHT', 'RUN_OUT', 'STUMPED'].includes(wicketType)) ? Number(fielderId) : undefined,
         nextBatsmanId: (isWicket && nextBatsmanId !== '') ? Number(nextBatsmanId) : undefined,
         nextBowlerId: nextBowlerId !== '' ? Number(nextBowlerId) : undefined
       });
       toast.success('Ball Recorded');
       // Reset form
       setRuns(0); setExtraType(''); setIsWicket(false);
-      setWicketType('BOWLED'); setPlayerOutId(''); setNextBatsmanId(''); setNextBowlerId('');
+      setWicketType('BOWLED'); setPlayerOutId(''); setFielderId(''); setNextBatsmanId(''); setNextBowlerId('');
       
       loadMatchData(parseInt(matchId));
     } catch (err) {
@@ -161,6 +166,19 @@ const AdminScoringPanel: React.FC = () => {
       loadMatchData(parseInt(matchId));
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to undo ball');
+    }
+  };
+
+  const handleSwapBatsmen = async () => {
+    if (!matchId) return;
+    const confirmSwap = window.confirm("Swap striker and non-striker?");
+    if (!confirmSwap) return;
+    try {
+      await MatchScoringService.swapBatsmen(parseInt(matchId));
+      toast.success('Batsmen swapped successfully');
+      loadMatchData(parseInt(matchId));
+    } catch (err) {
+      toast.error('Failed to swap batsmen');
     }
   };
 
@@ -429,14 +447,33 @@ const AdminScoringPanel: React.FC = () => {
 
       {!isAwaitingSecondInnings && !isMatchOverWarning && (
         <div className="glass-panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h3 className="gradient-text" style={{ margin: 0 }}>Control Panel</h3>
-            <button 
-               onClick={() => setShowForceBowler(!showForceBowler)}
-               className="btn" 
-               style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: showForceBowler ? 'rgba(59, 130, 246, 0.2)' : 'transparent', border: '1px solid #3b82f6', color: '#3b82f6' }}>
-               {showForceBowler ? 'Cancel Change' : 'Change Bowler'}
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button 
+                   onClick={handleSwapBatsmen}
+                   className="btn" 
+                   style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: 'transparent', border: '1px solid #10b981', color: '#10b981' }}>
+                   Swap Batsmen
+                </button>
+                <button 
+                   onClick={() => setShowForceBowler(!showForceBowler)}
+                   className="btn" 
+                   style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: showForceBowler ? 'rgba(59, 130, 246, 0.2)' : 'transparent', border: '1px solid #3b82f6', color: '#3b82f6' }}>
+                   {showForceBowler ? 'Cancel Change' : 'Change Bowler'}
+                </button>
+                <button 
+                   onClick={handleUndo} 
+                   disabled={details.currentOvers === 0}
+                   className="btn"
+                   style={{ 
+                     padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: 'transparent', 
+                     color: (details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24', 
+                     border: `1px solid ${(details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24'}` 
+                   }}>
+                   Undo Last Ball
+                </button>
+            </div>
           </div>
           
           {/* BALL BY BALL: THIS OVER DETAILS */}
@@ -531,7 +568,7 @@ const AdminScoringPanel: React.FC = () => {
             <div className="sticky-bottom-action-bar">
               {/* RUNS */}
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                {[0, 1, 2, 3, 4, 6].map(r => (
+                {[0, 1, 2, 3, 4, 5, 6].map(r => (
                   <button 
                     key={r} 
                     className={`btn ${runs === r && !isWicket ? 'btn-primary' : ''}`}
@@ -581,16 +618,27 @@ const AdminScoringPanel: React.FC = () => {
                       <option value={details.currentNonStriker?.id}>{details.currentNonStriker?.name}</option>
                     </select>
 
-                    <select className="form-input" value={nextBatsmanId} onChange={e => setNextBatsmanId(Number(e.target.value))}>
-                      <option value="">Next Batsman In</option>
-                      {sortedBatters.filter(p => 
-                        p.id !== details.currentStriker?.id && 
-                        p.id !== details.currentNonStriker?.id && 
-                        !battingScorecard.find(card => card.player.id === p.id && card.howOut && card.howOut.toLowerCase() !== 'not out')
-                      ).map(p => (
-                        <option key={p.id} value={p.id}>{p.name} ({p.role.replace('_', ' ')})</option>
-                      ))}
-                    </select>
+                    {['CAUGHT', 'RUN_OUT', 'STUMPED'].includes(wicketType) && (
+                        <select className="form-input" value={fielderId} onChange={e => setFielderId(Number(e.target.value))}>
+                          <option value="">{wicketType === 'CAUGHT' ? 'Caught By' : wicketType === 'STUMPED' ? 'Stumped By' : 'Run Out By'} (Fielder)</option>
+                          {bowlingSquad.filter(p => wicketType !== 'STUMPED' || p.id !== details.currentBowler?.id).map(p => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                          ))}
+                        </select>
+                    )}
+
+                    {details.currentWickets < 9 && (
+                        <select className="form-input" value={nextBatsmanId} onChange={e => setNextBatsmanId(Number(e.target.value))}>
+                          <option value="">Next Batsman In</option>
+                          {sortedBatters.filter(p => 
+                            p.id !== details.currentStriker?.id && 
+                            p.id !== details.currentNonStriker?.id && 
+                            !battingScorecard.find(card => card.player.id === p.id && card.howOut && card.howOut.toLowerCase() !== 'not out')
+                          ).map(p => (
+                            <option key={p.id} value={p.id}>{p.name} ({p.role.replace('_', ' ')})</option>
+                          ))}
+                        </select>
+                    )}
                   </div>
                 )}
               </div>
@@ -598,24 +646,9 @@ const AdminScoringPanel: React.FC = () => {
               <button className="btn btn-primary" onClick={submitBall} style={{ width: '100%', height: '54px', fontSize: '1.2rem', fontWeight: 'bold' }}>Record Delivery</button>
             </div>
             
-            {/* Spacer to prevent content from hiding behind sticky action bar on mobile */}
-            <div className="mobile-spacer" style={{ height: '320px' }}></div>
+            <div className="mobile-spacer" style={{ height: '420px' }}></div>
           </>
           )}
-
-          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-            <button 
-               className="btn" 
-               onClick={handleUndo} 
-               disabled={details.currentOvers === 0}
-               style={{ 
-                 background: 'transparent', 
-                 color: (details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24', 
-                 border: `1px solid ${(details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24'}` 
-               }}>
-               Undo Last Ball
-            </button>
-          </div>
         </div>
       )}
 

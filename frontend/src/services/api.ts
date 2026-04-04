@@ -69,6 +69,7 @@ export const MatchScoringService = {
   recordBall: (matchId: number, ballDto: BallSubmissionDto) => api.post<Match>(`/scoring/${matchId}/ball`, ballDto),
   undoLastBall: (matchId: number) => api.delete<Match>(`/scoring/${matchId}/last-ball`),
   updateBowler: (matchId: number, bowlerId: number) => api.patch<Match>(`/scoring/${matchId}/bowler?bowlerId=${bowlerId}`),
+  swapBatsmen: (matchId: number) => api.post<Match>(`/scoring/${matchId}/swap-batsmen`),
   endInnings: (matchId: number, params: { strikerId: number, nonStrikerId: number, bowlerId: number, targetScore: number }) =>
     api.post<Match>(`/scoring/${matchId}/end-innings`, null, { params }),
   completeMatch: (matchId: number, winnerTeamId?: number, manOfTheMatchId?: number) =>

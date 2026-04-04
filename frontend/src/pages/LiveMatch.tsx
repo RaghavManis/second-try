@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { MatchScoringService } from '../services/api';
+import { createPortal } from 'react-dom';
+import confetti from 'canvas-confetti';
 import type { LiveMatchDetailsDto, Match, ScorecardBatting, ScorecardBowling, Player } from '../types';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { Activity, Circle } from 'lucide-react';
@@ -11,7 +13,10 @@ const LiveMatch: React.FC = () => {
   const [battingCards, setBattingCards] = useState<ScorecardBatting[]>([]);
   const [bowlingCards, setBowlingCards] = useState<ScorecardBowling[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('Live');
+  const [boundaryAnim, setBoundaryAnim] = useState<'four' | 'six' | null>(null);
+  const lastDeliveriesHash = React.useRef<string | null>(null);
+  const boundaryTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Poll for live matches
   useEffect(() => {
@@ -40,6 +45,64 @@ const LiveMatch: React.FC = () => {
     const fetchLiveDetails = async () => {
       try {
         const res = await MatchScoringService.getLiveDetails(selectedMatchId);
+        
+        // Strict Boundary Animation Logic
+        if (res.data) {
+          const currentHash = JSON.stringify(res.data.thisOverBalls);
+          if (lastDeliveriesHash.current !== null && currentHash !== lastDeliveriesHash.current) {
+             if (res.data.thisOverBalls.length > 0) {
+               const lastBall = res.data.thisOverBalls[res.data.thisOverBalls.length - 1];
+                 if (lastBall === '4' || lastBall === '6') {
+                    setBoundaryAnim(lastBall === '4' ? 'four' : 'six');
+                    
+                    if (lastBall === '4') {
+                        // Light celebration: single spray from center bottom
+                        confetti({
+                            particleCount: 120,
+                            spread: 100,
+                            origin: { y: 0.9 },
+                            zIndex: 9999998,
+                            colors: ['#3b82f6', '#60a5fa', '#ffffff', '#10b981']
+                        });
+                    } else {
+                        // Strong celebration: Continuous firecracker burst from corners for 2.5s
+                        const duration = 2500;
+                        const end = Date.now() + duration;
+
+                        (function frame() {
+                            confetti({
+                                particleCount: 7,
+                                angle: 60,
+                                spread: 55,
+                                origin: { x: 0, y: 0.8 },
+                                zIndex: 9999998,
+                                colors: ['#8b5cf6', '#c084fc', '#f59e0b', '#ef4444', '#ffffff']
+                            });
+                            confetti({
+                                particleCount: 7,
+                                angle: 120,
+                                spread: 55,
+                                origin: { x: 1, y: 0.8 },
+                                zIndex: 9999998,
+                                colors: ['#8b5cf6', '#c084fc', '#f59e0b', '#ef4444', '#ffffff']
+                            });
+
+                            if (Date.now() < end) {
+                                requestAnimationFrame(frame);
+                            }
+                        }());
+                    }
+
+                    if (boundaryTimeoutRef.current) clearTimeout(boundaryTimeoutRef.current);
+                    boundaryTimeoutRef.current = setTimeout(() => {
+                        setBoundaryAnim(null);
+                    }, 2800);
+                 }
+             }
+          }
+          lastDeliveriesHash.current = currentHash;
+        }
+        
         setDetails(res.data);
       } catch (err) {
         console.error(err);
@@ -69,6 +132,7 @@ const LiveMatch: React.FC = () => {
     return () => {
         clearInterval(detailsInterval);
         clearInterval(scorecardInterval);
+        if (boundaryTimeoutRef.current) clearTimeout(boundaryTimeoutRef.current);
     };
   }, [selectedMatchId]);
 
@@ -122,6 +186,25 @@ const LiveMatch: React.FC = () => {
       if (!details) return null;
       return (
         <AnimatedSection>
+          {details.match.currentInnings === 1 && renderProjectedScore()}
+
+          {boundaryAnim && createPortal(
+            <div className={`super-boundary-overlay ${boundaryAnim === 'six' ? 'anim-six' : 'anim-four'}`} style={{
+              background: boundaryAnim === 'six' ? 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 60%)' : 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 60%)',
+              animation: 'fadeInOut 2.8s forwards'
+            }}>
+              <div style={{
+                transform: 'scale(1)',
+                color: boundaryAnim === 'six' ? '#8b5cf6' : '#3b82f6',
+                animation: boundaryAnim === 'six' ? 'boomSix 2.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards' : 'slideBoundary 2.8s forwards'
+              }}>
+                {boundaryAnim === 'six' ? '6' : '4'}
+                <div style={{fontSize: 'clamp(1.5rem, 6vw, 3.5rem)', textAlign: 'center', marginTop: '-10px', textTransform: 'uppercase'}}>{boundaryAnim === 'six' ? 'SIX!!' : 'FOUR!'}</div>
+              </div>
+            </div>,
+            document.body
+          )}
+
           <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.25rem' }}>
             
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
@@ -183,14 +266,90 @@ const LiveMatch: React.FC = () => {
       );
     };
 
+    const renderProjectedScore = () => {
+      if (!details || details.match.currentInnings !== 1 || !details.match.overs) return null;
+      
+      const crr = details.currentRunRate || 0;
+      const overs = details.match.overs;
+      
+      const rr1 = crr;
+      const rr2 = Math.floor(crr) + 2;
+      const rr3 = rr2 + 2;
+      const rr4 = rr3 + 2;
+      
+      const p1 = Math.round(rr1 * overs);
+      const p2 = Math.round(rr2 * overs);
+      const p3 = Math.round(rr3 * overs);
+      const p4 = Math.round(rr4 * overs);
+      
+      return (
+          <div style={{ marginTop: '1.5rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '12px', padding: '1rem' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', color: '#cbd5e1', display: 'flex', alignItems: 'center' }}>
+               <Activity size={18} style={{ marginRight: '8px', color: '#3b82f6' }} /> Projected Score
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.8rem' }}>
+               <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>Current RR ({rr1.toFixed(1)})</div>
+                  <div style={{ color: '#3b82f6', fontSize: '1.3rem', fontWeight: 'bold' }}>{p1}</div>
+               </div>
+               <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>RR {rr2}</div>
+                  <div style={{ color: '#3b82f6', fontSize: '1.3rem', fontWeight: 'bold' }}>{p2}</div>
+               </div>
+               <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>RR {rr3}</div>
+                  <div style={{ color: '#3b82f6', fontSize: '1.3rem', fontWeight: 'bold' }}>{p3}</div>
+               </div>
+               <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>RR {rr4}</div>
+                  <div style={{ color: '#3b82f6', fontSize: '1.3rem', fontWeight: 'bold' }}>{p4}</div>
+               </div>
+            </div>
+          </div>
+      );
+    };
+
   return (
     <div className="dashboard-wrapper" style={{ paddingBottom: '4rem' }}>
       
+      <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', marginTop: '1rem', paddingTop: '1rem' }}>
+        
+        {/* MATCH SELECTOR IF MULTIPLE */}
+        {liveMatches.length > 1 && (
+          <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem', marginBottom: '1rem' }}>
+            {liveMatches.map(m => (
+              <button 
+                key={m.id}
+                onClick={() => setSelectedMatchId(m.id!)}
+                className={`btn ${selectedMatchId === m.id ? 'btn-primary' : ''}`}
+                style={{ whiteSpace: 'nowrap', borderRadius: '30px', border: selectedMatchId !== m.id ? '1px solid var(--glass-border)' : 'none' }}>
+                {m.teamA.teamName} vs {m.teamB.teamName}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* TABS NAVIGATION */}
+        <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingTop: '0.2rem', paddingBottom: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          {['Live', '1st Innings', '2nd Innings', 'Playing XI', 'Match Info'].map(tab => (
+            <button 
+              key={tab} 
+              onClick={() => setActiveTab(tab)} 
+              className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-secondary'}`} 
+              style={{ flexShrink: 0, borderRadius: '20px', padding: '0.3rem 0.8rem', fontSize: '0.85rem', minHeight: '32px', lineHeight: '1' }}>
+              {tab}
+            </button>
+          ))}
+        </div>
+
+      {activeTab === 'Live' && (
+      <>
       {/* SECTION 1: LIVE HERO SCOREBOARD */}
-      <div className="parallax-hero" style={{ 
+      <div className="parallax-hero fade-in" style={{ 
         minHeight: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
         backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop")',
-        backgroundSize: 'cover', backgroundPosition: 'center', paddingTop: '100px', paddingBottom: '2rem'
+        backgroundSize: 'cover', backgroundPosition: 'center', paddingTop: '100px', paddingBottom: '2rem',
+        borderRadius: '16px', overflow: 'hidden', marginBottom: '2rem'
       }}>
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem', width: '100%', maxWidth: '800px' }}>
@@ -250,11 +409,24 @@ const LiveMatch: React.FC = () => {
               
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary)', lineHeight: 1 }}>
-                  {details.currentScore}<span style={{fontSize: '1.4rem', color: '#cbd5e1'}}>-{details.currentWickets}</span>
+                  {details.currentScore}<span style={{fontSize: '1.4rem', color: '#cbd5e1'}}>-{Math.min(10, details.currentWickets)}</span>
                 </div>
-                <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '4px' }}>
+                <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '4px', marginBottom: '0.5rem' }}>
                   Overs: <span style={{color: '#cbd5e1', fontWeight: 'bold'}}>{details.currentOvers}</span>
                 </div>
+                
+                {details.currentStriker && (
+                  <div style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 'bold', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px' }}>
+                    {details.currentStriker.name} <span style={{ color: '#fbbf24' }}>*</span> 
+                    <span style={{ color: '#cbd5e1', fontWeight: 'normal', marginLeft: '4px' }}>{details.strikerRuns}({details.strikerBalls})</span>
+                  </div>
+                )}
+                {details.currentNonStriker && (
+                  <div style={{ fontSize: '0.9rem', color: '#94a3b8', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                    {details.currentNonStriker.name} 
+                    <span style={{ color: '#64748b', marginLeft: '4px' }}>{details.nonStrikerRuns}({details.nonStrikerBalls})</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -267,38 +439,10 @@ const LiveMatch: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', marginTop: '2rem' }}>
-        
-        {/* STICKY MOBILE INFO BAR REMOVED TO PREVENT DUPLICATION */}
-        
-        {/* MATCH SELECTOR IF MULTIPLE */}
-        {liveMatches.length > 1 && (
-          <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem', marginBottom: '2rem' }}>
-            {liveMatches.map(m => (
-              <button 
-                key={m.id}
-                onClick={() => setSelectedMatchId(m.id!)}
-                className={`btn ${selectedMatchId === m.id ? 'btn-primary' : ''}`}
-                style={{ whiteSpace: 'nowrap', borderRadius: '30px', border: selectedMatchId !== m.id ? '1px solid var(--glass-border)' : 'none' }}>
-                {m.teamA.teamName} vs {m.teamB.teamName}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* TABS NAVIGATION */}
-        <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingTop: '0.2rem', paddingBottom: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-          {['Match Info', '1st Innings', '2nd Innings', 'Playing XI'].map(tab => (
-            <button 
-              key={tab} 
-              onClick={() => setActiveTab(activeTab === tab ? null : tab)} 
-              className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-secondary'}`} 
-              style={{ flexShrink: 0, borderRadius: '20px', padding: '0.3rem 0.8rem', fontSize: '0.8rem', minHeight: '32px', lineHeight: '1' }}>
-              {tab}
-            </button>
-          ))}
-        </div>
+      
+      {renderTimeline()}
+      </>
+      )}
 
         {/* TAB: Match Info */}
         {activeTab === 'Match Info' && (
@@ -430,7 +574,6 @@ const LiveMatch: React.FC = () => {
                                         <td style={{ textAlign: 'center' }}>{card.maidens}</td>
                                         <td style={{ textAlign: 'center' }}>{card.runs}</td>
                                         <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{card.wickets}</td>
-                                        <td style={{ textAlign: 'center' }}>{card.wickets}</td>
                                         <td style={{ textAlign: 'right', paddingRight: '0.5rem' }}>{card.overs > 0 ? (card.runs / ((Math.floor(card.overs) * 6 + Math.round((card.overs % 1)*10)) / 6)).toFixed(1) : '0.0'}</td>
                                     </tr>
                                 ))}
@@ -439,7 +582,6 @@ const LiveMatch: React.FC = () => {
                       </div>
                     </div>
                 </AnimatedSection>
-                {details.match.currentInnings === 1 && renderTimeline()}
             </div>
           )}
 
@@ -550,7 +692,6 @@ const LiveMatch: React.FC = () => {
              </div>
             </div>
           </AnimatedSection>
-          {details.match.currentInnings === 2 && renderTimeline()}
          </div>
          ))}
 

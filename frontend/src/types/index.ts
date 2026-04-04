@@ -88,6 +88,7 @@ export interface BallSubmissionDto {
   isWicket?: boolean;
   wicketType?: string;
   playerOutId?: number;
+  fielderId?: number;
   nextBatsmanId?: number;
   nextBowlerId?: number;
 }

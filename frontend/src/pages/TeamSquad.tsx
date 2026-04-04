@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { TeamService, PlayerService, UploadService } from '../services/api';
 import type { Team, Player, PlayerRole } from '../types';
 import { ArrowLeft, UserPlus, Trash2, Shield, User, Edit, Upload } from 'lucide-react';
@@ -217,9 +218,9 @@ const TeamSquad: React.FC = () => {
         )}
       </div>
 
-      {isModalOpen && (
+      {isModalOpen && createPortal(
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="modal-content">
             <h2 className="modal-title">{editingPlayerId ? 'Edit Player' : 'Register Player'}</h2>
             <form onSubmit={handleSavePlayer}>
               
@@ -294,13 +295,14 @@ const TeamSquad: React.FC = () => {
                   Is Vice Captain
                 </label>
               </div>
-              <div className="modal-actions">
+              <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={closeForm}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={uploading}>{editingPlayerId ? 'Update Player' : 'Save Player'}</button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

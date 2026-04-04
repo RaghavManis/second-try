@@ -148,7 +148,7 @@ public class MatchScoringService {
         if (isLegal) currentBalls++;
         
         // Rule 8: Wicket
-        if (isWicket) {
+        if (isWicket && currentWickets < 10) {
             String wType = ballDto.getWicketType();
             if (Arrays.asList("BOWLED", "CAUGHT", "LBW", "RUN_OUT", "STUMPED", "HIT_WICKET").contains(wType)) {
                 currentWickets++;
@@ -208,7 +208,29 @@ public class MatchScoringService {
                 outCard = scorecardBattingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), ballDto.getPlayerOutId())
                     .orElseGet(() -> createBattingCard(match, playerRepository.findById(ballDto.getPlayerOutId()).get()));
             }
-            outCard.setHowOut(ballDto.getWicketType() + (Arrays.asList("BOWLED", "LBW").contains(ballDto.getWicketType()) ? " b " : " ") + match.getCurrentBowler().getName());
+            if (Arrays.asList("BOWLED", "LBW").contains(ballDto.getWicketType())) {
+                outCard.setHowOut("b " + match.getCurrentBowler().getName());
+            } else if ("CAUGHT".equals(ballDto.getWicketType())) {
+                String fielderName = "Sub";
+                if (ballDto.getFielderId() != null) {
+                    fielderName = playerRepository.findById(ballDto.getFielderId()).map(Player::getName).orElse("Sub");
+                }
+                outCard.setHowOut("c " + fielderName + " b " + match.getCurrentBowler().getName());
+            } else if ("RUN_OUT".equals(ballDto.getWicketType())) {
+                String fielderName = "Sub";
+                if (ballDto.getFielderId() != null) {
+                    fielderName = playerRepository.findById(ballDto.getFielderId()).map(Player::getName).orElse("Sub");
+                }
+                outCard.setHowOut("run out (" + fielderName + ")");
+            } else if ("STUMPED".equals(ballDto.getWicketType())) {
+                String fielderName = "Sub";
+                if (ballDto.getFielderId() != null) {
+                    fielderName = playerRepository.findById(ballDto.getFielderId()).map(Player::getName).orElse("Sub");
+                }
+                outCard.setHowOut("stumped (" + fielderName + ")");
+            } else {
+                outCard.setHowOut(ballDto.getWicketType().replace("_", " "));
+            }
             scorecardBattingRepository.save(outCard);
         }
 
@@ -243,6 +265,13 @@ public class MatchScoringService {
                 ScorecardBatting nextCard = scorecardBattingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, match.getCurrentInnings(), nextBat.getId())
                     .orElseGet(() -> createBattingCard(match, nextBat));
                 scorecardBattingRepository.save(nextCard);
+            }
+        } else if (isWicket && currentWickets >= 10) {
+            // Nullify striker/non-striker explicitly for the 10th wicket bypass
+            if (ballDto.getPlayerOutId().equals(match.getCurrentStriker().getId())) {
+                match.setCurrentStriker(null);
+            } else {
+                match.setCurrentNonStriker(null);
             }
         }
 
@@ -280,6 +309,7 @@ public class MatchScoringService {
                 // The admin will select the new batsman/bowlers from the UI to resume, so we just set the target and swap teams here.
                 match.setFirstInningsScore(match.getCurrentScore());
                 match.setFirstInningsWickets(match.getCurrentWickets());
+                match.setFirstInningsBalls(match.getCurrentBalls());
                 
                 match.setCurrentInnings(2);
                 match.setTargetScore(match.getCurrentScore() + 1);
@@ -313,6 +343,17 @@ public class MatchScoringService {
     public Match updateBowler(Long matchId, Long newBowlerId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
         match.setCurrentBowler(playerRepository.findById(newBowlerId).orElseThrow(() -> new RuntimeException("Player not found")));
+        return matchRepository.save(match);
+    }
+    
+    @Transactional
+    public Match swapBatsmen(Long matchId) {
+        Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
+        Player temp = match.getCurrentStriker();
+        if (temp != null && match.getCurrentNonStriker() != null) {
+            match.setCurrentStriker(match.getCurrentNonStriker());
+            match.setCurrentNonStriker(temp);
+        }
         return matchRepository.save(match);
     }
     
@@ -415,6 +456,7 @@ public class MatchScoringService {
         if (match.getCurrentInnings() == 1) {
             match.setFirstInningsScore(match.getCurrentScore());
             match.setFirstInningsWickets(match.getCurrentWickets());
+            match.setFirstInningsBalls(match.getCurrentBalls());
             
             match.setCurrentInnings(2);
             match.setTargetScore(targetScore);

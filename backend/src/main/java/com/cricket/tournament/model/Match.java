@@ -71,6 +71,9 @@ public class Match {
     @Column(name = "first_innings_wickets")
     private Integer firstInningsWickets;
 
+    @Column(name = "first_innings_balls")
+    private Integer firstInningsBalls;
+
     @Column(name = "current_balls")
     private Integer currentBalls = 0;
 
@@ -268,6 +271,14 @@ public class Match {
 
     public void setFirstInningsWickets(Integer firstInningsWickets) {
         this.firstInningsWickets = firstInningsWickets;
+    }
+
+    public Integer getFirstInningsBalls() {
+        return firstInningsBalls;
+    }
+
+    public void setFirstInningsBalls(Integer firstInningsBalls) {
+        this.firstInningsBalls = firstInningsBalls;
     }
 
     public Player getCurrentStriker() {

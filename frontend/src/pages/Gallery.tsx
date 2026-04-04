@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { GalleryImage } from '../types';
 import { GalleryService, UploadService } from '../services/api';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 
 import { Image as ImageIcon, Trash2, Upload } from 'lucide-react';
@@ -11,6 +12,8 @@ const Gallery: React.FC = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+  const [downloadingUrl, setDownloadingUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchImages();
@@ -70,6 +73,28 @@ const Gallery: React.FC = () => {
     }
   };
 
+  const handleDownload = async (img: GalleryImage) => {
+    setDownloadingUrl(img.imageUrl);
+    try {
+      const response = await fetch(img.imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Tournament_Moment_${img.id}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Download started!');
+    } catch (e) {
+      console.error('Blob fetch failed, falling back to new tab', e);
+      window.open(img.imageUrl, '_blank');
+    } finally {
+      setDownloadingUrl(null);
+    }
+  };
+
   if (loading) return <div className="loader" style={{ textAlign: 'center', marginTop: '20vh' }}>Loading Gallery...</div>;
 
   return (
@@ -116,6 +141,7 @@ const Gallery: React.FC = () => {
               <div 
                 key={img.id} 
                 className="gallery-masonry-item animate-slide-up hover-lift" 
+                onClick={() => setSelectedImage(img)}
                 style={{ 
                   animationDelay: `${(i % 10) * 100}ms`,
                   position: 'relative', borderRadius: '12px', overflow: 'hidden', 
@@ -128,7 +154,7 @@ const Gallery: React.FC = () => {
                 />
                 {isAuthenticated && (
                   <button 
-                    onClick={() => handleDelete(img.id!)}
+                    onClick={(e) => { e.stopPropagation(); handleDelete(img.id!); }}
                     style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
                     title="Delete Image"
                   >
@@ -140,6 +166,27 @@ const Gallery: React.FC = () => {
           </div>
         )}
       </div>
+
+      {selectedImage && createPortal(
+        <div className="modal-overlay" onClick={() => setSelectedImage(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '900px', background: 'rgba(15, 23, 42, 0.95)', padding: '1rem', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+             <button 
+               onClick={() => setSelectedImage(null)}
+               style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(255,255,255,0.1)', color: 'var(--text-secondary)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
+               ✕
+             </button>
+             <img src={selectedImage.imageUrl} alt="Fullscreen Preview" style={{ width: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '8px', marginBottom: '1rem' }} />
+             <button 
+               className="btn btn-primary" 
+               onClick={() => handleDownload(selectedImage)} 
+               disabled={downloadingUrl === selectedImage.imageUrl}
+               style={{ minWidth: '200px' }}>
+               {downloadingUrl === selectedImage.imageUrl ? 'Downloading...' : 'Download Full Image'}
+             </button>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
