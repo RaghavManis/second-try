@@ -107,7 +107,7 @@ const Teams: React.FC = () => {
       {/* SECTION 1: HERO */}
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-        backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop")',
+        backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1593341646782-e0be10cd2bc4?q=80&w=2000&auto=format&fit=crop")',
         backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '-80px'
       }}>
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>

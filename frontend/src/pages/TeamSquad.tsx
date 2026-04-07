@@ -20,6 +20,7 @@ const TeamSquad: React.FC = () => {
   const [globalPlayers, setGlobalPlayers] = useState<Player[]>([]);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<number[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [viewImage, setViewImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (teamId) {
@@ -138,42 +139,42 @@ const TeamSquad: React.FC = () => {
           </div>
         ) : (
           players.map((player, idx) => (
-            <div key={player.id} className={`glass-panel hover-lift delay-${(idx % 3 + 1) * 100}`} style={{ position: 'relative', overflow: 'hidden' }}>
+            <div key={player.id} className={`glass-panel hover-lift delay-${(idx % 3 + 1) * 100}`} 
+                 style={{ position: 'relative', overflow: 'hidden', padding: '1.25rem', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
+                 onClick={() => navigate(`/players/${player.id}`)}>
               {isAuthenticated && (
-                <div style={{ position: 'absolute', top: 0, right: 0, padding: '1rem', display: 'flex', gap: '0.5rem' }}>
-                   <button className="btn btn-secondary" style={{padding: '0.3rem', background: '#ef444420', color: '#ef4444'}} onClick={() => player.id && handleRemovePlayer(player.id)}>
-                     <Trash2 size={16} />
+                <div style={{ position: 'absolute', top: 0, right: 0, padding: '0.75rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+                   <button className="btn btn-secondary" style={{padding: '0.4rem', background: '#ef444420', color: '#ef4444', borderRadius: '50%'}} onClick={(e) => { e.stopPropagation(); player.id && handleRemovePlayer(player.id); }}>
+                     <Trash2 size={14} />
                    </button>
                 </div>
               )}
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{
-                  width: '50px', height: '50px', borderRadius: '50%', 
-                  background: 'var(--bg-lighter)', display: 'flex', alignItems: 'center', 
-                  justifyContent: 'center', border: `2px solid ${getRoleColor(player.role)}`,
-                  fontSize: '1.2rem', fontWeight: 'bold', overflow: 'hidden'
-                }}>
-                  {player.playerImage ? (
-                    <img src={player.playerImage} alt={player.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <>{player.jerseyNumber || '-'}</>
-                  )}
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', margin: 0 }}>
+              <div style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'var(--background)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: `1px solid ${getRoleColor(player.role)}`, color: getRoleColor(player.role), zIndex: 5, fontSize: '0.9rem' }}>
+                {player.jerseyNumber || '-'}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', marginTop: '1rem' }}>
+                <img 
+                  src={player.playerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id || 0}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf`} 
+                  alt={player.name} 
+                  onClick={(e) => { e.stopPropagation(); setViewImage(player.playerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id || 0}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf`); }}
+                  style={{ width: '84px', height: '84px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', objectFit: 'cover', cursor: 'zoom-in', transition: 'transform 0.2s', border: `2px solid ${getRoleColor(player.role)}`, boxShadow: '0 8px 16px rgba(0,0,0,0.2)' }} 
+                />
+                <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '6px' }}>
                     {player.name}
-                    {player.isCaptain && <span style={{color: 'var(--primary)', marginLeft: '8px', fontSize: '0.9rem'}}>(C)</span>}
-                    {player.isViceCaptain && <span style={{color: 'var(--text-secondary)', marginLeft: '8px', fontSize: '0.9rem'}}>(VC)</span>}
+                    {player.isCaptain && <span style={{color: '#f59e0b', fontSize: '0.75rem', background: '#f59e0b20', padding: '2px 6px', borderRadius: '12px'}}>(C)</span>}
+                    {player.isViceCaptain && <span style={{color: '#e2e8f0', fontSize: '0.75rem', background: '#ffffff20', padding: '2px 6px', borderRadius: '12px'}}>(VC)</span>}
                   </h3>
-                  <span style={{ 
+                  <div style={{ 
                     fontSize: '0.8rem', color: getRoleColor(player.role), 
-                    background: `${getRoleColor(player.role)}20`, padding: '2px 8px', 
-                    borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px',
-                    marginTop: '4px'
+                    background: `${getRoleColor(player.role)}15`, padding: '4px 12px', 
+                    borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    marginTop: '10px', fontWeight: 600, letterSpacing: '0.5px'
                   }}>
-                    <Shield size={12} /> {player.role.replace('_', ' ')}
-                  </span>
+                    <Shield size={14} /> {player.role.replace('_', ' ')}
+                  </div>
                 </div>
               </div>
             </div>
@@ -242,6 +243,16 @@ const TeamSquad: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>,
+        document.body
+      )}
+
+      {viewImage && createPortal(
+        <div 
+          onClick={() => setViewImage(null)} 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out' }}
+        >
+           <img src={viewImage} alt="Fullscreen Preview" style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }} />
         </div>,
         document.body
       )}

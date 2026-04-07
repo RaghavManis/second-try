@@ -20,24 +20,17 @@ const PlayersList: React.FC = () => {
   const [editingPlayerId, setEditingPlayerId] = useState<number | null>(null);
   const [newPlayer, setNewPlayer] = useState({ name: '', role: 'BATSMAN' as PlayerRole, jerseyNumber: '', isCaptain: false, isViceCaptain: false, battingStyle: '', bowlingStyle: '', playerImage: '' });
   const [uploading, setUploading] = useState(false);
+  const [viewImage, setViewImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPlayers();
   }, []);
 
-  const shuffleArray = <T,>(array: T[]): T[] => {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  };
-
   const fetchPlayers = async () => {
     try {
       const res = await PlayerService.getAllPlayers();
-      setPlayers(shuffleArray(res.data));
+      const sorted = res.data.sort((a, b) => a.name.localeCompare(b.name));
+      setPlayers(sorted);
     } catch (error) {
       console.error('Failed to fetch players', error);
     } finally {
@@ -156,7 +149,12 @@ const PlayersList: React.FC = () => {
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', marginTop: isAuthenticated ? '2rem' : '0' }}>
-        <img src={player.playerImage || getRandomAvatar(player.id || 0)} alt={player.name} style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', objectFit: 'cover' }} />
+        <img 
+          src={player.playerImage || getRandomAvatar(player.id || 0)} 
+          alt={player.name} 
+          onClick={(e) => { e.stopPropagation(); setViewImage(player.playerImage || getRandomAvatar(player.id || 0)); }}
+          style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', objectFit: 'cover', cursor: 'zoom-in', transition: 'transform 0.2s' }} 
+        />
         <div>
           <h3 style={{ fontSize: '1.1rem', margin: 0 }}>
             {player.name}
@@ -186,7 +184,7 @@ const PlayersList: React.FC = () => {
       {/* SECTION 1: HERO */}
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-        backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop")',
+        backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2000&auto=format&fit=crop")',
         backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '-80px'
       }}>
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
@@ -297,7 +295,7 @@ const PlayersList: React.FC = () => {
       </div>
 
       {isModalOpen && createPortal(
-        <div className="modal-overlay">
+        <div className="modal-overlay" style={{ zIndex: 1000 }}>
           <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
             <h2 className="modal-title">{editingPlayerId ? 'Edit Player' : 'Register Global Player'}</h2>
             <form onSubmit={handleSavePlayer}>
@@ -379,6 +377,16 @@ const PlayersList: React.FC = () => {
               </div>
             </form>
           </div>
+        </div>,
+        document.body
+      )}
+
+      {viewImage && createPortal(
+        <div 
+          onClick={() => setViewImage(null)} 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out' }}
+        >
+           <img src={viewImage} alt="Fullscreen Preview" style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }} />
         </div>,
         document.body
       )}
