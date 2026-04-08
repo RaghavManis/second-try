@@ -13,8 +13,19 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    // Usually this should be passed from properties, but hardcoding a secure 256-bit key for MVP
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @org.springframework.beans.factory.annotation.Value("${jwt.secret}")
+    private String secret;
+
+    private Key key;
+
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        // Ensure the secret is at least 32 characters (256 bits) for HS256
+        if (secret.length() < 32) {
+            throw new IllegalArgumentException("JWT_SECRET must be at least 32 characters long for strong HMAC-SHA256 signature.");
+        }
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
     
     // Token valid for 10 hours
     private final long JWT_TOKEN_VALIDITY = 10 * 60 * 60 * 1000;

@@ -16,6 +16,9 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    private Long version;
+
     public enum MatchType {
         TOURNAMENT, PRACTICE
     }
