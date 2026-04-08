@@ -13,6 +13,7 @@ const Matches: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [newMatch, setNewMatch] = useState({ 
     teamAId: '', 
@@ -52,6 +53,7 @@ const Matches: React.FC = () => {
 
   const handleSchedule = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (newMatch.teamAId === newMatch.teamBId) {
       toast.error("A team cannot play against itself.");
       return;
@@ -65,8 +67,7 @@ const Matches: React.FC = () => {
     
     if (!teamA || !teamB) return;
 
-
-
+    setIsSubmitting(true);
     try {
       await MatchService.scheduleMatch({
         teamA,
@@ -82,7 +83,9 @@ const Matches: React.FC = () => {
       fetchData();
     } catch (error) {
       console.error('Failed to schedule match', error);
-      toast.error('Failed to schedule match.');
+      // Global interceptor will handle error toast
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -373,8 +376,10 @@ const Matches: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} style={{ flex: 1 }}>Cancel</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Schedule</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} style={{ flex: 1 }} disabled={isSubmitting}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting}>
+                  {isSubmitting ? 'Scheduling...' : 'Schedule'}
+                </button>
               </div>
             </form>
           </div>

@@ -17,6 +17,7 @@ const Teams: React.FC = () => {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [newTeam, setNewTeam] = useState<{ teamName: string, coachName: string, teamType: 'TOURNAMENT' | 'PRACTICE', teamLogo?: string }>({ teamName: '', coachName: '', teamType: 'TOURNAMENT' });
   const [uploading, setUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchTeams();
@@ -54,6 +55,8 @@ const Teams: React.FC = () => {
 
   const handleRegisterOrUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       if (editingTeam) {
         await TeamService.updateTeam(editingTeam.id!, { ...editingTeam, ...newTeam });
@@ -68,7 +71,9 @@ const Teams: React.FC = () => {
       fetchTeams();
     } catch (error) {
       console.error('Failed to save team', error);
-      toast.error('Failed to save team.');
+      // Let the global interceptor handle the toast, unless specific logic is needed
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -250,9 +255,9 @@ const Teams: React.FC = () => {
                 </select>
               </div>
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} style={{ flex: 1 }}>Cancel</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={uploading}>
-                  {editingTeam ? 'Save Changes' : 'Register'}
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} style={{ flex: 1 }} disabled={isSubmitting}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={uploading || isSubmitting}>
+                  {editingTeam ? (isSubmitting ? 'Saving...' : 'Save Changes') : (isSubmitting ? 'Registering...' : 'Register')}
                 </button>
               </div>
             </form>

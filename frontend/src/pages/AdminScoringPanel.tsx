@@ -37,6 +37,10 @@ const AdminScoringPanel: React.FC = () => {
   const [nextBatsmanId, setNextBatsmanId] = useState<number | ''>('');
   const [nextBowlerId, setNextBowlerId] = useState<number | ''>('');
   const [manOfTheMatchId, setManOfTheMatchId] = useState<number | ''>('');
+  
+  // Interaction Safety State
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (matchId) {
       loadMatchData(parseInt(matchId));
@@ -66,6 +70,7 @@ const AdminScoringPanel: React.FC = () => {
   };
 
   const startLiveScoring = async () => {
+    if (isSubmitting) return;
     if (!matchId || tossWinnerId === '' || strikerId === '' || nonStrikerId === '' || bowlerId === '') {
       return toast.error('Please complete all setup fields');
     }
@@ -77,6 +82,7 @@ const AdminScoringPanel: React.FC = () => {
     }
 
     try {
+      setIsSubmitting(true);
       await MatchScoringService.startLiveScoring(parseInt(matchId), {
         tossWinnerId: Number(tossWinnerId),
         tossDecision,
@@ -91,10 +97,13 @@ const AdminScoringPanel: React.FC = () => {
       loadMatchData(parseInt(matchId));
     } catch (err) {
       toast.error('Failed to start match');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const submitBall = async () => {
+    if (isSubmitting) return;
     if (!matchId) return;
     if (isWicket) {
       if (!wicketType || !playerOutId || (!nextBatsmanId && details?.currentWickets !== 9)) {
@@ -106,6 +115,7 @@ const AdminScoringPanel: React.FC = () => {
     }
     
     try {
+      setIsSubmitting(true);
       await MatchScoringService.recordBall(parseInt(matchId), {
         runs,
         extraType: extraType !== '' ? extraType : undefined,
@@ -124,18 +134,24 @@ const AdminScoringPanel: React.FC = () => {
       loadMatchData(parseInt(matchId));
     } catch (err) {
       toast.error('Failed to record ball');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const confirmBowler = async () => {
+    if (isSubmitting) return;
     if (!matchId || nextBowlerId === '') return;
     try {
+      setIsSubmitting(true);
       await MatchScoringService.updateBowler(parseInt(matchId), Number(nextBowlerId));
       toast.success('New Bowler Confirmed');
       setNextBowlerId('');
       loadMatchData(parseInt(matchId));
     } catch (err) {
       toast.error('Failed to update bowler');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -143,8 +159,10 @@ const AdminScoringPanel: React.FC = () => {
   const [showForceBowler, setShowForceBowler] = useState<boolean>(false);
 
   const forceConfirmBowler = async () => {
+    if (isSubmitting) return;
     if (!matchId || forceBowlerId === '') return;
     try {
+      setIsSubmitting(true);
       await MatchScoringService.updateBowler(parseInt(matchId), Number(forceBowlerId));
       toast.success('Bowler changed mid-over successfully!');
       setForceBowlerId('');
@@ -152,37 +170,48 @@ const AdminScoringPanel: React.FC = () => {
       loadMatchData(parseInt(matchId));
     } catch (err) {
       toast.error('Failed to change bowler');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleUndo = async () => {
+    if (isSubmitting) return;
     if (!matchId) return;
     const confirmUndo = window.confirm("Undo the last recorded ball?");
     if (!confirmUndo) return;
     
     try {
+      setIsSubmitting(true);
       await MatchScoringService.undoLastBall(parseInt(matchId));
       toast.success('Last ball undone successfully');
       loadMatchData(parseInt(matchId));
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to undo ball');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSwapBatsmen = async () => {
+    if (isSubmitting) return;
     if (!matchId) return;
     const confirmSwap = window.confirm("Swap striker and non-striker?");
     if (!confirmSwap) return;
     try {
+      setIsSubmitting(true);
       await MatchScoringService.swapBatsmen(parseInt(matchId));
       toast.success('Batsmen swapped successfully');
       loadMatchData(parseInt(matchId));
     } catch (err) {
       toast.error('Failed to swap batsmen');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const endInnings = async () => {
+    if (isSubmitting) return;
     if (!matchId || !details) return;
     if (strikerId === '' || nonStrikerId === '' || bowlerId === '') {
       return toast.error('Validation Error: Please select openers and bowler for the next innings first.');
@@ -195,6 +224,7 @@ const AdminScoringPanel: React.FC = () => {
     const targetScore = details.currentScore + 1;
     
     try {
+      setIsSubmitting(true);
       await MatchScoringService.endInnings(parseInt(matchId), {
         strikerId: Number(strikerId),
         nonStrikerId: Number(nonStrikerId),
@@ -206,12 +236,19 @@ const AdminScoringPanel: React.FC = () => {
       loadMatchData(parseInt(matchId));
     } catch (err) {
       toast.error('Failed to end innings');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const completeMatchBtn = async () => {
+    if (isSubmitting) return;
     if (!matchId || !details) return;
+    
+    const isConfirmed = window.confirm("Are you absolutely sure you want to Complete this Match? This will archive the scorecards and finalize the winner permanently. This action cannot be officially reversed.");
+    if (!isConfirmed) return;
     try {
+      setIsSubmitting(true);
       // Very simple auto winner determine
       let winnerId = undefined;
       if (details.match.currentInnings === 2 && details.targetScore !== undefined) {
@@ -220,6 +257,7 @@ const AdminScoringPanel: React.FC = () => {
          // else tie
       }
       if (!manOfTheMatchId) {
+         setIsSubmitting(false);
          return toast.error('Validation Error: You must formally select a Man of the Match before finalizing scoring!');
       }
       await MatchScoringService.completeMatch(parseInt(matchId), winnerId, Number(manOfTheMatchId));
@@ -227,6 +265,8 @@ const AdminScoringPanel: React.FC = () => {
       navigate('/matches');
     } catch (err) {
       toast.error('Failed to complete match');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -343,7 +383,7 @@ const AdminScoringPanel: React.FC = () => {
             </select>
           </div>
 
-          <button onClick={startLiveScoring} className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>Start Match</button>
+          <button onClick={startLiveScoring} disabled={isSubmitting} className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>{isSubmitting ? 'Starting...' : 'Start Match'}</button>
         </div>
       </div>
     );
@@ -419,7 +459,7 @@ const AdminScoringPanel: React.FC = () => {
                 </div>
             </div>
             
-            <button className="btn btn-primary" onClick={endInnings} style={{ width: '100%', padding: '1rem', fontSize: '1.2rem' }}>Start 2nd Innings</button>
+            <button className="btn btn-primary" onClick={endInnings} disabled={isSubmitting} style={{ width: '100%', padding: '1rem', fontSize: '1.2rem' }}>{isSubmitting ? 'Processing...' : 'Start 2nd Innings'}</button>
          </div>
       )}
 
@@ -441,7 +481,7 @@ const AdminScoringPanel: React.FC = () => {
               </select>
             </div>
 
-            <button className="btn btn-primary" style={{ background: '#10b981', color: '#fff', width: '100%', padding: '1rem', fontSize: '1.2rem' }} onClick={completeMatchBtn}>Save Match Verdict</button>
+            <button className="btn btn-primary" disabled={isSubmitting} style={{ background: isSubmitting ? '#94a3b8' : '#10b981', color: '#fff', width: '100%', padding: '1rem', fontSize: '1.2rem' }} onClick={completeMatchBtn}>{isSubmitting ? 'Finalizing Data...' : 'Save Match Verdict'}</button>
          </div>
       )}
 
@@ -450,26 +490,28 @@ const AdminScoringPanel: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h3 className="gradient-text" style={{ margin: 0 }}>Control Panel</h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button 
+                 <button 
                    onClick={handleSwapBatsmen}
+                   disabled={isSubmitting}
                    className="btn" 
-                   style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: 'transparent', border: '1px solid #10b981', color: '#10b981' }}>
+                   style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: 'transparent', border: '1px solid #10b981', color: '#10b981', opacity: isSubmitting ? 0.5 : 1 }}>
                    Swap Batsmen
                 </button>
                 <button 
                    onClick={() => setShowForceBowler(!showForceBowler)}
+                   disabled={isSubmitting}
                    className="btn" 
-                   style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: showForceBowler ? 'rgba(59, 130, 246, 0.2)' : 'transparent', border: '1px solid #3b82f6', color: '#3b82f6' }}>
+                   style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: showForceBowler ? 'rgba(59, 130, 246, 0.2)' : 'transparent', border: '1px solid #3b82f6', color: '#3b82f6', opacity: isSubmitting ? 0.5 : 1 }}>
                    {showForceBowler ? 'Cancel Change' : 'Change Bowler'}
                 </button>
                 <button 
                    onClick={handleUndo} 
-                   disabled={details.currentOvers === 0}
+                   disabled={details.currentOvers === 0 || isSubmitting}
                    className="btn"
                    style={{ 
                      padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: 'transparent', 
-                     color: (details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24', 
-                     border: `1px solid ${(details.currentOvers === 0) ? 'var(--glass-border)' : '#fbbf24'}` 
+                     color: (details.currentOvers === 0 || isSubmitting) ? 'var(--glass-border)' : '#fbbf24', 
+                     border: `1px solid ${(details.currentOvers === 0 || isSubmitting) ? 'var(--glass-border)' : '#fbbf24'}` 
                    }}>
                    Undo Last Ball
                 </button>
@@ -549,7 +591,7 @@ const AdminScoringPanel: React.FC = () => {
                 <option value="">Select Replacement Bowler</option>
                 {bowlingSquad.filter(p => p.id !== details.currentBowler?.id).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
-              <button className="btn btn-primary" onClick={forceConfirmBowler} disabled={forceBowlerId === ''} style={{ background: '#3b82f6' }}>Confirm Swap</button>
+              <button className="btn btn-primary" onClick={forceConfirmBowler} disabled={forceBowlerId === '' || isSubmitting} style={{ background: '#3b82f6' }}>{isSubmitting ? 'Swapping...' : 'Confirm Swap'}</button>
             </div>
           )}
 
@@ -560,7 +602,7 @@ const AdminScoringPanel: React.FC = () => {
                 <option value="">Select Bowler</option>
                 {bowlingSquad.filter(p => p.id !== details.currentBowler?.id && p.id !== details.previousBowlerId).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
-              <button className="btn btn-primary" onClick={confirmBowler} disabled={nextBowlerId === ''}>Confirm Bowler</button>
+              <button className="btn btn-primary" onClick={confirmBowler} disabled={nextBowlerId === '' || isSubmitting}>{isSubmitting ? 'Confirming...' : 'Confirm Bowler'}</button>
               <p style={{ fontSize: '0.8rem', marginTop: '1rem', color: '#94a3b8' }}>Since the over is complete, the strike has automatically rotated.</p>
             </div>
           ) : (
@@ -643,7 +685,7 @@ const AdminScoringPanel: React.FC = () => {
                 )}
               </div>
 
-              <button className="btn btn-primary" onClick={submitBall} style={{ width: '100%', height: '54px', fontSize: '1.2rem', fontWeight: 'bold' }}>Record Delivery</button>
+              <button className="btn btn-primary" disabled={isSubmitting} onClick={submitBall} style={{ width: '100%', height: '54px', fontSize: '1.2rem', fontWeight: 'bold' }}>{isSubmitting ? 'Recording...' : 'Record Delivery'}</button>
             </div>
             
             <div className="mobile-spacer" style={{ height: '420px' }}></div>

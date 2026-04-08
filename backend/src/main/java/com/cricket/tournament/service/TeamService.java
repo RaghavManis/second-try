@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.cricket.tournament.repository.PlayerRepository;
 import com.cricket.tournament.model.Player;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 @Service
 public class TeamService {
@@ -21,10 +23,13 @@ public class TeamService {
     @Autowired
     private PlayerRepository playerRepository;
 
+    @Cacheable(value = "teams")
     public List<Team> getAllTeams() {
         return teamRepository.findAll();
     }
 
+    @org.springframework.transaction.annotation.Transactional
+    @CacheEvict(value = "teams", allEntries = true)
     public Team createTeam(Team team) {
         return teamRepository.save(team);
     }
@@ -33,6 +38,7 @@ public class TeamService {
     private com.cricket.tournament.repository.MatchRepository matchRepository;
 
     @org.springframework.transaction.annotation.Transactional
+    @CacheEvict(value = {"teams", "team"}, allEntries = true)
     public void deleteTeam(Long id) {
         if (matchRepository.existsByTeamAIdOrTeamBId(id, id)) {
             throw new RuntimeException("This team is used in matches. Please delete those matches first.");
@@ -40,10 +46,13 @@ public class TeamService {
         teamRepository.deleteById(id);
     }
 
+    @Cacheable(value = "team", key = "#id")
     public Team getTeamById(Long id) {
         return teamRepository.findById(id).orElseThrow(() -> new RuntimeException("Team not found"));
     }
 
+    @org.springframework.transaction.annotation.Transactional
+    @CacheEvict(value = {"teams", "team"}, allEntries = true)
     public Team updateTeam(Long id, Team updatedTeam) {
         Team existingTeam = getTeamById(id);
         
@@ -56,6 +65,7 @@ public class TeamService {
     }
     
     @org.springframework.transaction.annotation.Transactional
+    @CacheEvict(value = {"teams", "team"}, allEntries = true)
     public Team assignPlayers(Long teamId, List<Long> playerIds) {
         Team team = getTeamById(teamId);
         List<Player> selectedPlayers = playerRepository.findAllById(playerIds);

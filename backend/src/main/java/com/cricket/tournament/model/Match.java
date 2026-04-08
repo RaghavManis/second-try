@@ -5,7 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "matches")
+@Table(name = "matches", indexes = {
+    @Index(name = "idx_match_team_a", columnList = "team_a_id"),
+    @Index(name = "idx_match_team_b", columnList = "team_b_id"),
+    @Index(name = "idx_match_status", columnList = "status")
+})
 public class Match {
 
     @Id

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { Team, Match, Score, PointsTableEntry, Player, LiveMatchSetupDto, BallSubmissionDto, LiveMatchDetailsDto, ScorecardBatting, ScorecardBowling, PlayerProfileDto } from '../types';
+import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 console.log("API URL:", API_URL);
@@ -18,6 +19,25 @@ api.interceptors.request.use((config) => {
   }
   return config;
 }, (error) => {
+  return Promise.reject(error);
+});
+
+api.interceptors.response.use((response) => {
+  return response;
+}, (error) => {
+  if (error.response) {
+    if (error.response.status >= 500) {
+      toast.error(error.response.data?.message || 'Internal Server Error occurred.');
+    } else if (error.response.status === 429) {
+      toast.error('Too many requests. Please try again later.');
+    } else if (error.response.status === 400 && error.response.data?.error === 'Validation Error') {
+      toast.error(error.response.data?.message || 'Validation failed.');
+    }
+  } else if (error.request) {
+    toast.error('Network Error: Could not reach the server.');
+  } else {
+    toast.error('An unexpected error occurred.');
+  }
   return Promise.reject(error);
 });
 

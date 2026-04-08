@@ -104,20 +104,45 @@ const Dashboard: React.FC = () => {
         justifyContent: 'center',
         position: 'relative',
         backgroundAttachment: 'fixed',
-        backgroundImage: 'url("https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop")',
+        backgroundImage: 'url("/dashboard-hero.jpg")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         marginTop: '-80px' // offset navbar slightly if needed
       }}>
-        <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
-        <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem' }}>
-          <h1 className="gradient-text" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
+        <div className="hero-overlay" style={{ 
+          position: 'absolute', 
+          inset: 0, 
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.3) 0%, rgba(15, 23, 42, 0.85) 100%)', 
+          zIndex: 1 
+        }}></div>
+        <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem', position: 'relative' }}>
+          <h1 className="gradient-text" style={{ 
+            fontSize: 'clamp(3rem, 8vw, 4.5rem)', 
+            fontWeight: 800, 
+            marginBottom: '1rem', 
+            letterSpacing: '-0.03em',
+            textShadow: '0 8px 30px rgba(0,0,0,0.5)'
+          }}>
             Siddha Premier League
           </h1>
-          <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
+          <p style={{ 
+            color: '#f8fafc', 
+            fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', 
+            fontWeight: 500,
+            maxWidth: '700px', 
+            margin: '0 auto 2.5rem auto', 
+            lineHeight: 1.6,
+            textShadow: '0 4px 15px rgba(0,0,0,0.8)'
+          }}>
             Experience the thrill of the tournament right from your dashboard. Track matches, teams, and star players in real-time.
           </p>
-          <button onClick={() => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary hover-lift" style={{ padding: '1rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px' }}>
+          <button onClick={() => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary hover-lift" style={{ 
+            padding: '1rem 2.5rem', 
+            fontSize: '1.2rem', 
+            fontWeight: 600,
+            borderRadius: '30px',
+            boxShadow: '0 8px 25px rgba(59, 130, 246, 0.4)'
+          }}>
             Explore Tournament <ArrowRight size={20} />
           </button>
         </div>

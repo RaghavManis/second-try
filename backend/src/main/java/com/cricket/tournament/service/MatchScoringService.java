@@ -8,9 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class MatchScoringService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MatchScoringService.class);
 
     @Autowired
     private MatchRepository matchRepository;
@@ -36,6 +40,7 @@ public class MatchScoringService {
     @Transactional
     public Match startLiveScoring(Long matchId, LiveMatchSetupDto setup) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
+        if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         match.setStatus(Match.MatchStatus.ONGOING);
         match.setTossWinner(teamRepository.findById(setup.getTossWinnerId()).orElse(null));
         match.setTossDecision(setup.getTossDecision());
@@ -64,6 +69,8 @@ public class MatchScoringService {
         }
         
         match = matchRepository.save(match);
+        
+        logger.info("[AUDIT] Match {} scoring started. Toss won by {}, chose {}", matchId, match.getTossWinner().getTeamName(), setup.getTossDecision());
         
         // Ensure scorecards are generated immediately for the openers so they appear on the frontend.
         ScorecardBatting strikerCard = createBattingCard(match, match.getCurrentStriker());
@@ -102,8 +109,13 @@ public class MatchScoringService {
 
     @Transactional
     public Match recordBall(Long matchId, BallSubmissionDto ballDto) {
+        if (ballDto.getRuns() != null && ballDto.getRuns() < 0) {
+            throw new IllegalArgumentException("Runs cannot be negative");
+        }
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
-        if (match.getStatus() != Match.MatchStatus.ONGOING) throw new RuntimeException("Match is not ongoing");
+        if (match.getStatus() != Match.MatchStatus.ONGOING) throw new IllegalStateException("Match is not ongoing");
+        
+        logger.info("[AUDIT] Match {} - Delivery: runs={}, extra={}, wicket={}", matchId, ballDto.getRuns(), ballDto.getExtraType(), ballDto.getIsWicket());
         return processBallMath(matchId, match, ballDto, true);
     }
 
@@ -345,6 +357,7 @@ public class MatchScoringService {
     @Transactional
     public Match updateBowler(Long matchId, Long newBowlerId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
+        if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         match.setCurrentBowler(playerRepository.findById(newBowlerId).orElseThrow(() -> new RuntimeException("Player not found")));
         return matchRepository.save(match);
     }
@@ -352,6 +365,7 @@ public class MatchScoringService {
     @Transactional
     public Match swapBatsmen(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
+        if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         Player temp = match.getCurrentStriker();
         if (temp != null && match.getCurrentNonStriker() != null) {
             match.setCurrentStriker(match.getCurrentNonStriker());
@@ -363,7 +377,9 @@ public class MatchScoringService {
     @Transactional
     public Match undoLastBall(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
-        if (match.getStatus() != Match.MatchStatus.ONGOING) throw new RuntimeException("Match is not ongoing");
+        if (match.getStatus() != Match.MatchStatus.ONGOING) throw new IllegalStateException("Match is not ongoing");
+        
+        logger.info("[AUDIT] Match {} - Last ball undone", matchId);
 
         List<BallEvent> events = ballEventRepository.findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(matchId, match.getCurrentInnings());
         if (events.isEmpty()) {
@@ -456,6 +472,8 @@ public class MatchScoringService {
     @Transactional
     public Match endInnings(Long matchId, Long newStrikerId, Long newNonStrikerId, Long newBowlerId, Integer targetScore) {
         Match match = matchRepository.findById(matchId).orElseThrow();
+        if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
+        logger.info("[AUDIT] Match {} - Innings {} Ended. Setting up next innings", matchId, match.getCurrentInnings());
         if (match.getCurrentInnings() == 1) {
             match.setFirstInningsScore(match.getCurrentScore());
             match.setFirstInningsWickets(match.getCurrentWickets());
@@ -616,6 +634,8 @@ public class MatchScoringService {
     @Transactional
     public Match completeMatch(Long matchId, Long winnerTeamId, Long manOfTheMatchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
+        if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Match is already completed");
+        
         match.setStatus(Match.MatchStatus.COMPLETED);
         if (winnerTeamId != null) {
             match.setWinnerTeam(teamRepository.findById(winnerTeamId).orElse(null));
@@ -637,6 +657,8 @@ public class MatchScoringService {
         if (manOfTheMatchId != null) {
             match.setManOfTheMatch(playerRepository.findById(manOfTheMatchId).orElse(null));
         }
+        
+        logger.info("[AUDIT] Match {} Officially Completed! Result: {}", matchId, match.getResult());
         
         // Save PlayerMatchStats
         List<ScorecardBatting> battingCards = scorecardBattingRepository.findByMatchId(matchId);

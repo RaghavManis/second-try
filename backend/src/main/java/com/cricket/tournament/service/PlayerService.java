@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.HashMap;
 import com.cricket.tournament.dto.PlayerProfileDto;
 import com.cricket.tournament.repository.PlayerMatchStatsRepository;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PlayerService {
@@ -24,16 +27,21 @@ public class PlayerService {
     @Autowired
     private TeamService teamService;
 
+    @Transactional
+    @CacheEvict(value = {"players", "playerProfile", "teamPlayers"}, allEntries = true)
     public Player addPlayer(Player player) {
         return playerRepository.save(player);
     }
 
+    @Cacheable(value = "teamPlayers", key = "#teamId")
     public List<Player> getPlayersByTeam(Long teamId) {
         // Verify team exists before fetching players
         teamService.getTeamById(teamId);
         return playerRepository.findByTeamId(teamId);
     }
 
+    @Transactional
+    @CacheEvict(value = {"players", "playerProfile", "teamPlayers"}, allEntries = true)
     public void removePlayer(Long id) {
         if (!playerRepository.existsById(id)) {
             throw new RuntimeException("Player not found");
@@ -41,6 +49,7 @@ public class PlayerService {
         playerRepository.deleteById(id);
     }
 
+    @Cacheable(value = "players")
     public List<Player> getAllPlayers() {
         return playerRepository.findAll();
     }
@@ -50,6 +59,8 @@ public class PlayerService {
                 .orElseThrow(() -> new RuntimeException("Player not found with id " + id));
     }
 
+    @Transactional
+    @CacheEvict(value = {"players", "playerProfile", "teamPlayers"}, allEntries = true)
     public Player updatePlayerBasicInfo(Long id, Player updatedPlayer) {
         Player existingPlayer = getPlayerById(id);
         
@@ -65,6 +76,7 @@ public class PlayerService {
         return playerRepository.save(existingPlayer);
     }
 
+    @Cacheable(value = "playerProfile", key = "#id")
     public PlayerProfileDto getPlayerProfile(Long id) {
         Player player = getPlayerById(id);
         

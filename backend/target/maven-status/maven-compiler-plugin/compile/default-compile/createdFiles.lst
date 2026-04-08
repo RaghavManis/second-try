@@ -11,6 +11,7 @@ com\cricket\tournament\controller\MatchScoringController.class
 com\cricket\tournament\controller\GalleryController.class
 com\cricket\tournament\service\TeamService.class
 com\cricket\tournament\controller\AuthController.class
+com\cricket\tournament\config\RateLimitConfig$1.class
 com\cricket\tournament\model\Team.class
 com\cricket\tournament\model\Team$TeamType.class
 com\cricket\tournament\repository\BallEventRepository.class
@@ -19,6 +20,7 @@ com\cricket\tournament\dto\BallSubmissionDto.class
 com\cricket\tournament\controller\TeamController.class
 com\cricket\tournament\repository\MatchRepository.class
 com\cricket\tournament\controller\ScoreController.class
+com\cricket\tournament\exception\GlobalExceptionHandler.class
 com\cricket\tournament\model\ScorecardBatting.class
 com\cricket\tournament\service\PointsService.class
 com\cricket\tournament\repository\PlayerMatchStatsRepository.class
@@ -27,6 +29,7 @@ com\cricket\tournament\model\Score.class
 com\cricket\tournament\config\CloudinaryConfig.class
 com\cricket\tournament\model\PlayerMatchStats.class
 com\cricket\tournament\model\ScorecardBowling.class
+com\cricket\tournament\config\RequestLoggingInterceptor.class
 com\cricket\tournament\model\Match.class
 com\cricket\tournament\controller\UploadController.class
 com\cricket\tournament\service\ScoreService.class
@@ -38,8 +41,11 @@ com\cricket\tournament\model\Match$MatchStatus.class
 com\cricket\tournament\security\JwtUtil.class
 com\cricket\tournament\repository\PlayerRepository.class
 com\cricket\tournament\model\BallEvent.class
+com\cricket\tournament\config\CacheConfig.class
 com\cricket\tournament\controller\PointsController.class
+com\cricket\tournament\config\RateLimitConfig.class
 com\cricket\tournament\repository\GalleryImageRepository.class
+com\cricket\tournament\dto\ErrorResponse.class
 com\cricket\tournament\dto\LiveMatchDetailsDto.class
 com\cricket\tournament\dto\PlayerProfileDto.class
 com\cricket\tournament\service\PlayerService.class

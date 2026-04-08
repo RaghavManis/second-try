@@ -3,7 +3,15 @@ package com.cricket.tournament.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "player_match_stats")
+@Table(name = "player_match_stats", 
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"match_id", "player_id"})
+    },
+    indexes = {
+        @Index(name = "idx_pms_player", columnList = "player_id"),
+        @Index(name = "idx_pms_match", columnList = "match_id")
+    }
+)
 public class PlayerMatchStats {
 
     @Id
