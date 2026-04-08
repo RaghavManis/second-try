@@ -26,6 +26,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLockFailure(org.springframework.orm.ObjectOptimisticLockingFailureException ex, HttpServletRequest request) {
+        logger.warn("Concurrency Error [{}]: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict Error",
+                "The match score was modified by someone else simultaneously. Please refresh the page.",
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
         logger.error("Runtime Error [{}]: {}", request.getRequestURI(), ex.getMessage());

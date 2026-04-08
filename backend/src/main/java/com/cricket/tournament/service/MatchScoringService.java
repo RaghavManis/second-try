@@ -514,8 +514,18 @@ public class MatchScoringService {
         return match;
     }
 
-    @Transactional(readOnly = true)
+    private final com.github.benmanes.caffeine.cache.Cache<Long, LiveMatchDetailsDto> liveDetailsCache = 
+        com.github.benmanes.caffeine.cache.Caffeine.newBuilder()
+            .expireAfterWrite(3, java.util.concurrent.TimeUnit.SECONDS)
+            .maximumSize(100)
+            .build();
+
     public LiveMatchDetailsDto getLiveDetails(Long matchId) {
+        return liveDetailsCache.get(matchId, k -> fetchLiveDetails(k));
+    }
+
+    @Transactional(readOnly = true)
+    protected LiveMatchDetailsDto fetchLiveDetails(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         
         // Force initialize lazy collections to prevent LazyInitializationException during JSON serialization
