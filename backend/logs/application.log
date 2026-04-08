@@ -560,3 +560,6 @@ This generated password is for development use only. Your security configuration
 2026-04-08 15:21:02 [http-nio-0.0.0.0-8082-exec-144] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
 2026-04-08 15:21:02 [http-nio-0.0.0.0-8082-exec-144] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
 2026-04-08 15:21:02 [http-nio-0.0.0.0-8082-exec-144] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 8 ms
+2026-04-08 16:33:01 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=46m12s956ms628µs700ns).
+2026-04-08 16:55:25 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h8m25s751ms237µs100ns).
+2026-04-08 16:55:44 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=22m43s868ms910µs200ns).

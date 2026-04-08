@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/error").permitAll()
+                        .requestMatchers("/actuator/**").permitAll() // Allow health checks
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll() // Allow everyone to read data
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow OPTIONS requests
                         .anyRequest().authenticated() // Block POST, PUT, DELETE without token
@@ -49,7 +50,12 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Use origins dynamically from application.properties / environment variables
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        // Defensively strip trailing slashes if they were accidentally added in environment variables
+        java.util.List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .map(origin -> origin.endsWith("/") ? origin.substring(0, origin.length() - 1) : origin)
+                .toList();
+        configuration.setAllowedOrigins(origins);
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(
