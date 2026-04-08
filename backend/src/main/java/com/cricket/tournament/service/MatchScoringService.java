@@ -68,21 +68,24 @@ public class MatchScoringService {
             match.setPlayingXiTeamB(new HashSet<>(playerRepository.findAllById(setup.getPlayingXiTeamBIds())));
         }
         
-        match = matchRepository.save(match);
+        Match savedMatch = matchRepository.save(match);
         
-        logger.info("[AUDIT] Match {} scoring started. Toss won by {}, chose {}", matchId, match.getTossWinner().getTeamName(), setup.getTossDecision());
+        logger.info("[AUDIT] Match {} scoring started. Toss won by {}, chose {}", matchId, savedMatch.getTossWinner().getTeamName(), setup.getTossDecision());
         
-        // Ensure scorecards are generated immediately for the openers so they appear on the frontend.
-        ScorecardBatting strikerCard = createBattingCard(match, match.getCurrentStriker());
+        // Ensure scorecards are mathematically idempotent to prevent UniqueConstraint crashes if setup is clicked twice (e.g. across two days).
+        ScorecardBatting strikerCard = scorecardBattingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, 1, savedMatch.getCurrentStriker().getId())
+            .orElseGet(() -> createBattingCard(savedMatch, savedMatch.getCurrentStriker()));
         scorecardBattingRepository.save(strikerCard);
         
-        ScorecardBatting nonStrikerCard = createBattingCard(match, match.getCurrentNonStriker());
+        ScorecardBatting nonStrikerCard = scorecardBattingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, 1, savedMatch.getCurrentNonStriker().getId())
+            .orElseGet(() -> createBattingCard(savedMatch, savedMatch.getCurrentNonStriker()));
         scorecardBattingRepository.save(nonStrikerCard);
         
-        ScorecardBowling bowlerCard = createBowlingCard(match, match.getCurrentBowler());
+        ScorecardBowling bowlerCard = scorecardBowlingRepository.findFirstByMatchIdAndInningsAndPlayerId(matchId, 1, savedMatch.getCurrentBowler().getId())
+            .orElseGet(() -> createBowlingCard(savedMatch, savedMatch.getCurrentBowler()));
         scorecardBowlingRepository.save(bowlerCard);
         
-        return match;
+        return savedMatch;
     }
 
     private ScorecardBatting createBattingCard(Match match, Player player) {

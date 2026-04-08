@@ -11,5 +11,7 @@ public interface BallEventRepository extends JpaRepository<BallEvent, Long> {
     List<BallEvent> findByMatchIdOrderByOverNumberAscBallNumberAsc(Long matchId);
     List<BallEvent> findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(Long matchId, Integer innings);
     List<BallEvent> findTop20ByMatchIdAndInningsOrderByOverNumberDescBallNumberDescIdDesc(Long matchId, Integer innings);
-    void deleteByMatchId(Long matchId);
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM BallEvent b WHERE b.match.id = :matchId")
+    void deleteByMatchId(@org.springframework.data.repository.query.Param("matchId") Long matchId);
 }

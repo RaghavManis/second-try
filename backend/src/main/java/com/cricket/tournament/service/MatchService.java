@@ -80,5 +80,6 @@ public class MatchService {
         matchRepository.save(match);
 
         matchRepository.delete(match);
+        matchRepository.flush();
     }
 }

@@ -9,5 +9,7 @@ import java.util.Optional;
 @Repository
 public interface ScoreRepository extends JpaRepository<Score, Long> {
     Optional<Score> findByMatchId(Long matchId);
-    void deleteByMatchId(Long matchId);
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM Score s WHERE s.match.id = :matchId")
+    void deleteByMatchId(@org.springframework.data.repository.query.Param("matchId") Long matchId);
 }

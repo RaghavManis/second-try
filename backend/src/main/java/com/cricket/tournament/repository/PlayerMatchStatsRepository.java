@@ -14,7 +14,9 @@ public interface PlayerMatchStatsRepository extends JpaRepository<PlayerMatchSta
     List<PlayerMatchStats> findByPlayerId(Long playerId);
 
     List<PlayerMatchStats> findByMatchId(Long matchId);
-    void deleteByMatchId(Long matchId);
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM PlayerMatchStats p WHERE p.match.id = :matchId")
+    void deleteByMatchId(@org.springframework.data.repository.query.Param("matchId") Long matchId);
 
     @Query("SELECT new map(" +
            "pms.matchType as matchType, " +
