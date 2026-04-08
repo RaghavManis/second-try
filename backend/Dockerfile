@@ -1,18 +1,20 @@
 # Build stage
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
-# Copy the pom.xml and source code
+
+# Cache Maven dependencies by copying only the POM first
 COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Now copy the source code and build (this layer only rebuilds if code changes)
 COPY src ./src
-# Build the application
 RUN mvn clean package -DskipTests
 
 # Run stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-# Copy the built jar file from the build stage
 COPY --from=build /app/target/*.jar app.jar
-# Expose the default port
 EXPOSE 8080
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Strictly limit JVM Memory to prevent the 512MB Render Container from OOM crashing (521 Error)
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70.0", "-XX:+UseSerialGC", "-jar", "app.jar"]
