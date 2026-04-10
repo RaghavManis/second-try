@@ -18,11 +18,13 @@ import Gallery from './pages/Gallery';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
+import ScrollToTop from './components/ScrollToTop';
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <div className="app-container">
           <Toaster position="top-right" toastOptions={{
             style: { background: '#1a1a2e', color: '#fff', border: '1px solid #ffffff20' }

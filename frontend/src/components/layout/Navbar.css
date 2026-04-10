@@ -2,11 +2,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  margin: 1rem 2rem;
+  padding: 1rem 2.5rem;
+  margin: 1.5rem 2.5rem;
   position: sticky;
-  top: 1rem;
+  top: 1.5rem;
   z-index: 100;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.85); /* Darker, richer backdrop */
+  border: 1px solid rgba(255, 255, 255, 0.15); /* Stronger border */
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .nav-brand {
@@ -17,41 +23,64 @@
 
 .brand-icon {
   color: var(--primary);
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
 }
 
 .brand-text {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 800;
   letter-spacing: -0.02em;
 }
 
 .nav-links {
   display: flex;
   list-style: none;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  color: var(--text-secondary);
+  gap: 0.6rem;
+  padding: 0.6rem 1.25rem;
+  color: #cbd5e1; /* Brighter slate for higher baseline contrast */
   text-decoration: none;
-  font-weight: 500;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  font-weight: 600; /* Bolder baseline */
+  font-size: 1.05rem; /* Slightly larger */
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+.nav-link svg {
+  transition: transform 0.3s ease, color 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
 .nav-link:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.nav-link:hover svg {
+  transform: scale(1.15) rotate(5deg);
+  color: #ffffff;
 }
 
 .nav-link.active {
-  color: var(--primary);
-  background: rgba(16, 185, 129, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+  font-weight: 700; /* Extra bold for active */
+}
+
+.nav-link.active svg {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 10px rgba(16,185,129,0.7));
 }
 
 @media (max-width: 768px) {

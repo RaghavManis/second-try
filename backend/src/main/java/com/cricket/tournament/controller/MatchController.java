@@ -44,6 +44,12 @@ public class MatchController {
         return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Match> updateMatch(@PathVariable Long id, @Valid @RequestBody Match match) {
+        Match updatedMatch = matchService.updateMatch(id, match);
+        return new ResponseEntity<>(updatedMatch, HttpStatus.OK);
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<Match> updateMatchStatus(@PathVariable Long id, @RequestBody java.util.Map<String, String> payload) {
         Match match = matchService.getMatchById(id);

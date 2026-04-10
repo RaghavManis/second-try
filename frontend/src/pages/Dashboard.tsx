@@ -39,7 +39,7 @@ const Dashboard: React.FC = () => {
         });
 
         // Slice previews
-        setTeams(tournamentTeams.slice(0, 5)); // top 5 tournament teams
+        setTeams(tournamentTeams); // all tournament teams
         setRecentMatches(allMatches.slice(0, 5)); // up to 5 recent matches
         setStandings((pointsRes.data.TOURNAMENT || []).slice(0, 4)); // top 4 standings
 

@@ -13,6 +13,7 @@ const Matches: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [editingMatchId, setEditingMatchId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [newMatch, setNewMatch] = useState({ 
@@ -69,24 +70,53 @@ const Matches: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await MatchService.scheduleMatch({
+      const matchData = {
         teamA,
         teamB,
         matchDate: dateOnly,
         overs: newMatch.overs,
         status: newMatch.status,
         matchType: newMatch.matchType
-      });
+      };
+
+      if (editingMatchId) {
+        await MatchService.updateMatch(editingMatchId, matchData as any);
+        toast.success('Match updated successfully!');
+      } else {
+        await MatchService.scheduleMatch(matchData as any);
+        toast.success('Match scheduled successfully!');
+      }
+      
       setShowModal(false);
       setNewMatch({ teamAId: '', teamBId: '', matchDate: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' });
-      toast.success('Match scheduled successfully!');
+      setEditingMatchId(null);
       fetchData();
-    } catch (error) {
-      console.error('Failed to schedule match', error);
-      // Global interceptor will handle error toast
+    } catch (error: any) {
+      console.error(editingMatchId ? 'Failed to update match' : 'Failed to schedule match', error);
+      toast.error(error.response?.data?.message || (editingMatchId ? "Failed to update match." : "Failed to schedule match."));
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEditClick = (e: React.MouseEvent, match: Match) => {
+    e.stopPropagation();
+    setEditingMatchId(match.id!);
+    
+    let dateStr = match.matchDate as string;
+    if (dateStr && !dateStr.includes('T')) {
+       dateStr = `${dateStr}T09:00`;
+    }
+    
+    setNewMatch({ 
+      teamAId: match.teamA.id!.toString(), 
+      teamBId: match.teamB.id!.toString(), 
+      matchDate: dateStr, 
+      overs: match.overs,
+      status: match.status as any,
+      matchType: match.matchType as any
+    });
+    setShowModal(true);
   };
 
   const handleDeleteMatch = async (e: React.MouseEvent, id: number) => {
@@ -114,7 +144,7 @@ const Matches: React.FC = () => {
 
   const getRandomLogo = (id: number) => `https://api.dicebear.com/7.x/identicon/svg?seed=Team${id}&backgroundColor=1e293b`;
 
-  const MatchCard = ({ match, showActions = false, onDelete }: { match: Match; showActions?: boolean, onDelete?: (e: React.MouseEvent, id: number) => void }) => {
+  const MatchCard = ({ match, showActions = false, onDelete, onEdit }: { match: Match; showActions?: boolean, onDelete?: (e: React.MouseEvent, id: number) => void, onEdit?: (e: React.MouseEvent, match: Match) => void }) => {
     let team1 = match.teamA;
     let team2 = match.teamB;
     let team1Info = null;
@@ -158,6 +188,15 @@ const Matches: React.FC = () => {
           <div style={{ background: '#8b5cf620', color: '#8b5cf6', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
             PRACTICE
           </div>
+        )}
+        {showActions && isAuthenticated && onEdit && match.status === 'SCHEDULED' && (
+          <button 
+            onClick={(e) => onEdit(e, match)}
+            style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#3b82f6', cursor: 'pointer', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            title="Edit Match"
+          >
+            <Edit size={14} />
+          </button>
         )}
         {showActions && isAuthenticated && onDelete && (
           <button 
@@ -300,7 +339,11 @@ const Matches: React.FC = () => {
               <p className="scroll-section-subtitle" style={{ marginBottom: 0, textAlign: 'left' }}>Full management directory.</p>
             </div>
             {isAuthenticated && (
-              <button className="btn btn-primary hover-lift" onClick={() => setShowModal(true)}>
+              <button className="btn btn-primary hover-lift" onClick={() => {
+                 setEditingMatchId(null);
+                 setNewMatch({ teamAId: '', teamBId: '', matchDate: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' });
+                 setShowModal(true);
+              }}>
                 <CalendarPlus size={18} /> Schedule Match
               </button>
             )}
@@ -316,7 +359,7 @@ const Matches: React.FC = () => {
               </div>
             ) : (
               matches.map((match) => (
-                <MatchCard key={match.id} match={match} showActions={true} onDelete={handleDeleteMatch} />
+                <MatchCard key={match.id} match={match} showActions={true} onDelete={handleDeleteMatch} onEdit={handleEditClick} />
               ))
             )}
           </div>
@@ -326,7 +369,7 @@ const Matches: React.FC = () => {
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content glass-panel" style={{ maxWidth: '500px' }}>
-            <h2>Schedule Match</h2>
+            <h2>{editingMatchId ? 'Edit Match' : 'Schedule Match'}</h2>
             <form onSubmit={handleSchedule} style={{ marginTop: '1.5rem' }}>
               
               <div style={{ display: 'flex', gap: '1rem' }}>
@@ -376,9 +419,9 @@ const Matches: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} style={{ flex: 1 }} disabled={isSubmitting}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowModal(false); setEditingMatchId(null); setNewMatch({ teamAId: '', teamBId: '', matchDate: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' }); }} style={{ flex: 1 }} disabled={isSubmitting}>Cancel</button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting}>
-                  {isSubmitting ? 'Scheduling...' : 'Schedule'}
+                  {isSubmitting ? (editingMatchId ? 'Updating...' : 'Scheduling...') : (editingMatchId ? 'Update' : 'Schedule')}
                 </button>
               </div>
             </form>

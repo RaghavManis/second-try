@@ -105,7 +105,7 @@ const Teams: React.FC = () => {
 
   if (loading) return <div className="loader" style={{ textAlign: 'center', marginTop: '20vh' }}>Loading teams...</div>;
 
-  const featuredTeams = teams.filter(t => t.teamType === 'TOURNAMENT' || t.teamType == null).slice(0, 5);
+  const featuredTeams = teams.filter(t => t.teamType === 'TOURNAMENT' || t.teamType == null);
 
   return (
     <div className="dashboard-wrapper">

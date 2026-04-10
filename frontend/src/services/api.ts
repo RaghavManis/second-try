@@ -67,6 +67,7 @@ export const MatchService = {
   getAllMatches: () => api.get<Match[]>('/matches'),
   getMatchById: (id: number) => api.get<Match>(`/matches/${id}`),
   scheduleMatch: (match: Match) => api.post<Match>('/matches', match),
+  updateMatch: (id: number, match: Match) => api.put<Match>(`/matches/${id}`, match),
   updateMatchStatus: (id: number, status: string) => api.patch<Match>(`/matches/${id}/status`, { status }),
   deleteMatch: (id: number) => api.delete(`/matches/${id}`),
 };

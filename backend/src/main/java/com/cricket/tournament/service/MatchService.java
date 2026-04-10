@@ -64,6 +64,27 @@ public class MatchService {
         return matchRepository.save(match);
     }
 
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
+    public Match updateMatch(Long id, Match updatedMatch) {
+        Match existingMatch = getMatchById(id);
+        
+        if (existingMatch.getStatus() != Match.MatchStatus.SCHEDULED) {
+            throw new IllegalStateException("Only scheduled matches can be updated");
+        }
+
+        if (updatedMatch.getTeamA().getId().equals(updatedMatch.getTeamB().getId())) {
+            throw new IllegalArgumentException("Team A and Team B cannot be the same");
+        }
+
+        existingMatch.setTeamA(updatedMatch.getTeamA());
+        existingMatch.setTeamB(updatedMatch.getTeamB());
+        existingMatch.setMatchDate(updatedMatch.getMatchDate());
+        existingMatch.setOvers(updatedMatch.getOvers());
+        existingMatch.setMatchType(updatedMatch.getMatchType());
+        
+        return matchRepository.save(existingMatch);
+    }
+
     @org.springframework.transaction.annotation.Transactional
     @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public void deleteMatch(Long id) {

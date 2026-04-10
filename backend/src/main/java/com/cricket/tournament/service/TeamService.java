@@ -38,7 +38,7 @@ public class TeamService {
     private com.cricket.tournament.repository.MatchRepository matchRepository;
 
     @org.springframework.transaction.annotation.Transactional
-    @CacheEvict(value = {"teams", "team"}, allEntries = true)
+    @CacheEvict(value = {"teams", "team", "teamPlayers"}, allEntries = true)
     public void deleteTeam(Long id) {
         if (matchRepository.existsByTeamAIdOrTeamBId(id, id)) {
             throw new RuntimeException("This team is used in matches. Please delete those matches first.");
@@ -52,7 +52,7 @@ public class TeamService {
     }
 
     @org.springframework.transaction.annotation.Transactional
-    @CacheEvict(value = {"teams", "team"}, allEntries = true)
+    @CacheEvict(value = {"teams", "team", "teamPlayers"}, allEntries = true)
     public Team updateTeam(Long id, Team updatedTeam) {
         Team existingTeam = getTeamById(id);
         
@@ -65,11 +65,12 @@ public class TeamService {
     }
     
     @org.springframework.transaction.annotation.Transactional
-    @CacheEvict(value = {"teams", "team"}, allEntries = true)
+    @CacheEvict(value = {"teams", "team", "teamPlayers"}, allEntries = true)
     public Team assignPlayers(Long teamId, List<Long> playerIds) {
         Team team = getTeamById(teamId);
         List<Player> selectedPlayers = playerRepository.findAllById(playerIds);
-        team.setPlayers(selectedPlayers);
+        team.getPlayers().clear();
+        team.getPlayers().addAll(selectedPlayers);
         return teamRepository.save(team);
     }
 }
