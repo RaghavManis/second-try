@@ -11,6 +11,7 @@ import jakarta.persistence.*;
         @Index(name = "idx_batting_match_innings_player", columnList = "match_id, innings, player_id")
     }
 )
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ScorecardBatting {
 
     @Id

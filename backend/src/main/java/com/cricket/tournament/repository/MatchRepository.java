@@ -9,11 +9,10 @@ import java.util.List;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
-    @EntityGraph(attributePaths = {"playingXiTeamA", "playingXiTeamB"})
+    @EntityGraph(attributePaths = {"playingXiTeamA", "playingXiTeamB", "teamA", "teamB"})
     List<Match> findAll();
 
-    @EntityGraph(attributePaths = {"playingXiTeamA", "playingXiTeamB"})
-
+    @EntityGraph(attributePaths = {"playingXiTeamA", "playingXiTeamB", "teamA", "teamB"})
     List<Match> findByStatus(Match.MatchStatus status);
     boolean existsByTeamAIdOrTeamBId(Long teamAId, Long teamBId);
 

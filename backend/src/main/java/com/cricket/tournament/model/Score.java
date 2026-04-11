@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 
 @Entity
 @Table(name = "scores")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Score {
 
     @Id

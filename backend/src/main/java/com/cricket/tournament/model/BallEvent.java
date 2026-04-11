@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 @Table(name = "ball_events", indexes = {
     @Index(name = "idx_ball_match_innings", columnList = "match_id, innings, over_number, ball_number, id")
 })
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class BallEvent {
 
     @Id
