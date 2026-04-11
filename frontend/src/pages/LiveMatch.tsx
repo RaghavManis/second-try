@@ -493,12 +493,12 @@ const LiveMatch: React.FC = () => {
                   <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                      <span style={{ color: '#94a3b8' }}>{details.match.teamA.teamName} Captain</span>
-                     <span>{details.match.teamA.coachName || 'TBA'}</span>
+                     <span>{details.match.playingXiTeamA?.find(p => p.isCaptain)?.name || 'TBA'}</span>
                   </div>
                   <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                      <span style={{ color: '#94a3b8' }}>{details.match.teamB.teamName} Captain</span>
-                     <span>{details.match.teamB.coachName || 'TBA'}</span>
+                     <span>{details.match.playingXiTeamB?.find(p => p.isCaptain)?.name || 'TBA'}</span>
                   </div>
                </div>
             </div>
