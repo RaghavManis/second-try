@@ -88,6 +88,16 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const getRoleColor = (role: string) => {
+    switch(role) {
+      case 'BATSMAN': return '#3b82f6';
+      case 'BOWLER': return '#ef4444';
+      case 'ALL_ROUNDER': return '#10b981';
+      case 'WICKETKEEPER': return '#f59e0b';
+      default: return '#8b5cf6';
+    }
+  };
+
   const getRandomAvatar = (id: number) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf`;
   const getRandomLogo = (id: number) => `https://api.dicebear.com/7.x/identicon/svg?seed=Team${id}&backgroundColor=1e293b`;
 
@@ -107,44 +117,93 @@ const Dashboard: React.FC = () => {
         backgroundImage: 'url("/dashboard-hero.jpg")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        marginTop: '-80px' // offset navbar slightly if needed
+        backgroundRepeat: 'no-repeat',
+        marginTop: '0', 
+        paddingTop: '80px'
       }}>
         <div className="hero-overlay" style={{ 
           position: 'absolute', 
           inset: 0, 
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.3) 0%, rgba(15, 23, 42, 0.85) 100%)', 
+          background: 'radial-gradient(circle at center, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.95) 100%)',
           zIndex: 1 
         }}></div>
-        <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem', position: 'relative' }}>
-          <h1 className="gradient-text" style={{ 
-            fontSize: 'clamp(3rem, 8vw, 4.5rem)', 
-            fontWeight: 800, 
-            marginBottom: '1rem', 
-            letterSpacing: '-0.03em',
-            textShadow: '0 8px 30px rgba(0,0,0,0.5)'
+        <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem', position: 'relative', width: '100%' }}>
+          
+          <div style={{ display: 'inline-block', marginBottom: '1.5rem', padding: '0.5rem 1.5rem', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '30px', backdropFilter: 'blur(10px)', color: '#fff', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
+            Official Tournament Portal
+          </div>
+          
+          <h1 className="spl-title" style={{ 
+            fontSize: 'clamp(3rem, 8vw, 6.5rem)', 
+            fontWeight: 900, 
+            marginBottom: '0.5rem', 
+            letterSpacing: '-0.02em',
+            lineHeight: 1.1,
+            background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 20px 40px rgba(0,0,0,0.8)',
+            position: 'relative',
+            whiteSpace: 'pre-line'
           }}>
-            Siddha Premier League
+            <span>SIDDHA PREMIER</span><span className="league-text"> LEAGUE</span>
           </h1>
+          
+          <h2 style={{
+             color: 'var(--primary)',
+             fontSize: 'clamp(1.5rem, 4vw, 2.8rem)',
+             fontWeight: 800,
+             marginBottom: '2rem',
+             textTransform: 'uppercase',
+             letterSpacing: '0.1em',
+             textShadow: '0 4px 15px rgba(16, 185, 129, 0.4)'
+          }}>Season 2026</h2>
+
           <p style={{ 
             color: '#f8fafc', 
-            fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', 
-            fontWeight: 500,
-            maxWidth: '700px', 
-            margin: '0 auto 2.5rem auto', 
+            fontSize: 'clamp(1.1rem, 2vw, 1.4rem)', 
+            fontWeight: 400,
+            maxWidth: '800px', 
+            margin: '0 auto 3rem auto', 
             lineHeight: 1.6,
-            textShadow: '0 4px 15px rgba(0,0,0,0.8)'
+            textShadow: '0 4px 15px rgba(0,0,0,0.9)'
           }}>
-            Experience the thrill of the tournament right from your dashboard. Track matches, teams, and star players in real-time.
+            Experience the most electrifying cricket tournament. Track live fixtures, witness the rise of star athletes, and feel the adrenaline in real-time.
           </p>
-          <button onClick={() => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary hover-lift" style={{ 
-            padding: '1rem 2.5rem', 
-            fontSize: '1.2rem', 
-            fontWeight: 600,
-            borderRadius: '30px',
-            boxShadow: '0 8px 25px rgba(59, 130, 246, 0.4)'
-          }}>
-            Explore Tournament <ArrowRight size={20} />
-          </button>
+
+          <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+             <button onClick={() => document.getElementById('action-center')?.scrollIntoView({ behavior: 'smooth' })} className="btn hover-lift" style={{ 
+               padding: '1.2rem 3.5rem', 
+               fontSize: '1.2rem', 
+               fontWeight: 700,
+               borderRadius: '50px',
+               background: 'linear-gradient(135deg, var(--primary) 0%, #047857 100%)',
+               color: '#fff',
+               boxShadow: '0 10px 30px rgba(16, 185, 129, 0.5)',
+               border: 'none',
+               textTransform: 'uppercase',
+               letterSpacing: '1px',
+               display: 'inline-flex',
+               alignItems: 'center',
+               gap: '0.75rem'
+             }}>
+               Live Action <ArrowRight size={22} />
+             </button>
+             <button onClick={() => document.getElementById('stats-section')?.scrollIntoView({ behavior: 'smooth' })} className="btn hover-lift" style={{ 
+               padding: '1.2rem 3.5rem', 
+               fontSize: '1.2rem', 
+               fontWeight: 700,
+               borderRadius: '50px',
+               background: 'rgba(15, 23, 42, 0.6)',
+               color: '#fff',
+               border: '2px solid rgba(255,255,255,0.2)',
+               backdropFilter: 'blur(10px)',
+               textTransform: 'uppercase',
+               letterSpacing: '1px'
+             }}>
+               View Stats
+             </button>
+          </div>
         </div>
       </div>
 
@@ -184,7 +243,7 @@ const Dashboard: React.FC = () => {
 
         {/* SECTION 3: RECENT MATCHES CAROUSEL */}
         {recentMatches.length > 0 && (
-          <AnimatedSection className="bg-section-2 theme-light">
+          <AnimatedSection id="action-center" className="bg-section-2 theme-light">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
               <div>
                 <h2 className="scroll-section-title gradient-text" style={{ marginBottom: 0, textAlign: 'left' }}>Action Center</h2>
@@ -219,50 +278,67 @@ const Dashboard: React.FC = () => {
                 }
 
                 return (
-                  <div key={match.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{
-                      position: 'absolute', top: '1rem', right: '1rem',
-                      background: `${getStatusColor(match.status)}20`, color: getStatusColor(match.status),
-                      padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600
-                    }}>
-                      {match.status}
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem', marginBottom: '1.5rem' }}>
-                      <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                        <img src={team1.teamLogo || getRandomLogo(team1.id || 0)} alt={team1.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
-                        <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{team1.teamName}</h3>
-                        {(match.status === 'COMPLETED' || match.status === 'ONGOING') && (
-                          <div style={{ fontWeight: 'bold', fontSize: '1rem', color: '#fff', marginTop: '0.2rem' }}>
-                            {team1Info}
-                          </div>
-                        )}
+                  <div key={match.id} className="glass-panel hover-lift" style={{ 
+                      padding: 0, 
+                      position: 'relative', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      minWidth: '340px', 
+                      borderTop: `4px solid ${getStatusColor(match.status)}`,
+                      background: 'linear-gradient(145deg, rgba(30,41,59,0.7) 0%, rgba(15,23,42,0.9) 100%)',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                      overflow: 'hidden'
+                   }}>
+                    <div style={{ padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <Clock size={14} color="var(--primary)" /> {new Date(match.matchDate).toLocaleDateString()}
                       </div>
-                      <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-secondary)', padding: '0 1rem' }}>VS</div>
-                      <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                        <img src={team2.teamLogo || getRandomLogo(team2.id || 0)} alt={team2.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
-                        <h3 className="gradient-text" style={{ fontSize: '1.1rem' }}>{team2.teamName}</h3>
-                        {(match.status === 'COMPLETED' || match.status === 'ONGOING') && (
-                          <div style={{ fontWeight: 'bold', fontSize: '1rem', color: '#fff', marginTop: '0.2rem' }}>
-                            {team2Info}
-                          </div>
-                        )}
+                      <div style={{
+                        background: `${getStatusColor(match.status)}15`, color: getStatusColor(match.status),
+                        padding: '4px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase'
+                      }}>
+                        {match.status}
                       </div>
                     </div>
 
-                    {match.status === 'COMPLETED' && match.result && (
-                      <div style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.5rem', borderRadius: '8px', marginBottom: '1rem', color: '#10b981', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                        {match.result}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '2rem 1.5rem', position: 'relative' }}>
+                      <div style={{ textAlign: 'center', width: '40%', zIndex: 2 }}>
+                        <div style={{ position: 'relative', display: 'inline-block' }}>
+                          <div style={{ position: 'absolute', inset: 0, background: 'var(--primary)', filter: 'blur(20px)', opacity: 0.2, borderRadius: '50%' }}></div>
+                          <img src={team1.teamLogo || getRandomLogo(team1.id || 0)} alt={team1.teamName} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', position: 'relative', border: '2px solid rgba(255,255,255,0.1)' }} />
+                        </div>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '0.75rem', marginBottom: '0.25rem' }}>{team1.teamName}</h3>
+                        {(match.status === 'COMPLETED' || match.status === 'ONGOING') && team1Info && (
+                          <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>{team1Info}</div>
+                        )}
                       </div>
-                    )}
+                      
+                      <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 1 }}>
+                        <div style={{ width: '40px', height: '40px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-secondary)', backdropFilter: 'blur(4px)', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                          VS
+                        </div>
+                      </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: 'auto' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        <Clock size={16} /> <span>{new Date(match.matchDate).toLocaleDateString()}</span>
+                      <div style={{ textAlign: 'center', width: '40%', zIndex: 2 }}>
+                        <div style={{ position: 'relative', display: 'inline-block' }}>
+                           <div style={{ position: 'absolute', inset: 0, background: 'var(--primary)', filter: 'blur(20px)', opacity: 0.2, borderRadius: '50%' }}></div>
+                           <img src={team2.teamLogo || getRandomLogo(team2.id || 0)} alt={team2.teamName} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', position: 'relative', border: '2px solid rgba(255,255,255,0.1)' }} />
+                        </div>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '0.75rem', marginBottom: '0.25rem' }}>{team2.teamName}</h3>
+                        {(match.status === 'COMPLETED' || match.status === 'ONGOING') && team2Info && (
+                           <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>{team2Info}</div>
+                        )}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        <MapPin size={16} /> <span>{match.overs} Overs Match</span>
-                      </div>
+                    </div>
+
+                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.03)', textAlign: 'center' }}>
+                      {match.status === 'COMPLETED' && match.result ? (
+                        <div style={{ color: '#34d399', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.5px' }}>{match.result}</div>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 500 }}>
+                          <MapPin size={12} /> {match.overs} Overs Match • {match.matchType === 'TOURNAMENT' ? 'League' : 'Practice'}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -284,14 +360,32 @@ const Dashboard: React.FC = () => {
 
             <AutoScrollContainer className="horizontal-scroller">
               {teams.map(team => (
-                <div key={team.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer' }} onClick={() => navigate(`/teams/${team.id}`)}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                    <img src={team.teamLogo || getRandomLogo(team.id || 0)} alt={team.teamName} style={{ width: 56, height: 56, borderRadius: '12px', objectFit: 'cover' }} />
-                    <div>
-                      <h3 className="gradient-text" style={{ fontSize: '1.3rem', marginBottom: '0.25rem' }}>{team.teamName}</h3>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        <Shield size={14} color="var(--primary)" /> Coach: {team.coachName}
-                      </div>
+                <div key={team.id} className="glass-panel hover-lift" style={{ 
+                    padding: '1.5rem', 
+                    cursor: 'pointer', 
+                    position: 'relative', 
+                    overflow: 'hidden', 
+                    minWidth: '280px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1.25rem',
+                    background: 'linear-gradient(135deg, rgba(30,41,59,0.5) 0%, rgba(15,23,42,0.8) 100%)',
+                    border: '1px solid rgba(255,255,255,0.08)'
+                 }} onClick={() => navigate(`/teams/${team.id}`)}>
+                  <div style={{ position: 'absolute', right: '-20px', bottom: '-20px', opacity: 0.05, pointerEvents: 'none', transform: 'rotate(-15deg)' }}>
+                     <img src={team.teamLogo || getRandomLogo(team.id || 0)} alt="watermark" style={{ width: '150px', height: '150px', objectFit: 'cover' }} />
+                  </div>
+                  
+                  <div style={{ position: 'relative' }}>
+                    <div style={{ width: '68px', height: '68px', borderRadius: '16px', padding: '3px', background: 'linear-gradient(135deg, var(--primary), #3b82f6)', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
+                      <img src={team.teamLogo || getRandomLogo(team.id || 0)} alt={team.teamName} style={{ width: '100%', height: '100%', borderRadius: '14px', objectFit: 'cover', background: 'var(--bg-color)' }} />
+                    </div>
+                  </div>
+
+                  <div style={{ zIndex: 1, paddingRight: '1rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.4rem 0', color: '#fff', letterSpacing: '-0.01em' }}>{team.teamName}</h3>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 600 }}>
+                      <Shield size={12} color="var(--primary)" /> {team.coachName}
                     </div>
                   </div>
                 </div>
@@ -313,11 +407,34 @@ const Dashboard: React.FC = () => {
 
             <AutoScrollContainer className="horizontal-scroller">
               {players.map(player => (
-                <div key={player.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem' }} onClick={() => navigate(`/players/${player.id}`)}>
-                  <img src={player.playerImage || getRandomAvatar(player.id || 0)} alt={player.name} style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', objectFit: 'cover' }} />
-                  <div>
-                    <h3 style={{ fontSize: '1.1rem', margin: '0 0 0.25rem 0' }}>{player.name}</h3>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '0.25rem' }}>{player.role.replace('_', ' ')}</div>
+                <div key={player.id} className="hover-lift" style={{ 
+                    cursor: 'pointer', 
+                    padding: '2.5rem 1.5rem 1.5rem 1.5rem', 
+                    position: 'relative', 
+                    marginTop: '2.5rem', 
+                    minWidth: '220px',
+                    borderRadius: '20px',
+                    background: 'linear-gradient(180deg, rgba(30,41,59,0.4) 0%, rgba(15,23,42,0.8) 100%)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+                 }} onClick={() => navigate(`/players/${player.id}`)}>
+                  
+                  <div style={{ position: 'absolute', top: '-40px', left: '50%', transform: 'translateX(-50%)' }}>
+                    <div style={{ position: 'absolute', inset: '-5px', background: `${getRoleColor(player.role)}`, filter: 'blur(15px)', opacity: 0.4, borderRadius: '50%' }}></div>
+                    <img src={player.playerImage || getRandomAvatar(player.id || 0)} alt={player.name} style={{ width: '84px', height: '84px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #1e293b', background: '#1e293b', position: 'relative', zIndex: 2, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }} />
+                  </div>
+
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.4rem', marginTop: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>
+                    {player.name}
+                  </h3>
+                  
+                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: getRoleColor(player.role), background: `${getRoleColor(player.role)}15`, padding: '4px 12px', borderRadius: '20px', border: `1px solid ${getRoleColor(player.role)}30` }}>
+                     {player.role.replace('_', ' ')}
                   </div>
                 </div>
               ))}

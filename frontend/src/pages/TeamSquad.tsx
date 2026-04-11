@@ -111,71 +111,135 @@ const TeamSquad: React.FC = () => {
   const captain = players.find(p => p.isCaptain);
   const captainDisplay = captain ? captain.name : 'Not Assigned';
 
+  const getLogo = (id?: number) => `https://api.dicebear.com/7.x/identicon/svg?seed=Team${id || 0}&backgroundColor=1e293b`;
+  const teamBgImage = team.teamLogo || getLogo(team.id);
+
   return (
     <div className="page-container">
-      <div className="hero-banner animate-slide-up">
-        <div className="hero-overlay"></div>
-        <div className="hero-content">
-          <div>
-            <button className="btn btn-secondary hover-lift" onClick={() => navigate('/teams')} style={{ marginBottom: '1rem', padding: '0.5rem', background: 'rgba(255,255,255,0.1)' }}>
-              <ArrowLeft size={16} style={{marginRight: '0.5rem'}}/> Back to Teams
-            </button>
-            <h1 className="page-title gradient-text" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{team.teamName} Squad</h1>
-            <p className="page-subtitle" style={{ color: '#cbd5e1' }}>Coach: {team.coachName} | Captain: {captainDisplay}</p>
+      <div className="hero-banner animate-slide-up" style={{ 
+          borderRadius: '24px', 
+          overflow: 'hidden', 
+          marginBottom: '2rem', 
+          position: 'relative',
+          backgroundImage: `url('/teams-bg.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+          border: '1px solid rgba(255,255,255,0.05)'
+        }}>
+        <div className="hero-overlay" style={{ 
+           position: 'absolute', inset: 0, 
+           background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.95) 100%)',
+           backdropFilter: 'blur(4px)' 
+        }}></div>
+
+        {/* Epic Team Watermark */}
+        <div style={{ position: 'absolute', right: '-5%', top: '-20%', opacity: 0.15, pointerEvents: 'none', zIndex: 1, transform: 'rotate(-15deg)' }}>
+           <img src={teamBgImage} alt="watermark" style={{ width: '450px', height: '450px', objectFit: 'contain', filter: 'grayscale(100%) brightness(150%)' }} />
+        </div>
+        <div className="hero-content" style={{ padding: '3rem 2rem', position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+          
+          <div style={{ width: '120px', height: '120px', borderRadius: '24px', padding: '6px', background: 'linear-gradient(135deg, var(--primary), #3b82f6)', boxShadow: '0 15px 35px rgba(0,0,0,0.5)', flexShrink: 0 }}>
+             <img src={teamBgImage} alt={team.teamName} style={{ width: '100%', height: '100%', borderRadius: '18px', objectFit: 'cover', background: 'var(--bg-color)' }} />
           </div>
-          {isAuthenticated && (
-            <button className="btn btn-primary hover-lift" onClick={openManageModal}>
-              <Users size={18} /> Manage Squad
+
+          <div style={{ flex: 1, minWidth: '250px' }}>
+            <button className="btn btn-secondary hover-lift" onClick={() => navigate('/teams')} style={{ marginBottom: '1rem', padding: '0.4rem 1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', borderRadius: '20px' }}>
+              <ArrowLeft size={14} /> Back to Teams
             </button>
+            <h1 className="page-title gradient-text" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '0.5rem', letterSpacing: '-0.02em', textShadow: '0 4px 15px rgba(0,0,0,0.5)', lineHeight: 1.1 }}>{team.teamName}</h1>
+            <div style={{ display: 'flex', gap: '1rem', color: '#cbd5e1', fontSize: '0.9rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}><Shield size={14} color="var(--primary)" /> Coach: <strong style={{color: '#fff'}}>{team.coachName}</strong></span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}><User size={14} color="var(--primary)" /> Captain: <strong style={{color: '#fff'}}>{captainDisplay}</strong></span>
+            </div>
+          </div>
+          
+          {isAuthenticated && (
+            <div style={{ alignSelf: 'flex-start' }}>
+              <button className="btn btn-primary hover-lift" onClick={openManageModal} style={{ padding: '0.8rem 1.5rem', fontSize: '1rem', fontWeight: '800', boxShadow: '0 10px 20px rgba(16, 185, 129, 0.4)', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Users size={18} /> Manage Squad
+              </button>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="dashboard-grid animate-slide-up delay-100" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
+      <div className="animate-slide-up delay-100" style={{ textAlign: 'center', margin: '3rem 0 2rem 0' }}>
+        <h2 className="gradient-text" style={{ fontSize: '2.5rem', marginBottom: '0.5rem', letterSpacing: '-0.02em', fontWeight: 900 }}>Let's Meet the Stars</h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>The elite athletes fighting for {team.teamName}'s ultimate glory.</p>
+      </div>
+
+      <div className="dashboard-grid animate-slide-up delay-100" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
         {players.length === 0 ? (
-          <div className="glass-panel" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem' }}>
-            <User size={48} color="var(--text-secondary)" style={{marginBottom: '1rem', opacity: 0.5}}/>
+          <div className="glass-panel" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem' }}>
+            <User size={40} color="var(--text-secondary)" style={{marginBottom: '0.5rem', opacity: 0.5}}/>
             <h3 style={{color: 'var(--text-secondary)'}}>No players assigned yet.</h3>
           </div>
         ) : (
-          players.map((player, idx) => (
-            <div key={player.id} className={`glass-panel hover-lift delay-${(idx % 3 + 1) * 100}`} 
-                 style={{ position: 'relative', overflow: 'hidden', padding: '1.25rem', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
-                 onClick={() => navigate(`/players/${player.id}`)}>
+          [...players].sort((a, b) => {
+            if (a.isCaptain && !b.isCaptain) return -1;
+            if (!a.isCaptain && b.isCaptain) return 1;
+            if (a.isViceCaptain && !b.isViceCaptain) return -1;
+            if (!a.isViceCaptain && b.isViceCaptain) return 1;
+            return a.name.localeCompare(b.name);
+          }).map((player, idx) => (
+            <div 
+              key={player.id} 
+              className={`player-card role-${player.role.toLowerCase()} animate-card-entry`} 
+              style={{ animationDelay: `${idx * 100}ms`, padding: '1rem 0.5rem' }}
+              onClick={() => navigate(`/players/${player.id}`)}
+            >
+              {player.isCaptain && <div className="captain-badge">CAPTAIN</div>}
+              {player.isViceCaptain && <div className="vc-badge">VC</div>}
+              
+              {/* Decorative Role Circle */}
+              <div style={{ 
+                position: 'absolute', top: '8px', left: '8px', 
+                width: '10px', height: '10px', borderRadius: '50%', 
+                background: getRoleColor(player.role),
+                boxShadow: `0 0 8px ${getRoleColor(player.role)}`,
+                zIndex: 5
+              }}></div>
+
               {isAuthenticated && (
-                <div style={{ position: 'absolute', top: 0, right: 0, padding: '0.75rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
-                   <button className="btn btn-secondary" style={{padding: '0.4rem', background: '#ef444420', color: '#ef4444', borderRadius: '50%'}} onClick={(e) => { e.stopPropagation(); player.id && handleRemovePlayer(player.id); }}>
-                     <Trash2 size={14} />
+                <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', zIndex: 10 }}>
+                   <button 
+                     className="btn btn-secondary" 
+                     style={{ padding: '0.3rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '50%', border: '1px solid rgba(239, 68, 68, 0.2)' }} 
+                     onClick={(e) => { e.stopPropagation(); player.id && handleRemovePlayer(player.id); }}
+                   >
+                     <Trash2 size={12} />
                    </button>
                 </div>
               )}
               
-              <div style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'var(--background)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: `1px solid ${getRoleColor(player.role)}`, color: getRoleColor(player.role), zIndex: 5, fontSize: '0.9rem' }}>
-                {player.jerseyNumber || '-'}
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', marginTop: '1rem' }}>
+              <div className="player-avatar-wrapper" style={{ marginBottom: '0.5rem' }}>
                 <img 
                   src={player.playerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id || 0}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf`} 
                   alt={player.name} 
+                  className="player-avatar"
+                  style={{ width: '70px', height: '70px' }}
                   onClick={(e) => { e.stopPropagation(); setViewImage(player.playerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.id || 0}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf`); }}
-                  style={{ width: '84px', height: '84px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', objectFit: 'cover', cursor: 'zoom-in', transition: 'transform 0.2s', border: `2px solid ${getRoleColor(player.role)}`, boxShadow: '0 8px 16px rgba(0,0,0,0.2)' }} 
                 />
-                <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                  <h3 style={{ fontSize: '1.25rem', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '6px' }}>
-                    {player.name}
-                    {player.isCaptain && <span style={{color: '#f59e0b', fontSize: '0.75rem', background: '#f59e0b20', padding: '2px 6px', borderRadius: '12px'}}>(C)</span>}
-                    {player.isViceCaptain && <span style={{color: '#e2e8f0', fontSize: '0.75rem', background: '#ffffff20', padding: '2px 6px', borderRadius: '12px'}}>(VC)</span>}
-                  </h3>
-                  <div style={{ 
-                    fontSize: '0.8rem', color: getRoleColor(player.role), 
-                    background: `${getRoleColor(player.role)}15`, padding: '4px 12px', 
-                    borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '6px',
-                    marginTop: '10px', fontWeight: 600, letterSpacing: '0.5px'
-                  }}>
-                    <Shield size={14} /> {player.role.replace('_', ' ')}
-                  </div>
+                <div className="jersey-number" style={{ width: '24px', height: '24px', fontSize: '0.7rem' }}>{player.jerseyNumber || '-'}</div>
+              </div>
+
+              <div className="player-info" style={{ marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1.05rem', marginBottom: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{player.name}</h3>
+                <div className="role-badge" style={{ padding: '4px 10px', fontSize: '0.65rem' }}>
+                  <Shield size={12} /> {player.role.replace('_', ' ')}
                 </div>
+              </div>
+              
+              <div style={{ marginTop: '0.75rem', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.4rem 0.25rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Batting</div>
+                    <div style={{ fontWeight: '700', fontSize: '0.7rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#fff' }}>{player.battingStyle || 'N/A'}</div>
+                 </div>
+                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.4rem 0.25rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Bowling</div>
+                    <div style={{ fontWeight: '700', fontSize: '0.7rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#fff' }}>{player.bowlingStyle || 'N/A'}</div>
+                 </div>
               </div>
             </div>
           ))

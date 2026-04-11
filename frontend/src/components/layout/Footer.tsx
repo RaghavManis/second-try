@@ -5,6 +5,13 @@ import toast from 'react-hot-toast';
 const Footer: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [contactSubject, setContactSubject] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    mobile: '',
+    email: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const openContactModal = (e: React.MouseEvent, subject: string) => {
     e.preventDefault();
@@ -12,11 +19,42 @@ const Footer: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // No backend required per instructions, just UI
-    toast.success('Your message has been sent successfully!');
-    setIsModalOpen(false);
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || 'Message sent successfully!');
+        setIsModalOpen(false);
+        setFormData({ name: '', mobile: '', email: '', message: '' });
+      } else {
+        toast.error(data.message || 'Failed to send message');
+      }
+    } catch (err) {
+      toast.error('Connection error. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -40,11 +78,11 @@ const Footer: React.FC = () => {
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.8rem' }}>
                 <MapPin size={20} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
-                <span>Village Cricket Ground,<br/>District Center, State - 123456</span>
+                <span>Siddha Cricket Ground, Near Kali Mata Mandir,<br/>Nandaur Bazar, Madhuban Mau - 221603, Uttar Pradesh</span>
               </li>
               <li style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                 <Mail size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
-                <a href="mailto:contact@crickettournament.com" style={{ color: 'inherit', textDecoration: 'none' }}>contact@crickettournament.com</a>
+                <a href="mailto:mnsyd24@gmail.com" style={{ color: 'inherit', textDecoration: 'none' }}>mnsyd24@gmail.com</a>
               </li>
             </ul>
           </div>
@@ -70,7 +108,7 @@ const Footer: React.FC = () => {
                 <Instagram size={22} />
               </a>
               {/* REPLACE '#' WITH YOUR LINKEDIN LINK BELOW (KEPT LAST AS REQUESTED) */}
-              <a href="#" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s' }} className="social-icon hover-lift">
+              <a href="https://www.linkedin.com/in/manish024/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s' }} className="social-icon hover-lift">
                 <Linkedin size={22} />
               </a>
             </div>
@@ -78,7 +116,7 @@ const Footer: React.FC = () => {
         </div>
         
         <div style={{ textAlign: 'center', marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-          &copy; {new Date().getFullYear()} Cricket Tournament. All Rights Reserved.
+          &copy; {new Date().getFullYear()} SPL. All Rights Reserved.
         </div>
         
         <style>{`
@@ -107,15 +145,39 @@ const Footer: React.FC = () => {
             <form onSubmit={handleContactSubmit}>
               <div className="form-group">
                 <label className="form-label">Name</label>
-                <input type="text" className="form-input" required placeholder="Enter your full name" />
+                <input 
+                  type="text" 
+                  name="name"
+                  className="form-input" 
+                  required 
+                  placeholder="Enter your full name" 
+                  value={formData.name}
+                  onChange={handleInputChange}
+                />
               </div>
               <div className="form-group">
                 <label className="form-label">Mobile Number</label>
-                <input type="tel" className="form-input" required placeholder="Enter mobile number" />
+                <input 
+                  type="tel" 
+                  name="mobile"
+                  className="form-input" 
+                  required 
+                  placeholder="Enter mobile number" 
+                  value={formData.mobile}
+                  onChange={handleInputChange}
+                />
               </div>
               <div className="form-group">
                 <label className="form-label">Email</label>
-                <input type="email" className="form-input" required placeholder="Enter your email address" />
+                <input 
+                  type="email" 
+                  name="email"
+                  className="form-input" 
+                  required 
+                  placeholder="Enter your email address" 
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
               </div>
               <div className="form-group">
                 <label className="form-label">Subject</label>
@@ -123,7 +185,16 @@ const Footer: React.FC = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Message / Description</label>
-                <textarea className="form-input" required placeholder="Type your message here..." rows={4} style={{ resize: 'vertical' }}></textarea>
+                <textarea 
+                  name="message"
+                  className="form-input" 
+                  required 
+                  placeholder="Type your message here..." 
+                  rows={4} 
+                  style={{ resize: 'vertical' }}
+                  value={formData.message}
+                  onChange={handleInputChange}
+                ></textarea>
               </div>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>Send Message</button>
             </form>

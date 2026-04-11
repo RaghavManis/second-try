@@ -47,25 +47,44 @@ const AdminScoringPanel: React.FC = () => {
     }
   }, [matchId]);
 
-  const loadMatchData = async (id: number) => {
+  const loadMatchData = async (id: number, force: boolean = false) => {
     try {
-      const matchRes = await MatchService.getMatchById(id);
-      setMatch(matchRes.data);
-      if (matchRes.data.status === 'ONGOING') {
-        const detailsRes = await MatchScoringService.getLiveDetails(id);
-        setDetails(detailsRes.data);
-        const cardRes = await MatchScoringService.getCompleteScorecard(id);
-        setBattingScorecard(cardRes.data.batting.filter(c => c.innings === detailsRes.data.match.currentInnings));
-      }
+      const detailsRes = await MatchScoringService.getLiveDetails(id, force);
+      const detailsData = detailsRes.data;
+      applyDetailsUpdate(detailsData);
       
-      if (matchRes.data.teamA.id && matchRes.data.teamB.id) {
-        const squadARes = await PlayerService.getPlayersByTeam(matchRes.data.teamA.id);
-        const squadBRes = await PlayerService.getPlayersByTeam(matchRes.data.teamB.id);
-        setTeamASquad(squadARes.data);
-        setTeamBSquad(squadBRes.data);
+      // Load full squads for playing XI selection (only if needed/initial load)
+      if (detailsData.match.teamA.id && detailsData.match.teamB.id) {
+        const [squadA, squadB] = await Promise.all([
+          PlayerService.getPlayersByTeam(detailsData.match.teamA.id),
+          PlayerService.getPlayersByTeam(detailsData.match.teamB.id)
+        ]);
+        setTeamASquad(squadA.data);
+        setTeamBSquad(squadB.data);
       }
     } catch (err) {
       toast.error('Failed to load match data');
+    }
+  };
+
+  const applyDetailsUpdate = async (detailsData: LiveMatchDetailsDto) => {
+    if (!detailsData || !detailsData.match) {
+      console.warn('Received incomplete match details, falling back to full refresh...');
+      if (matchId) loadMatchData(parseInt(matchId), true);
+      return;
+    }
+
+    setDetails(detailsData);
+    setMatch(detailsData.match);
+    
+    // Background fetch for the full scorecard if ongoing
+    if (detailsData.match.status === 'ONGOING') {
+      try {
+        const cardRes = await MatchScoringService.getCompleteScorecard(detailsData.match.id!);
+        setBattingScorecard(cardRes.data.batting.filter(c => c.innings === detailsData.match.currentInnings));
+      } catch (err) {
+        console.error('Failed to update background scorecard', err);
+      }
     }
   };
 
@@ -83,7 +102,7 @@ const AdminScoringPanel: React.FC = () => {
 
     try {
       setIsSubmitting(true);
-      await MatchScoringService.startLiveScoring(parseInt(matchId), {
+      const res = await MatchScoringService.startLiveScoring(parseInt(matchId), {
         tossWinnerId: Number(tossWinnerId),
         tossDecision,
         strikerId: Number(strikerId),
@@ -94,7 +113,7 @@ const AdminScoringPanel: React.FC = () => {
         playingXiTeamBIds: playingXiTeamB
       });
       toast.success('Match Started!');
-      loadMatchData(parseInt(matchId));
+      await applyDetailsUpdate(res.data);
     } catch (err) {
       toast.error('Failed to start match');
     } finally {
@@ -116,7 +135,7 @@ const AdminScoringPanel: React.FC = () => {
     
     try {
       setIsSubmitting(true);
-      await MatchScoringService.recordBall(parseInt(matchId), {
+      const res = await MatchScoringService.recordBall(parseInt(matchId), {
         runs,
         extraType: extraType !== '' ? extraType : undefined,
         isWicket,
@@ -131,7 +150,7 @@ const AdminScoringPanel: React.FC = () => {
       setRuns(0); setExtraType(''); setIsWicket(false);
       setWicketType('BOWLED'); setPlayerOutId(''); setFielderId(''); setNextBatsmanId(''); setNextBowlerId('');
       
-      loadMatchData(parseInt(matchId));
+      await applyDetailsUpdate(res.data);
     } catch (err) {
       toast.error('Failed to record ball');
     } finally {
@@ -144,10 +163,10 @@ const AdminScoringPanel: React.FC = () => {
     if (!matchId || nextBowlerId === '') return;
     try {
       setIsSubmitting(true);
-      await MatchScoringService.updateBowler(parseInt(matchId), Number(nextBowlerId));
+      const res = await MatchScoringService.updateBowler(parseInt(matchId), Number(nextBowlerId));
       toast.success('New Bowler Confirmed');
       setNextBowlerId('');
-      loadMatchData(parseInt(matchId));
+      await applyDetailsUpdate(res.data);
     } catch (err) {
       toast.error('Failed to update bowler');
     } finally {
@@ -163,11 +182,11 @@ const AdminScoringPanel: React.FC = () => {
     if (!matchId || forceBowlerId === '') return;
     try {
       setIsSubmitting(true);
-      await MatchScoringService.updateBowler(parseInt(matchId), Number(forceBowlerId));
+      const res = await MatchScoringService.updateBowler(parseInt(matchId), Number(forceBowlerId));
       toast.success('Bowler changed mid-over successfully!');
       setForceBowlerId('');
       setShowForceBowler(false);
-      loadMatchData(parseInt(matchId));
+      await applyDetailsUpdate(res.data);
     } catch (err) {
       toast.error('Failed to change bowler');
     } finally {
@@ -183,9 +202,9 @@ const AdminScoringPanel: React.FC = () => {
     
     try {
       setIsSubmitting(true);
-      await MatchScoringService.undoLastBall(parseInt(matchId));
+      const res = await MatchScoringService.undoLastBall(parseInt(matchId));
       toast.success('Last ball undone successfully');
-      loadMatchData(parseInt(matchId));
+      await applyDetailsUpdate(res.data);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to undo ball');
     } finally {
@@ -200,9 +219,9 @@ const AdminScoringPanel: React.FC = () => {
     if (!confirmSwap) return;
     try {
       setIsSubmitting(true);
-      await MatchScoringService.swapBatsmen(parseInt(matchId));
+      const res = await MatchScoringService.swapBatsmen(parseInt(matchId));
       toast.success('Batsmen swapped successfully');
-      loadMatchData(parseInt(matchId));
+      await applyDetailsUpdate(res.data);
     } catch (err) {
       toast.error('Failed to swap batsmen');
     } finally {
@@ -225,7 +244,7 @@ const AdminScoringPanel: React.FC = () => {
     
     try {
       setIsSubmitting(true);
-      await MatchScoringService.endInnings(parseInt(matchId), {
+      const res = await MatchScoringService.endInnings(parseInt(matchId), {
         strikerId: Number(strikerId),
         nonStrikerId: Number(nonStrikerId),
         bowlerId: Number(bowlerId),
@@ -233,7 +252,7 @@ const AdminScoringPanel: React.FC = () => {
       });
       toast.success('Innings ended. Swapped teams!');
       setStrikerId(''); setNonStrikerId(''); setBowlerId('');
-      loadMatchData(parseInt(matchId));
+      await applyDetailsUpdate(res.data);
     } catch (err) {
       toast.error('Failed to end innings');
     } finally {
@@ -416,8 +435,8 @@ const AdminScoringPanel: React.FC = () => {
   return (
     <div className="page-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
       
-      {/* LIVE MINI BAR */}
-      <div className="glass-panel sticky-top" style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+      {/* LIVE MINI BAR - NOW NON-STICKY */}
+      <div className="glass-panel" style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
         <div>
           <h2 style={{ margin: 0 }}>{details.match.battingTeam?.teamName} <span style={{ color: 'var(--primary)' }}>{details.currentScore} - {details.currentWickets}</span></h2>
           <p style={{ margin: 0, color: '#94a3b8' }}>Overs: {details.currentOvers} | CRR: {details.currentRunRate.toFixed(2)}</p>
@@ -607,7 +626,7 @@ const AdminScoringPanel: React.FC = () => {
             </div>
           ) : (
           <>
-            <div className="sticky-bottom-action-bar">
+            <div className="action-bar-panel" style={{ background: 'rgba(15, 23, 42, 0.4)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '1.5rem', marginBottom: '2rem' }}>
               {/* RUNS */}
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                 {[0, 1, 2, 3, 4, 5, 6].map(r => (

@@ -38,10 +38,11 @@ public class MatchScoringService {
     private PlayerMatchStatsRepository playerMatchStatsRepository;
 
     @Transactional
-    public Match startLiveScoring(Long matchId, LiveMatchSetupDto setup) {
+    public LiveMatchDetailsDto startLiveScoring(Long matchId, LiveMatchSetupDto setup) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         match.setStatus(Match.MatchStatus.ONGOING);
+        liveDetailsCache.invalidate(matchId);
         match.setTossWinner(teamRepository.findById(setup.getTossWinnerId()).orElse(null));
         match.setTossDecision(setup.getTossDecision());
         
@@ -85,7 +86,8 @@ public class MatchScoringService {
             .orElseGet(() -> createBowlingCard(savedMatch, savedMatch.getCurrentBowler()));
         scorecardBowlingRepository.save(bowlerCard);
         
-        return savedMatch;
+        liveDetailsCache.invalidate(matchId);
+        return getLiveDetails(matchId, true);
     }
 
     private ScorecardBatting createBattingCard(Match match, Player player) {
@@ -111,7 +113,7 @@ public class MatchScoringService {
     }
 
     @Transactional
-    public Match recordBall(Long matchId, BallSubmissionDto ballDto) {
+    public LiveMatchDetailsDto recordBall(Long matchId, BallSubmissionDto ballDto) {
         if (ballDto.getRuns() != null && ballDto.getRuns() < 0) {
             throw new IllegalArgumentException("Runs cannot be negative");
         }
@@ -119,7 +121,11 @@ public class MatchScoringService {
         if (match.getStatus() != Match.MatchStatus.ONGOING) throw new IllegalStateException("Match is not ongoing");
         
         logger.info("[AUDIT] Match {} - Delivery: runs={}, extra={}, wicket={}", matchId, ballDto.getRuns(), ballDto.getExtraType(), ballDto.getIsWicket());
-        return processBallMath(matchId, match, ballDto, true);
+        Match updatedMatch = processBallMath(matchId, match, ballDto, true);
+        matchRepository.flush();
+        ballEventRepository.flush();
+        liveDetailsCache.invalidate(matchId);
+        return getLiveDetails(matchId, true);
     }
 
     private Match processBallMath(Long matchId, Match match, BallSubmissionDto ballDto, boolean saveEvent) {
@@ -358,15 +364,16 @@ public class MatchScoringService {
     }
 
     @Transactional
-    public Match updateBowler(Long matchId, Long newBowlerId) {
+    public LiveMatchDetailsDto updateBowler(Long matchId, Long newBowlerId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         match.setCurrentBowler(playerRepository.findById(newBowlerId).orElseThrow(() -> new RuntimeException("Player not found")));
-        return matchRepository.save(match);
+        liveDetailsCache.invalidate(matchId);
+        return getLiveDetails(matchId, true);
     }
     
     @Transactional
-    public Match swapBatsmen(Long matchId) {
+    public LiveMatchDetailsDto swapBatsmen(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         Player temp = match.getCurrentStriker();
@@ -374,11 +381,12 @@ public class MatchScoringService {
             match.setCurrentStriker(match.getCurrentNonStriker());
             match.setCurrentNonStriker(temp);
         }
-        return matchRepository.save(match);
+        liveDetailsCache.invalidate(matchId);
+        return getLiveDetails(matchId, true);
     }
     
     @Transactional
-    public Match undoLastBall(Long matchId) {
+    public LiveMatchDetailsDto undoLastBall(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
         if (match.getStatus() != Match.MatchStatus.ONGOING) throw new IllegalStateException("Match is not ongoing");
         
@@ -468,12 +476,15 @@ public class MatchScoringService {
              this.processBallMath(matchId, match, dto, false);
         }
 
-        return matchRepository.findById(matchId).orElseThrow();
+        matchRepository.flush();
+        ballEventRepository.flush();
+        liveDetailsCache.invalidate(matchId);
+        return getLiveDetails(matchId, true);
     }
 
     
     @Transactional
-    public Match endInnings(Long matchId, Long newStrikerId, Long newNonStrikerId, Long newBowlerId, Integer targetScore) {
+    public LiveMatchDetailsDto endInnings(Long matchId, Long newStrikerId, Long newNonStrikerId, Long newBowlerId, Integer targetScore) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         logger.info("[AUDIT] Match {} - Innings {} Ended. Setting up next innings", matchId, match.getCurrentInnings());
@@ -501,7 +512,8 @@ public class MatchScoringService {
             if (match.getCurrentNonStriker() != null) scorecardBattingRepository.save(createBattingCard(match, match.getCurrentNonStriker()));
             if (match.getCurrentBowler() != null) scorecardBowlingRepository.save(createBowlingCard(match, match.getCurrentBowler()));
             
-            return match;
+            liveDetailsCache.invalidate(matchId);
+            return getLiveDetails(matchId, true);
         } else if (match.getCurrentInnings() == 2 && match.getCurrentStriker() == null) {
             match.setCurrentStriker(playerRepository.findById(newStrikerId).orElse(null));
             match.setCurrentNonStriker(playerRepository.findById(newNonStrikerId).orElse(null));
@@ -512,18 +524,22 @@ public class MatchScoringService {
             if (match.getCurrentNonStriker() != null) scorecardBattingRepository.save(createBattingCard(match, match.getCurrentNonStriker()));
             if (match.getCurrentBowler() != null) scorecardBowlingRepository.save(createBowlingCard(match, match.getCurrentBowler()));
             
-            return match;
+            liveDetailsCache.invalidate(matchId);
+            return getLiveDetails(matchId, true);
         }
-        return match;
+        return getLiveDetails(matchId, true);
     }
 
     private final com.github.benmanes.caffeine.cache.Cache<Long, LiveMatchDetailsDto> liveDetailsCache = 
         com.github.benmanes.caffeine.cache.Caffeine.newBuilder()
-            .expireAfterWrite(3, java.util.concurrent.TimeUnit.SECONDS)
+            .expireAfterWrite(1, java.util.concurrent.TimeUnit.SECONDS)
             .maximumSize(100)
             .build();
 
-    public LiveMatchDetailsDto getLiveDetails(Long matchId) {
+    public LiveMatchDetailsDto getLiveDetails(Long matchId, boolean force) {
+        if (force) {
+            return fetchLiveDetails(matchId);
+        }
         return liveDetailsCache.get(matchId, k -> fetchLiveDetails(k));
     }
 
@@ -582,6 +598,7 @@ public class MatchScoringService {
                 dto.setBowlerRuns(s.getRuns());
                 dto.setBowlerWickets(s.getWickets());
                 dto.setBowlerOvers(s.getOvers());
+                dto.setBowlerEconomy(s.getEconomyRate());
             });
         }
         
@@ -593,7 +610,7 @@ public class MatchScoringService {
             dto.setNonStrikerRuns(0); dto.setNonStrikerBalls(0);
         }
         if (match.getCurrentBowler() != null && dto.getBowlerRuns() == null) {
-            dto.setBowlerRuns(0); dto.setBowlerWickets(0); dto.setBowlerOvers(0.0);
+            dto.setBowlerRuns(0); dto.setBowlerWickets(0); dto.setBowlerOvers(0.0); dto.setBowlerEconomy(0.0);
         }
         
         // Rule 16: Last six balls display
@@ -645,7 +662,7 @@ public class MatchScoringService {
     }
 
     @Transactional
-    public Match completeMatch(Long matchId, Long winnerTeamId, Long manOfTheMatchId) {
+    public LiveMatchDetailsDto completeMatch(Long matchId, Long winnerTeamId, Long manOfTheMatchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Match is already completed");
         
@@ -709,8 +726,8 @@ public class MatchScoringService {
         });
         
         playerMatchStatsRepository.saveAll(statsMap.values());
-
-        return matchRepository.save(match);
+        liveDetailsCache.invalidate(matchId);
+        return getLiveDetails(matchId, true);
     }
     
     @Transactional(readOnly = true)

@@ -30,6 +30,7 @@ public class LiveMatchDetailsDto {
     private Double bowlerOvers;
     private Integer bowlerRuns;
     private Integer bowlerWickets;
+    private Double bowlerEconomy;
 
     private List<String> recentBalls; 
     private List<String> thisOverBalls; 
@@ -73,6 +74,8 @@ public class LiveMatchDetailsDto {
     public void setBowlerRuns(Integer bowlerRuns) { this.bowlerRuns = bowlerRuns; }
     public Integer getBowlerWickets() { return bowlerWickets; }
     public void setBowlerWickets(Integer bowlerWickets) { this.bowlerWickets = bowlerWickets; }
+    public Double getBowlerEconomy() { return bowlerEconomy; }
+    public void setBowlerEconomy(Double bowlerEconomy) { this.bowlerEconomy = bowlerEconomy; }
     public List<String> getRecentBalls() { return recentBalls; }
     public void setRecentBalls(List<String> recentBalls) { this.recentBalls = recentBalls; }
     public List<String> getThisOverBalls() { return thisOverBalls; }

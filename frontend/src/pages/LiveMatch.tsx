@@ -186,7 +186,6 @@ const LiveMatch: React.FC = () => {
       if (!details) return null;
       return (
         <AnimatedSection>
-          {details.match.currentInnings === 1 && renderProjectedScore()}
 
           {boundaryAnim && createPortal(
             <div className={`super-boundary-overlay ${boundaryAnim === 'six' ? 'anim-six' : 'anim-four'}`} style={{
@@ -266,63 +265,21 @@ const LiveMatch: React.FC = () => {
       );
     };
 
-    const renderProjectedScore = () => {
-      if (!details || details.match.currentInnings !== 1 || !details.match.overs) return null;
-      
-      const crr = details.currentRunRate || 0;
-      const overs = details.match.overs;
-      
-      const rr1 = crr;
-      const rr2 = Math.floor(crr) + 2;
-      const rr3 = rr2 + 2;
-      const rr4 = rr3 + 2;
-      
-      const p1 = Math.round(rr1 * overs);
-      const p2 = Math.round(rr2 * overs);
-      const p3 = Math.round(rr3 * overs);
-      const p4 = Math.round(rr4 * overs);
-      
-      return (
-          <div style={{ marginTop: '1.5rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '12px', padding: '1rem' }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', color: '#cbd5e1', display: 'flex', alignItems: 'center' }}>
-               <Activity size={18} style={{ marginRight: '8px', color: '#3b82f6' }} /> Projected Score
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.8rem' }}>
-               <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>Current RR ({rr1.toFixed(1)})</div>
-                  <div style={{ color: '#3b82f6', fontSize: '1.3rem', fontWeight: 'bold' }}>{p1}</div>
-               </div>
-               <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>RR {rr2}</div>
-                  <div style={{ color: '#3b82f6', fontSize: '1.3rem', fontWeight: 'bold' }}>{p2}</div>
-               </div>
-               <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>RR {rr3}</div>
-                  <div style={{ color: '#3b82f6', fontSize: '1.3rem', fontWeight: 'bold' }}>{p3}</div>
-               </div>
-               <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '4px' }}>RR {rr4}</div>
-                  <div style={{ color: '#3b82f6', fontSize: '1.3rem', fontWeight: 'bold' }}>{p4}</div>
-               </div>
-            </div>
-          </div>
-      );
-    };
 
   return (
     <div className="dashboard-wrapper" style={{ paddingBottom: '4rem' }}>
       
-      <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', marginTop: '1rem', paddingTop: '1rem' }}>
+      <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', marginTop: '0.25rem', paddingTop: '0.25rem' }}>
         
         {/* MATCH SELECTOR IF MULTIPLE */}
         {liveMatches.length > 1 && (
-          <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
             {liveMatches.map(m => (
               <button 
                 key={m.id}
                 onClick={() => setSelectedMatchId(m.id!)}
                 className={`btn ${selectedMatchId === m.id ? 'btn-primary' : ''}`}
-                style={{ whiteSpace: 'nowrap', borderRadius: '30px', border: selectedMatchId !== m.id ? '1px solid var(--glass-border)' : 'none' }}>
+                style={{ whiteSpace: 'nowrap', borderRadius: '30px', border: selectedMatchId !== m.id ? '1px solid var(--glass-border)' : 'none', padding: '0.4rem 1rem', fontSize: '0.8rem' }}>
                 {m.teamA.teamName} vs {m.teamB.teamName}
               </button>
             ))}
@@ -330,7 +287,7 @@ const LiveMatch: React.FC = () => {
         )}
 
         {/* TABS NAVIGATION */}
-        <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingTop: '0.2rem', paddingBottom: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingTop: '0.1rem', paddingBottom: '0.4rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
           {['Live', '1st Innings', '2nd Innings', 'Playing XI', 'Match Info'].map(tab => (
             <button 
               key={tab} 
@@ -346,32 +303,32 @@ const LiveMatch: React.FC = () => {
       <>
       {/* SECTION 1: LIVE HERO SCOREBOARD */}
       <div className="parallax-hero fade-in" style={{ 
-        minHeight: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+        minHeight: '230px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
         backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop")',
-        backgroundSize: 'cover', backgroundPosition: 'center', paddingTop: '100px', paddingBottom: '2rem',
-        borderRadius: '16px', overflow: 'hidden', marginBottom: '2rem'
+        backgroundSize: 'cover', backgroundPosition: 'center', paddingTop: '0.4rem', paddingBottom: '1rem',
+        borderRadius: '16px', overflow: 'hidden', marginBottom: '1rem'
       }}>
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem', width: '100%', maxWidth: '800px' }}>
           
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', width: '100%', zIndex: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem', width: '100%', zIndex: 10 }}>
             {details.match.status === 'COMPLETED' ? (
-              <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '0.4rem 1rem', borderRadius: '30px', fontWeight: 'bold', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '0.3rem 0.75rem', borderRadius: '30px', fontSize: '0.8rem', fontWeight: 'bold', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
                 MATCH COMPLETED
               </div>
             ) : (
-              <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '30px', fontWeight: 'bold', border: '1px solid rgba(239, 68, 68, 0.4)' }}>
-                <Circle size={10} className="animate-pulse" style={{ fill: '#ef4444', marginRight: '6px' }} /> LIVE
+              <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', padding: '0.3rem 0.75rem', borderRadius: '30px', fontSize: '0.8rem', fontWeight: 'bold', border: '1px solid rgba(239, 68, 68, 0.4)' }}>
+                <Circle size={8} className="animate-pulse" style={{ fill: '#ef4444', marginRight: '6px' }} /> LIVE
               </div>
             )}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.5rem', marginBottom: '0.5rem', marginTop: '1.5rem' }}>
-             <img src={details.match.teamA.teamLogo || getRandomLogo(details.match.teamA.id || 0)} alt={details.match.teamA.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
-             <h3 style={{ fontSize: '1.2rem', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '2px', margin: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem', marginTop: '0.5rem' }}>
+             <img src={details.match.teamA.teamLogo || getRandomLogo(details.match.teamA.id || 0)} alt={details.match.teamA.teamName} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+             <h3 style={{ fontSize: '1rem', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>
                {details.match.teamA.teamName} vs {details.match.teamB.teamName}
              </h3>
-             <img src={details.match.teamB.teamLogo || getRandomLogo(details.match.teamB.id || 0)} alt={details.match.teamB.teamName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+             <img src={details.match.teamB.teamLogo || getRandomLogo(details.match.teamB.id || 0)} alt={details.match.teamB.teamName} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
           </div>
 
           {details.match.tossWinner && details.match.tossDecision && (
@@ -386,54 +343,111 @@ const LiveMatch: React.FC = () => {
               </h2>
           )}
 
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '16px', padding: '1.25rem', backdropFilter: 'blur(10px)', width: '100%', boxSizing: 'border-box' }}>
+          <div style={{ background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--glass-border)', borderRadius: '20px', padding: '1.5rem', backdropFilter: 'blur(16px)', width: '100%', boxSizing: 'border-box', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', position: 'relative', overflow: 'hidden' }}>
             
-            {details.match.currentInnings === 2 && details.match.bowlingTeam && (
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.75rem' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>1st Innings: <span style={{color: '#cbd5e1'}}>{details.match.bowlingTeam.teamName}</span></div>
-                  <div style={{ color: '#94a3b8', fontSize: '1.05rem', fontWeight: 'bold' }}>
-                    {details.match.firstInningsScore ?? (details.targetScore ? details.targetScore - 1 : 0)}-{details.match.firstInningsWickets ?? 'x'}
+            {/* Line 1: 1st Innings Info (Conditional) */}
+            {details.match.currentInnings === 2 && (
+               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.85rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    1st Innings ({details.match.bowlingTeam?.teamName}): <span style={{ color: '#fff', fontWeight: 'bold', marginLeft: '8px' }}>{details.match.firstInningsScore}-{details.match.firstInningsWickets}</span>
                   </div>
                </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div style={{ textAlign: 'left', flex: 1 }}>
-                <h2 style={{ fontSize: '1.3rem', margin: 0, color: details.match.currentInnings === 2 ? '#fff' : 'inherit' }}>{currentBattingTeam?.teamName}</h2>
-                {details.match.currentInnings === 2 && (
-                   <div style={{ fontSize: '0.85rem', color: '#fbbf24', marginTop: '4px', fontWeight: 'bold' }}>
-                      Target: {details.targetScore}
-                   </div>
-                )}
+            {/* Line 2: Balanced Current Score & Overs */}
+            <div style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.5rem' }}>
+                <span style={{ fontSize: '2.8rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1 }}>{details.currentScore}</span>
+                <span style={{ fontSize: '1.6rem', color: '#cbd5e1', fontWeight: 700 }}>- {Math.min(10, details.currentWickets)}</span>
               </div>
-              
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary)', lineHeight: 1 }}>
-                  {details.currentScore}<span style={{fontSize: '1.4rem', color: '#cbd5e1'}}>-{Math.min(10, details.currentWickets)}</span>
-                </div>
-                <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '4px', marginBottom: '0.5rem' }}>
-                  Overs: <span style={{color: '#cbd5e1', fontWeight: 'bold'}}>{details.currentOvers}</span>
-                </div>
-                
+              <div style={{ fontSize: '1rem', color: '#94a3b8', marginTop: '0.2rem', fontWeight: '600' }}>
+                {details.currentOvers} <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'normal' }}>Overs</span>
+              </div>
+            </div>
+
+            {/* Line 3: Technical Data (Batsman Left | Bowler Right) */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '1.5rem' }}>
+              {/* Left Column: Batsmen */}
+              <div style={{ borderRight: '1px solid rgba(255,255,255,0.05)', paddingRight: '1rem' }}>
                 {details.currentStriker && (
-                  <div style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 'bold', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px' }}>
-                    {details.currentStriker.name} <span style={{ color: '#fbbf24' }}>*</span> 
-                    <span style={{ color: '#cbd5e1', fontWeight: 'normal', marginLeft: '4px' }}>{details.strikerRuns}({details.strikerBalls})</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ fontSize: '0.95rem', color: '#fff', fontWeight: 'bold' }}>
+                      {details.currentStriker.name} <span style={{ color: '#fbbf24' }}>*</span>
+                    </div>
+                    <div style={{ fontSize: '0.95rem', color: '#cbd5e1' }}>
+                      {details.strikerRuns}<span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: '2px' }}>({details.strikerBalls})</span>
+                    </div>
                   </div>
                 )}
                 {details.currentNonStriker && (
-                  <div style={{ fontSize: '0.9rem', color: '#94a3b8', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                    {details.currentNonStriker.name} 
-                    <span style={{ color: '#64748b', marginLeft: '4px' }}>{details.nonStrikerRuns}({details.nonStrikerBalls})</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
+                      {details.currentNonStriker.name}
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
+                      {details.nonStrikerRuns}<span style={{ fontSize: '0.75rem', color: '#475569', marginLeft: '2px' }}>({details.nonStrikerBalls})</span>
+                    </div>
                   </div>
+                )}
+              </div>
+
+              {/* Right Column: Bowler (Removed "Bowling" Label) */}
+              <div style={{ textAlign: 'right' }}>
+                {details.currentBowler && (
+                  <>
+                    <div style={{ fontSize: '0.95rem', color: '#fbbf24', fontWeight: 'bold', marginBottom: '2px' }}>{details.currentBowler.name}</div>
+                    <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 'bold' }}>
+                      {details.bowlerWickets}-{details.bowlerRuns} <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'normal' }}>({details.bowlerOvers})</span>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '0.9rem', marginTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', flexWrap: 'wrap', gap: '8px' }}>
-              <div>CRR: <span style={{color: '#fff', fontWeight: 'bold'}}>{details.currentRunRate.toFixed(2)}</span></div>
-              {details.targetScore && (
-                <div>REQ: <span style={{color: '#fff', fontWeight: 'bold'}}>{details.requiredRunRate?.toFixed(2)}</span></div>
+            {/* Line 4: Unified Analytical Footer (Innings Conditional) */}
+            <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '0.75rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)', gap: '4px' }}>
+              {details.match.currentInnings === 2 ? (
+                <>
+                  <div style={{ textAlign: 'center', flex: 1 }}>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '2px' }}>CRR</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{details.currentRunRate.toFixed(2)}</div>
+                  </div>
+                  <div style={{ height: '24px', width: '1px', background: 'rgba(16, 185, 129, 0.3)' }}></div>
+                  <div style={{ textAlign: 'center', flex: 1 }}>
+                    <div style={{ fontSize: '0.7rem', color: '#fbbf24', textTransform: 'uppercase', marginBottom: '2px' }}>REQ</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fbbf24' }}>{details.requiredRunRate?.toFixed(2)}</div>
+                  </div>
+                  <div style={{ height: '24px', width: '1px', background: 'rgba(16, 185, 129, 0.3)' }}></div>
+                  <div style={{ textAlign: 'center', flex: 1 }}>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '2px' }}>Target</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{details.targetScore}</div>
+                  </div>
+                </>
+              ) : (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ fontSize: '0.65rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '8px', fontWeight: 'bold', opacity: 0.8 }}>Projected Score</div>
+                  <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ textAlign: 'center', flex: 1 }}>
+                      <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', whiteSpace: 'nowrap', marginBottom: '2px' }}>at {details.currentRunRate.toFixed(1)} RR</div>
+                      <div style={{ fontSize: '1rem', fontWeight: '900', color: '#3b82f6' }}>{Math.round(details.currentRunRate * (details.match.overs || 20))}</div>
+                    </div>
+                    <div style={{ height: '20px', width: '1px', background: 'rgba(59, 130, 246, 0.2)' }}></div>
+                    <div style={{ textAlign: 'center', flex: 1 }}>
+                      <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', whiteSpace: 'nowrap', marginBottom: '2px' }}>at {(details.currentRunRate + 2).toFixed(1)}</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff' }}>{Math.round((details.currentRunRate + 2) * (details.match.overs || 20))}</div>
+                    </div>
+                    <div style={{ height: '20px', width: '1px', background: 'rgba(59, 130, 246, 0.2)' }}></div>
+                    <div style={{ textAlign: 'center', flex: 1 }}>
+                      <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', whiteSpace: 'nowrap', marginBottom: '2px' }}>at {(details.currentRunRate + 4).toFixed(1)}</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff' }}>{Math.round((details.currentRunRate + 4) * (details.match.overs || 20))}</div>
+                    </div>
+                    <div style={{ height: '20px', width: '1px', background: 'rgba(59, 130, 246, 0.2)' }}></div>
+                    <div style={{ textAlign: 'center', flex: 1 }}>
+                      <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', whiteSpace: 'nowrap', marginBottom: '2px' }}>at {(details.currentRunRate + 6).toFixed(1)}</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff' }}>{Math.round((details.currentRunRate + 6) * (details.match.overs || 20))}</div>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>

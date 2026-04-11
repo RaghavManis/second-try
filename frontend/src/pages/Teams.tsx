@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { TeamService, UploadService } from '../services/api';
+import { TeamService, UploadService, PlayerService } from '../services/api';
 import type { Team } from '../types';
-import { UserPlus, Shield, Users, Edit, Upload, Trash2 } from 'lucide-react';
+import { UserPlus, Shield, Users, Edit, Upload, Trash2, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -11,7 +11,7 @@ import { AutoScrollContainer } from '../components/AutoScrollContainer';
 const Teams: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<(Team & { captainName?: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
@@ -26,7 +26,18 @@ const Teams: React.FC = () => {
   const fetchTeams = async () => {
     try {
       const res = await TeamService.getAllTeams();
-      setTeams(res.data);
+      const teamsData = res.data;
+      
+      const enhancedTeams = await Promise.all(teamsData.map(async (team) => {
+        try {
+          const playersRes = await PlayerService.getPlayersByTeam(team.id!);
+          const captain = playersRes.data.find(p => p.isCaptain);
+          return { ...team, captainName: captain ? captain.name : 'TBD' };
+        } catch {
+          return { ...team, captainName: 'TBD' };
+        }
+      }));
+      setTeams(enhancedTeams);
     } catch (e) {
       console.error('Failed to fetch teams', e);
     } finally {
@@ -112,18 +123,21 @@ const Teams: React.FC = () => {
       {/* SECTION 1: HERO */}
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-        backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1593341646782-e0be10cd2bc4?q=80&w=2000&auto=format&fit=crop")',
-        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '-80px'
+        backgroundAttachment: 'fixed', backgroundImage: 'url("/teams-bg.jpg")',
+        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '0', paddingTop: '80px'
       }}>
-        <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
+        <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.5) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem' }}>
-          <h1 className="gradient-text" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
+          <div style={{ display: 'inline-block', marginBottom: '1rem', padding: '0.5rem 1.5rem', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '30px', backdropFilter: 'blur(10px)', color: '#fff', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
+            League Contenders
+          </div>
+          <h1 className="gradient-text" style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.02em', textShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
             Tournament Teams
           </h1>
-          <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
+          <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6, textShadow: '0 4px 15px rgba(0,0,0,0.9)' }}>
             Meet the franchises competing for the championship.
           </p>
-          <button onClick={() => document.getElementById('teams-content')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary hover-lift" style={{ padding: '1rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px' }}>
+          <button onClick={() => document.getElementById('teams-content')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary hover-lift" style={{ padding: '1rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', boxShadow: '0 8px 25px rgba(16, 185, 129, 0.4)' }}>
             View Squads <Users size={20} style={{ marginLeft: '8px' }}/>
           </button>
         </div>
@@ -138,11 +152,33 @@ const Teams: React.FC = () => {
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The top contenders drawing the crowds.</p>
           <AutoScrollContainer className="horizontal-scroller">
             {featuredTeams.map(team => (
-              <div key={team.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }} onClick={() => navigate(`/teams/${team.id}`)}>
-                <img src={getLogo(team)} alt={team.teamName} style={{ width: 80, height: 80, borderRadius: '16px', marginBottom: '1rem', objectFit: 'cover' }} />
-                <h3 className="gradient-text" style={{ fontSize: '1.3rem', textAlign: 'center', marginBottom: '0.5rem' }}>{team.teamName}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                  <Shield size={14} color="var(--primary)" /> Coach: {team.coachName}
+              <div key={team.id} className="glass-panel hover-lift" style={{ 
+                  padding: '1.5rem', 
+                  cursor: 'pointer', 
+                  position: 'relative', 
+                  overflow: 'hidden', 
+                  minWidth: '280px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.25rem',
+                  background: 'linear-gradient(135deg, rgba(30,41,59,0.5) 0%, rgba(15,23,42,0.8) 100%)',
+                  border: '1px solid rgba(255,255,255,0.08)'
+               }} onClick={() => navigate(`/teams/${team.id}`)}>
+                <div style={{ position: 'absolute', right: '-20px', bottom: '-20px', opacity: 0.05, pointerEvents: 'none', transform: 'rotate(-15deg)' }}>
+                   <img src={getLogo(team)} alt="watermark" style={{ width: '150px', height: '150px', objectFit: 'cover' }} />
+                </div>
+                
+                <div style={{ position: 'relative' }}>
+                  <div style={{ width: '68px', height: '68px', borderRadius: '16px', padding: '3px', background: 'linear-gradient(135deg, var(--primary), #3b82f6)', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }}>
+                    <img src={getLogo(team)} alt={team.teamName} style={{ width: '100%', height: '100%', borderRadius: '14px', objectFit: 'cover', background: 'var(--bg-color)' }} />
+                  </div>
+                </div>
+
+                <div style={{ zIndex: 1, paddingRight: '1rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.4rem 0', color: '#fff', letterSpacing: '-0.01em' }}>{team.teamName}</h3>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 600 }}>
+                    <User size={12} color="var(--primary)" /> {team.captainName}
+                  </div>
                 </div>
               </div>
             ))}
@@ -175,39 +211,38 @@ const Teams: React.FC = () => {
               </div>
             ) : (
               teams.map((team) => (
-                <div key={team.id} className="glass-panel hover-lift" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
+                <div key={team.id} className="hover-lift" style={{ 
+                    position: 'relative', cursor: 'pointer', borderRadius: '24px', overflow: 'hidden',
+                    background: 'linear-gradient(180deg, rgba(30,41,59,0.5) 0%, rgba(15,23,42,0.95) 100%)',
+                    border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.4)', paddingBottom: '2rem'
+                 }} onClick={() => navigate(`/teams/${team.id}`)}>
+                  
+                  {/* Background Accents */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '140px', background: 'linear-gradient(180deg, var(--primary) 0%, transparent 100%)', opacity: 0.1 }}></div>
+                  <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', opacity: 0.05, pointerEvents: 'none' }}>
+                     <img src={getLogo(team)} alt="watermark" style={{ width: '200px', height: '200px', objectFit: 'cover' }} />
+                  </div>
+
                   {isAuthenticated && (
-                    <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px', zIndex: 10 }}>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); openEditModal(team); }}
-                        style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
-                        title="Edit Team"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button 
-                        onClick={(e) => handleDeleteTeam(e, team.id!)}
-                        style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}
-                        title="Delete Team"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                    <div style={{ position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '8px', zIndex: 10, background: 'rgba(0,0,0,0.4)', padding: '6px', borderRadius: '12px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      <button onClick={(e) => { e.stopPropagation(); openEditModal(team); }} style={{ background: 'transparent', border: 'none', color: '#60a5fa', cursor: 'pointer', display: 'flex' }} title="Edit"><Edit size={16} /></button>
+                      <button onClick={(e) => handleDeleteTeam(e, team.id!)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex' }} title="Delete"><Trash2 size={16} /></button>
                     </div>
                   )}
-                  <img src={getLogo(team)} alt={team.teamName} style={{ width: 64, height: 64, borderRadius: '12px', marginBottom: '1rem', objectFit: 'cover' }} />
-                  <h3 className="gradient-text" style={{ fontSize: '1.4rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.75rem', marginBottom: '1rem', width: '100%' }}>
-                    {team.teamName}
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
-                      <Shield size={16} color="var(--primary)" />
-                      <span>Coach: <strong style={{color: 'var(--text-primary)'}}>{team.coachName}</strong></span>
+
+                  <div style={{ marginTop: '3rem', zIndex: 1, position: 'relative', width: '100%' }}>
+                    <div style={{ width: '90px', height: '90px', borderRadius: '22px', padding: '4px', background: 'linear-gradient(135deg, var(--primary), #3b82f6)', boxShadow: '0 10px 25px rgba(0,0,0,0.5)', margin: '0 auto 1.5rem auto' }}>
+                      <img src={getLogo(team)} alt={team.teamName} style={{ width: '100%', height: '100%', borderRadius: '18px', objectFit: 'cover', background: 'var(--bg-color)' }} />
                     </div>
-                    <button className="btn btn-secondary" style={{ marginTop: '1rem', width: '100%', display: 'flex', justifyContent: 'center' }} 
-                      onClick={() => navigate(`/teams/${team.id}`)}>
-                      <Users size={16} /> View Squad
-                    </button>
+                    <h3 style={{ fontSize: '1.6rem', fontWeight: 900, margin: '0 0 0.5rem 0', color: '#fff', letterSpacing: '-0.02em', padding: '0 1rem', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{team.teamName}</h3>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 16px', borderRadius: '20px', fontSize: '0.85rem', color: '#e2e8f0', fontWeight: 600, marginBottom: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+                      <User size={14} color="var(--primary)" /> Captain: {team.captainName}
+                    </div>
                   </div>
+
+                  <button className="btn hover-lift" style={{ background: 'var(--primary)', color: '#fff', fontWeight: 700, borderRadius: '30px', padding: '0.7rem 2.5rem', border: 'none', boxShadow: '0 8px 20px rgba(16, 185, 129, 0.4)', zIndex: 1 }} onClick={(e) => { e.stopPropagation(); navigate(`/teams/${team.id}`); }}>
+                    <Users size={18} style={{marginRight: '8px'}} /> View Squad
+                  </button>
                 </div>
               ))
             )}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Trophy, Users, Calendar, BarChart2, LogIn, LogOut, User, Circle, Image as ImageIcon, Sun, Moon } from 'lucide-react';
+import { Trophy, Users, Calendar, BarChart2, LogIn, LogOut, User, Circle, Image as ImageIcon, Sun, Moon, Crown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { MatchScoringService } from '../../services/api';
 import './Navbar.css';
@@ -10,6 +10,7 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isOnLivePage = location.pathname === '/live-match';
+  const isScoringPage = location.pathname.includes('/score');
 
   const [hasLiveMatch, setHasLiveMatch] = React.useState(false);
   const [theme, setTheme] = React.useState<'light'|'dark'>(() => {
@@ -41,10 +42,13 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="navbar glass-panel">
+    <nav className={`navbar glass-panel ${isScoringPage ? 'non-sticky' : 'sticky-nav'}`}>
       <div className="nav-brand">
-        <Trophy className="brand-icon" size={28} />
-        <span className="brand-text gradient-text">Cricket Tourney</span>
+        <div className="brand-main">
+          <Crown className="brand-icon premium-icon" size={32} />
+          <span className="brand-text gradient-text">SPL</span>
+        </div>
+        <div className="brand-subtext mobile-only">SEASON 2026</div>
       </div>
       <ul className="nav-links">
         <li>

@@ -10,6 +10,7 @@ import java.time.LocalDate;
     @Index(name = "idx_match_team_b", columnList = "team_b_id"),
     @Index(name = "idx_match_status", columnList = "status")
 })
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Match {
 
     @Id

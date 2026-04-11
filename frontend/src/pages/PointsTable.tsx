@@ -75,15 +75,18 @@ const PointsTable: React.FC = () => {
       {/* SECTION 1: HERO */}
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-        backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=2000&auto=format&fit=crop")',
-        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '-80px'
+        backgroundAttachment: 'fixed', backgroundImage: 'url("/trophy-bg.jpg")',
+        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '0', paddingTop: '80px'
       }}>
-        <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
+        <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.5) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem' }}>
-          <h1 className="gradient-text" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
+          <div style={{ display: 'inline-block', marginBottom: '1rem', padding: '0.5rem 1.5rem', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '30px', backdropFilter: 'blur(10px)', color: '#fbbf24', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
+            The Road to Glory
+          </div>
+          <h1 className="gradient-text" style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.02em', textShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
             Tournament Leaderboard
           </h1>
-          <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
+          <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6, textShadow: '0 4px 15px rgba(0,0,0,0.9)' }}>
             Explore the standings and top performers across all formats.
           </p>
           <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '30px', padding: '6px', maxWidth: '300px', margin: '0 auto 2rem auto', border: '1px solid var(--glass-border)' }}>
@@ -98,7 +101,7 @@ const PointsTable: React.FC = () => {
               Practice
             </button>
           </div>
-          <button onClick={() => document.getElementById('standings-content')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-secondary hover-lift" style={{ padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)' }}>
+          <button onClick={() => document.getElementById('standings-content')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-secondary hover-lift" style={{ padding: '0.8rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', boxShadow: '0 8px 25px rgba(251, 191, 36, 0.2)' }}>
             View Standings <Trophy size={18} style={{ marginLeft: '8px' }}/>
           </button>
         </div>

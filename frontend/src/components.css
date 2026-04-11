@@ -196,3 +196,162 @@
     display: none;
   }
 }
+
+/* Premium Player Cards */
+.player-card {
+  position: relative;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+}
+
+.player-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--role-color, var(--primary));
+  opacity: 0.8;
+  transition: height 0.3s ease;
+}
+
+.player-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.player-card:hover::before {
+  height: 8px;
+}
+
+.player-card .player-avatar-wrapper {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.player-card .player-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  background: var(--bg-dark);
+  transition: all 0.5s ease;
+}
+
+.player-card:hover .player-avatar {
+  border-color: var(--role-color, var(--primary));
+  transform: scale(1.1);
+}
+
+.player-card .jersey-number {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  background: var(--role-color, var(--primary));
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1rem;
+  border: 4px solid #1e293b;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 2;
+}
+
+.player-card .player-info h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.player-card .role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--role-color, var(--primary));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.player-card:hover .role-badge {
+  background: var(--role-color, var(--primary));
+  color: #fff;
+}
+
+.player-card .captain-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 0;
+  padding: 4px 12px 4px 20px;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  color: #000;
+  font-weight: 900;
+  font-size: 0.7rem;
+  border-radius: 0 20px 20px 0;
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.3);
+  z-index: 3;
+}
+
+.player-card .vc-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 0;
+  padding: 4px 12px 4px 20px;
+  background: linear-gradient(90deg, #94a3b8, #cbd5e1);
+  color: #1e293b;
+  font-weight: 900;
+  font-size: 0.7rem;
+  border-radius: 0 20px 20px 0;
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.3);
+  z-index: 3;
+}
+
+/* Role Colors */
+.role-batsman { --role-color: #3b82f6; }
+.role-bowler { --role-color: #ef4444; }
+.role-all_rounder { --role-color: #10b981; }
+.role-wicketkeeper { --role-color: #f59e0b; }
+
+/* Entry Animation */
+.animate-card-entry {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardEntry 0.6s forwards cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes cardEntry {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

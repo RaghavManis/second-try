@@ -8,9 +8,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class MatchService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MatchService.class);
 
     @Autowired
     private MatchRepository matchRepository;
@@ -88,19 +92,24 @@ public class MatchService {
     @org.springframework.transaction.annotation.Transactional
     @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public void deleteMatch(Long id) {
-        // Explicitly clear dependencies to avoid FK violation and orphan records
+        if (id == null) return;
+        
+        logger.info("[AUDIT] Initiating robust bulk deletion for match ID: {}", id);
+
+        // 1. Delete dependent records from child tables using bulk JPQL/Native queries
         ballEventRepository.deleteByMatchId(id);
         scorecardBattingRepository.deleteByMatchId(id);
         scorecardBowlingRepository.deleteByMatchId(id);
         scoreRepository.deleteByMatchId(id);
         playerMatchStatsRepository.deleteByMatchId(id);
 
-        Match match = getMatchById(id);
-        if (match.getPlayingXiTeamA() != null) match.getPlayingXiTeamA().clear();
-        if (match.getPlayingXiTeamB() != null) match.getPlayingXiTeamB().clear();
-        matchRepository.save(match);
+        // 2. Clear join tables (ManyToMany) using native queries
+        matchRepository.deleteXiAByMatchId(id);
+        matchRepository.deleteXiBByMatchId(id);
 
-        matchRepository.delete(match);
-        matchRepository.flush();
+        // 3. Delete the match record itself using bulk JPQL
+        matchRepository.deleteByMatchId(id);
+        
+        logger.info("[AUDIT] Robust bulk deletion completed for match ID: {}", id);
     }
 }

@@ -84,17 +84,17 @@ export const PointsService = {
 
 export const MatchScoringService = {
   getLiveMatches: () => api.get<Match[]>('/scoring/live'),
-  getLiveDetails: (matchId: number) => api.get<LiveMatchDetailsDto>(`/scoring/${matchId}/live-details`),
+  getLiveDetails: (matchId: number, force: boolean = false) => api.get<LiveMatchDetailsDto>(`/scoring/${matchId}/live-details?_t=${Date.now()}${force ? '&force=true' : ''}`),
   getCompleteScorecard: (matchId: number) => api.get<{ match: Match, batting: ScorecardBatting[], bowling: ScorecardBowling[] }>(`/scoring/${matchId}/scorecard`),
-  startLiveScoring: (matchId: number, setup: LiveMatchSetupDto) => api.post<Match>(`/scoring/${matchId}/setup`, setup),
-  recordBall: (matchId: number, ballDto: BallSubmissionDto) => api.post<Match>(`/scoring/${matchId}/ball`, ballDto),
-  undoLastBall: (matchId: number) => api.delete<Match>(`/scoring/${matchId}/last-ball`),
-  updateBowler: (matchId: number, bowlerId: number) => api.patch<Match>(`/scoring/${matchId}/bowler?bowlerId=${bowlerId}`),
-  swapBatsmen: (matchId: number) => api.post<Match>(`/scoring/${matchId}/swap-batsmen`),
+  startLiveScoring: (matchId: number, setup: LiveMatchSetupDto) => api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/setup`, setup),
+  recordBall: (matchId: number, ballDto: BallSubmissionDto) => api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/ball`, ballDto),
+  undoLastBall: (matchId: number) => api.delete<LiveMatchDetailsDto>(`/scoring/${matchId}/last-ball`),
+  updateBowler: (matchId: number, bowlerId: number) => api.patch<LiveMatchDetailsDto>(`/scoring/${matchId}/bowler?bowlerId=${bowlerId}`),
+  swapBatsmen: (matchId: number) => api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/swap-batsmen`),
   endInnings: (matchId: number, params: { strikerId: number, nonStrikerId: number, bowlerId: number, targetScore: number }) =>
-    api.post<Match>(`/scoring/${matchId}/end-innings`, null, { params }),
+    api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/end-innings`, null, { params }),
   completeMatch: (matchId: number, winnerTeamId?: number, manOfTheMatchId?: number) =>
-    api.post<Match>(`/scoring/${matchId}/complete`, null, { params: { winnerTeamId, manOfTheMatchId } }),
+    api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/complete`, null, { params: { winnerTeamId, manOfTheMatchId } }),
 };
 
 export const UploadService = {

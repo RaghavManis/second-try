@@ -27,7 +27,8 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        long startTime = (Long) request.getAttribute("startTime");
+        Object startTimeObj = request.getAttribute("startTime");
+        long startTime = (startTimeObj instanceof Long) ? (Long) startTimeObj : System.currentTimeMillis();
         long executionTime = System.currentTimeMillis() - startTime;
         
         String ip = request.getHeader("X-Forwarded-For");

@@ -22,7 +22,9 @@ com\cricket\tournament\repository\MatchRepository.class
 com\cricket\tournament\controller\ScoreController.class
 com\cricket\tournament\exception\GlobalExceptionHandler.class
 com\cricket\tournament\model\ScorecardBatting.class
+com\cricket\tournament\controller\ContactController.class
 com\cricket\tournament\service\PointsService.class
+com\cricket\tournament\dto\ContactRequestDto.class
 com\cricket\tournament\repository\PlayerMatchStatsRepository.class
 com\cricket\tournament\repository\ScorecardBowlingRepository.class
 com\cricket\tournament\model\Score.class
@@ -45,6 +47,7 @@ com\cricket\tournament\config\CacheConfig.class
 com\cricket\tournament\controller\PointsController.class
 com\cricket\tournament\config\RateLimitConfig.class
 com\cricket\tournament\repository\GalleryImageRepository.class
+com\cricket\tournament\service\EmailService.class
 com\cricket\tournament\dto\ErrorResponse.class
 com\cricket\tournament\dto\LiveMatchDetailsDto.class
 com\cricket\tournament\dto\PlayerProfileDto.class

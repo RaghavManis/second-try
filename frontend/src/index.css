@@ -599,6 +599,10 @@ body {
   .desktop-only {
     display: none !important;
   }
+
+  .league-text {
+    display: block;
+  }
 }
 
 @media (min-width: 769px) {

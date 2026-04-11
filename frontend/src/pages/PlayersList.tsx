@@ -133,40 +133,60 @@ const PlayersList: React.FC = () => {
   const getRandomAvatar = (id: number) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf`;
 
   const PlayerCard = ({ player }: { player: Player }) => (
-    <div className="glass-panel hover-lift" style={{ padding: '1.25rem', cursor: 'pointer', position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }} onClick={() => navigate(`/players/${player.id}`)}>
+    <div className="hover-lift" style={{ 
+        cursor: 'pointer', 
+        padding: '3rem 1.5rem 1.5rem 1.5rem', 
+        position: 'relative', 
+        marginTop: '2.5rem', 
+        height: 'calc(100% - 2.5rem)',
+        borderRadius: '24px',
+        background: 'linear-gradient(180deg, rgba(30,41,59,0.3) 0%, rgba(15,23,42,0.9) 100%)',
+        border: '1px solid rgba(255,255,255,0.05)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.3)'
+     }} onClick={() => navigate(`/players/${player.id}`)}>
+      
       {isAuthenticated && (
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '0.5rem', display: 'flex', justifyContent: 'flex-start', gap: '0.5rem', zIndex: 10 }}>
-           <button className="btn btn-secondary" style={{padding: '0.3rem', background: '#3b82f620', color: '#3b82f6'}} onClick={(e) => { e.stopPropagation(); openEditModal(player); }}>
-             <Edit size={16} />
+        <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+           <button className="btn" style={{padding: '0.4rem', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: 'none'}} onClick={(e) => { e.stopPropagation(); openEditModal(player); }}>
+             <Edit size={14} />
            </button>
-           <button className="btn btn-secondary" style={{padding: '0.3rem', background: '#ef444420', color: '#ef4444'}} onClick={(e) => player.id && handleRemovePlayer(e, player.id)}>
-             <Trash2 size={16} />
+           <button className="btn" style={{padding: '0.4rem', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none'}} onClick={(e) => player.id && handleRemovePlayer(e, player.id)}>
+             <Trash2 size={14} />
            </button>
         </div>
       )}
-      <div style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'var(--background)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: `1px solid ${getRoleColor(player.role)}`, color: getRoleColor(player.role) }}>
+
+      <div style={{ position: 'absolute', top: '10px', right: '10px', background: `${getRoleColor(player.role)}20`, width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, border: `1px solid ${getRoleColor(player.role)}50`, color: getRoleColor(player.role), fontSize: '0.8rem', zIndex: 10 }}>
         {player.jerseyNumber || '-'}
       </div>
       
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', marginTop: isAuthenticated ? '2rem' : '0' }}>
+      <div style={{ position: 'absolute', top: '-45px', left: '50%', transform: 'translateX(-50%)', zIndex: 2 }}>
+        <div style={{ position: 'absolute', inset: '-5px', background: `${getRoleColor(player.role)}`, filter: 'blur(20px)', opacity: 0.35, borderRadius: '50%' }}></div>
         <img 
           src={player.playerImage || getRandomAvatar(player.id || 0)} 
           alt={player.name} 
           onClick={(e) => { e.stopPropagation(); setViewImage(player.playerImage || getRandomAvatar(player.id || 0)); }}
-          style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', objectFit: 'cover', cursor: 'zoom-in', transition: 'transform 0.2s' }} 
+          style={{ width: '90px', height: '90px', borderRadius: '50%', objectFit: 'cover', border: '4px solid #0f172a', background: '#1e293b', position: 'relative', boxShadow: '0 10px 25px rgba(0,0,0,0.5)', cursor: 'zoom-in', transition: 'transform 0.3s' }} 
         />
-        <div>
-          <h3 style={{ fontSize: '1.1rem', margin: 0 }}>
-            {player.name}
-            {player.isCaptain && <span style={{color: 'var(--primary)', marginLeft: '6px', fontSize: '0.8rem'}}>(C)</span>}
-            {player.isViceCaptain && <span style={{color: 'var(--text-secondary)', marginLeft: '6px', fontSize: '0.8rem'}}>(VC)</span>}
-          </h3>
-          <div style={{ 
-            fontSize: '0.75rem', color: getRoleColor(player.role), background: `${getRoleColor(player.role)}20`, 
-            padding: '2px 8px', borderRadius: '12px', display: 'inline-block', marginTop: '4px', fontWeight: 600
-          }}>
-            {player.role.replace('_', ' ')}
-          </div>
+      </div>
+
+      <div style={{ marginTop: 'auto', width: '100%' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {player.name}
+        </h3>
+        
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+          {player.isCaptain && <span style={{color: '#fbbf24', background: 'rgba(251, 191, 36, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 800, border: '1px solid rgba(251, 191, 36, 0.3)'}}>CAPTAIN</span>}
+          {player.isViceCaptain && <span style={{color: '#94a3b8', background: 'rgba(148, 163, 184, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 800, border: '1px solid rgba(148, 163, 184, 0.3)'}}>VICE CAPTAIN</span>}
+        </div>
+
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', color: getRoleColor(player.role), background: `${getRoleColor(player.role)}15`, padding: '6px 14px', borderRadius: '20px', border: `1px solid ${getRoleColor(player.role)}30`, width: '100%' }}>
+           {player.role.replace('_', ' ')}
         </div>
       </div>
     </div>
@@ -184,23 +204,26 @@ const PlayersList: React.FC = () => {
       {/* SECTION 1: HERO */}
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-        backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2000&auto=format&fit=crop")',
-        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '-80px'
+        backgroundAttachment: 'fixed', backgroundImage: 'url("/players-bg.jpg")',
+        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '0', paddingTop: '80px'
       }}>
-        <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
+        <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.5) 0%, rgba(15, 23, 42, 1) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem' }}>
-          <h1 className="gradient-text" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
+          <div style={{ display: 'inline-block', marginBottom: '1rem', padding: '0.5rem 1.5rem', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '30px', backdropFilter: 'blur(10px)', color: '#fff', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>
+            Star Athletes
+          </div>
+          <h1 className="gradient-text" style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.02em', textShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
             Tournament Players
           </h1>
-          <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
+          <p style={{ color: '#cbd5e1', fontSize: 'clamp(1.2rem, 2vw, 1.5rem)', maxWidth: '600px', margin: '0 auto 2.5rem auto', lineHeight: 1.6, textShadow: '0 4px 15px rgba(0,0,0,0.9)' }}>
             Explore the athletes powering the competition.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <button onClick={() => document.getElementById('players-content')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary hover-lift" style={{ padding: '1rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px' }}>
+            <button onClick={() => document.getElementById('players-content')?.scrollIntoView({ behavior: 'smooth' })} className="btn btn-primary hover-lift" style={{ padding: '1rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', boxShadow: '0 8px 25px rgba(16, 185, 129, 0.4)' }}>
               Discover Talent <Star size={20} style={{ marginLeft: '8px' }}/>
             </button>
             {isAuthenticated && (
-              <button onClick={() => setIsModalOpen(true)} className="btn btn-secondary hover-lift" style={{ padding: '1rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', background: 'var(--primary)' }}>
+              <button onClick={() => setIsModalOpen(true)} className="btn btn-secondary hover-lift" style={{ padding: '1rem 2.5rem', fontSize: '1.2rem', borderRadius: '30px', background: 'var(--primary)', border: 'none', color: '#fff' }}>
                 Add Player <UserPlus size={20} style={{ marginLeft: '8px' }}/>
               </button>
             )}
