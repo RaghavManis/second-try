@@ -290,8 +290,8 @@ const Dashboard: React.FC = () => {
                       overflow: 'hidden'
                    }}>
                     <div style={{ padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                        <Clock size={14} color="var(--primary)" /> {new Date(match.matchDate).toLocaleDateString()}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#e2e8f0', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+                        <Clock size={16} color="var(--primary)" /> {new Date(match.matchDate).toLocaleDateString()}
                       </div>
                       <div style={{
                         background: `${getStatusColor(match.status)}15`, color: getStatusColor(match.status),
@@ -307,7 +307,7 @@ const Dashboard: React.FC = () => {
                           <div style={{ position: 'absolute', inset: 0, background: 'var(--primary)', filter: 'blur(20px)', opacity: 0.2, borderRadius: '50%' }}></div>
                           <img src={team1.teamLogo || getRandomLogo(team1.id || 0)} alt={team1.teamName} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', position: 'relative', border: '2px solid rgba(255,255,255,0.1)' }} />
                         </div>
-                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '0.75rem', marginBottom: '0.25rem' }}>{team1.teamName}</h3>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginTop: '0.75rem', marginBottom: '0.25rem', color: '#fff', textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>{team1.teamName}</h3>
                         {(match.status === 'COMPLETED' || match.status === 'ONGOING') && team1Info && (
                           <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>{team1Info}</div>
                         )}
@@ -324,7 +324,7 @@ const Dashboard: React.FC = () => {
                            <div style={{ position: 'absolute', inset: 0, background: 'var(--primary)', filter: 'blur(20px)', opacity: 0.2, borderRadius: '50%' }}></div>
                            <img src={team2.teamLogo || getRandomLogo(team2.id || 0)} alt={team2.teamName} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', position: 'relative', border: '2px solid rgba(255,255,255,0.1)' }} />
                         </div>
-                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: '0.75rem', marginBottom: '0.25rem' }}>{team2.teamName}</h3>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginTop: '0.75rem', marginBottom: '0.25rem', color: '#fff', textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>{team2.teamName}</h3>
                         {(match.status === 'COMPLETED' || match.status === 'ONGOING') && team2Info && (
                            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>{team2Info}</div>
                         )}
@@ -333,10 +333,10 @@ const Dashboard: React.FC = () => {
 
                     <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.03)', textAlign: 'center' }}>
                       {match.status === 'COMPLETED' && match.result ? (
-                        <div style={{ color: '#34d399', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.5px' }}>{match.result}</div>
+                        <div style={{ color: '#34d399', fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.5px', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{match.result}</div>
                       ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 500 }}>
-                          <MapPin size={12} /> {match.overs} Overs Match • {match.matchType === 'TOURNAMENT' ? 'League' : 'Practice'}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: '#e2e8f0', fontSize: '0.85rem', fontWeight: 700, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+                          <MapPin size={14} color="var(--primary)" /> {match.overs} Overs Match • {match.matchType === 'TOURNAMENT' ? 'League' : 'Practice'}
                         </div>
                       )}
                     </div>
