@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MatchScoringService } from '../services/api';
 import type { Match, ScorecardBatting, ScorecardBowling } from '../types';
-import { Trophy, Star } from 'lucide-react';
+import { Trophy, Star, X } from 'lucide-react';
 import { AnimatedSection } from '../components/AnimatedSection';
 
 interface ScorecardData {
@@ -16,7 +16,8 @@ const MatchScorecard: React.FC = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<ScorecardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>('Summary');
+  const [activeTab, setActiveTab] = useState<string>('Result');
+  const [showPomStats, setShowPomStats] = useState(false);
 
   useEffect(() => {
     if (matchId) {
@@ -46,6 +47,10 @@ const MatchScorecard: React.FC = () => {
   const innings2Batting = batting.filter(b => b.innings === 2);
   const innings2Bowling = bowling.filter(b => b.innings === 2);
 
+  // Find POM Stats
+  const pomBatting = batting.find(b => b.player.id === match.manOfTheMatch?.id);
+  const pomBowling = bowling.find(b => b.player.id === match.manOfTheMatch?.id);
+
   const calculateTotal = (batters: ScorecardBatting[]) => {
     return batters.reduce((acc, curr) => acc + curr.runs, 0); 
   };
@@ -60,9 +65,9 @@ const MatchScorecard: React.FC = () => {
   return (
     <div className="dashboard-wrapper" style={{ paddingBottom: '5rem' }}>
       <div className="parallax-hero" style={{ 
-        minHeight: '450px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+        minHeight: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
         backgroundAttachment: 'fixed', backgroundImage: 'url("https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop")',
-        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '-80px', padding: '4rem 1rem'
+        backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '-80px', padding: '3rem 1rem'
       }}>
         <div className="hero-overlay" style={{ background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%)' }}></div>
         <div className="hero-content text-center animate-slide-up" style={{ textAlign: 'center', zIndex: 2, padding: '2rem', maxWidth: '800px' }}>
@@ -78,81 +83,90 @@ const MatchScorecard: React.FC = () => {
           
           <h2 style={{ fontSize: '2rem', color: '#fff', marginBottom: '0.5rem', fontWeight: 700 }}>{match.teamA.teamName} vs {match.teamB.teamName}</h2>
           
-          {match.status === 'COMPLETED' && (
-             <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '0.75rem 2rem', borderRadius: '40px', fontWeight: 'bold', border: '1px solid rgba(16, 185, 129, 0.4)', fontSize: '1.2rem', marginTop: '1rem', boxShadow: '0 0 20px rgba(16,185,129,0.2)' }}>
-               {match.result || (match.winnerTeam ? `${match.winnerTeam.teamName} Won` : 'Match Tied')}
-             </div>
-          )}
-
-          {match.manOfTheMatch && (
-            <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center' }}>
-              <div className="glass-panel" style={{ 
-                background: 'linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.2) 100%)', 
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                padding: '1.5rem 2.5rem', 
-                borderRadius: '24px', 
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1.5rem',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.4), 0 0 20px rgba(245, 158, 11, 0.1)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <div style={{ position: 'absolute', top: '-20px', right: '-20px', opacity: 0.1, transform: 'rotate(15deg)' }}>
-                  <Trophy size={100} color="#f59e0b" />
-                </div>
-
-                <div style={{ position: 'relative' }}>
-                  <div style={{ position: 'absolute', inset: '-4px', background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', borderRadius: '50%', opacity: 0.5, filter: 'blur(8px)' }}></div>
-                  <img 
-                    src={match.manOfTheMatch.playerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${match.manOfTheMatch.id}&backgroundColor=b6e3f4,c0aede`} 
-                    alt={match.manOfTheMatch.name} 
-                    style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f59e0b', position: 'relative' }} 
-                  />
-                  <div style={{ position: 'absolute', bottom: '-5px', right: '-5px', background: '#f59e0b', color: '#fff', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #1e293b' }}>
-                    <Trophy size={14} />
-                  </div>
-                </div>
-
-                <div style={{ textAlign: 'left', zIndex: 1 }}>
-                  <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 800, marginBottom: '4px' }}>Player of the Match</div>
-                  <div style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.01em' }}>{match.manOfTheMatch.name}</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#94a3b8', fontSize: '0.9rem', marginTop: '4px' }}>
-                    <Star size={14} fill="#f59e0b" color="#f59e0b" /> Exceptional Performance
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
       
       <div className="page-container" style={{ maxWidth: '1000px', margin: '0 auto', marginTop: '2rem' }}>
          
-         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <button className="btn btn-secondary" onClick={() => navigate('/matches')}>&larr; Matches</button>
-            <div style={{ display: 'flex', gap: '0.6rem', overflowX: 'auto', paddingBottom: '0.75rem', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-                {['Summary', 'Basic Info', '1st Innings', '2nd Innings', 'Squads'].map(tab => (
-                    <button 
-                        key={tab} 
-                        onClick={() => setActiveTab(tab)} 
-                        className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ 
-                          whiteSpace: 'nowrap', 
-                          borderRadius: '30px', 
-                          padding: '0.6rem 1.5rem', 
-                          flexShrink: 0,
-                          minWidth: '100px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}>
-                        {tab}
-                    </button>
-                ))}
+         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '2.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <button className="btn btn-secondary" onClick={() => navigate('/matches')}>&larr; Matches</button>
+                <div style={{ display: 'flex', gap: '0.6rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+                    {['Result', 'Summary', '1st Innings', '2nd Innings', 'Squads', 'Basic Info'].map(tab => (
+                        <button 
+                            key={tab} 
+                            onClick={() => setActiveTab(tab)} 
+                            className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ 
+                              whiteSpace: 'nowrap', 
+                              borderRadius: '30px', 
+                              padding: '0.6rem 1.5rem', 
+                              flexShrink: 0,
+                              minWidth: '100px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }}>
+                            {tab}
+                        </button>
+                    ))}
+                </div>
             </div>
          </div>
+
+         {activeTab === 'Result' && (
+             <AnimatedSection>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+                    {match.status === 'COMPLETED' && (
+                        <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '1rem 3rem', borderRadius: '40px', fontWeight: 800, border: '2px solid rgba(16, 185, 129, 0.4)', fontSize: '1.4rem', boxShadow: '0 0 30px rgba(16,185,129,0.3)', textAlign: 'center' }}>
+                            {match.result || (match.winnerTeam ? `${match.winnerTeam.teamName} Won` : 'Match Tied')}
+                        </div>
+                    )}
+
+                    {match.manOfTheMatch && (
+                        <div style={{ cursor: 'pointer', transition: 'all 0.3s' }} onClick={() => setShowPomStats(true)}>
+                            <div className="glass-panel" style={{ 
+                                background: 'linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.2) 100%)', 
+                                border: '1px solid rgba(245, 158, 11, 0.3)',
+                                padding: '1.5rem 3rem', 
+                                borderRadius: '24px', 
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2rem',
+                                boxShadow: '0 10px 40px rgba(0,0,0,0.4), 0 0 20px rgba(245, 158, 11, 0.1)',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}>
+                                <div style={{ position: 'absolute', top: '-20px', right: '-20px', opacity: 0.1, transform: 'rotate(15deg)' }}>
+                                    <Trophy size={100} color="#f59e0b" />
+                                </div>
+
+                                <div style={{ position: 'relative' }}>
+                                    <div style={{ position: 'absolute', inset: '-4px', background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', borderRadius: '50%', opacity: 0.5, filter: 'blur(8px)' }}></div>
+                                    <img 
+                                        src={match.manOfTheMatch.playerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${match.manOfTheMatch.id}&backgroundColor=b6e3f4,c0aede`} 
+                                        alt={match.manOfTheMatch.name} 
+                                        style={{ width: '90px', height: '90px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f59e0b', position: 'relative' }} 
+                                    />
+                                    <div style={{ position: 'absolute', bottom: '-5px', right: '-5px', background: '#f59e0b', color: '#fff', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #1e293b' }}>
+                                        <Trophy size={16} />
+                                    </div>
+                                </div>
+
+                                <div style={{ textAlign: 'left', zIndex: 1 }}>
+                                    <div style={{ color: '#fbbf24', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 800, marginBottom: '6px' }}>Player of the Match</div>
+                                    <div style={{ color: '#fff', fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.01em' }}>{match.manOfTheMatch.name}</div>
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#cbd5e1', fontSize: '1rem', marginTop: '6px', background: 'rgba(255,255,255,0.05)', padding: '4px 12px', borderRadius: '20px' }}>
+                                        <Star size={16} fill="#f59e0b" color="#f59e0b" /> Click for details
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+             </AnimatedSection>
+         )}
 
          {activeTab === 'Summary' && (
              <AnimatedSection>
@@ -376,6 +390,74 @@ const MatchScorecard: React.FC = () => {
          )}
 
       </div>
+
+      {showPomStats && match.manOfTheMatch && (
+          <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+              <div className="modal-content glass-panel" style={{ maxWidth: '600px', width: '100%', padding: '2.5rem', position: 'relative' }}>
+                  <button 
+                    onClick={() => setShowPomStats(false)} 
+                    style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                      <X size={20} />
+                  </button>
+
+                  <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                      <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1rem' }}>
+                        <div style={{ position: 'absolute', inset: '-10px', background: 'var(--primary)', filter: 'blur(20px)', opacity: 0.3, borderRadius: '50%' }}></div>
+                        <img 
+                            src={match.manOfTheMatch.playerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${match.manOfTheMatch.id}&backgroundColor=b6e3f4,c0aede`} 
+                            style={{ width: '120px', height: '120px', borderRadius: '50%', border: '4px solid var(--primary)', position: 'relative' }} 
+                            alt={match.manOfTheMatch.name}
+                        />
+                      </div>
+                      <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', margin: 0 }}>{match.manOfTheMatch.name}</h2>
+                      <div style={{ color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', marginTop: '0.5rem' }}>Match Performance</div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                      <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
+                          <h4 style={{ color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem', fontSize: '1.1rem' }}>
+                             Batting
+                          </h4>
+                          {pomBatting ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                  <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff' }}>{pomBatting.runs}<span style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 500, marginLeft: '5px' }}>({pomBatting.balls})</span></div>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.9rem' }}>
+                                      <div><span style={{ color: '#94a3b8' }}>4s: </span> {pomBatting.fours}</div>
+                                      <div><span style={{ color: '#94a3b8' }}>6s: </span> {pomBatting.sixes}</div>
+                                      <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#94a3b8' }}>SR: </span> {pomBatting.strikeRate?.toFixed(1) || '0.0'}</div>
+                                  </div>
+                              </div>
+                          ) : <div style={{ color: '#64748b' }}>Did not bat</div>}
+                      </div>
+
+                      <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
+                          <h4 style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem', fontSize: '1.1rem' }}>
+                             Bowling
+                          </h4>
+                          {pomBowling ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                  <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff' }}>{pomBowling.wickets}<span style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 500, marginLeft: '5px' }}>/ {pomBowling.runs}</span></div>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.9rem' }}>
+                                      <div><span style={{ color: '#94a3b8' }}>Overs: </span> {pomBowling.overs}</div>
+                                      <div><span style={{ color: '#94a3b8' }}>Maidens: </span> {pomBowling.maidens || 0}</div>
+                                      <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#94a3b8' }}>Econ: </span> {pomBowling.economyRate?.toFixed(1) || '0.0'}</div>
+                                  </div>
+                              </div>
+                          ) : <div style={{ color: '#64748b' }}>Did not bowl</div>}
+                      </div>
+                  </div>
+                  
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ width: '100%', marginTop: '2rem', borderRadius: '30px' }}
+                    onClick={() => setShowPomStats(false)}
+                  >
+                      Close Summary
+                  </button>
+              </div>
+          </div>
+      )}
     </div>
   );
 };
