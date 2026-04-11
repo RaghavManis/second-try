@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MatchScoringService } from '../services/api';
 import type { Match, ScorecardBatting, ScorecardBowling } from '../types';
+import { Trophy, Star } from 'lucide-react';
 import { AnimatedSection } from '../components/AnimatedSection';
 
 interface ScorecardData {
@@ -84,10 +85,42 @@ const MatchScorecard: React.FC = () => {
           )}
 
           {match.manOfTheMatch && (
-            <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.25) 100%)', padding: '1rem 2.5rem', borderRadius: '20px', border: '1px solid rgba(245, 158, 11, 0.5)', display: 'inline-block' }}>
-                <div style={{ color: '#f59e0b', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '5px' }}>Player of the Match</div>
-                <div style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>{match.manOfTheMatch.name}</div>
+            <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center' }}>
+              <div className="glass-panel" style={{ 
+                background: 'linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.2) 100%)', 
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                padding: '1.5rem 2.5rem', 
+                borderRadius: '24px', 
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1.5rem',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.4), 0 0 20px rgba(245, 158, 11, 0.1)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{ position: 'absolute', top: '-20px', right: '-20px', opacity: 0.1, transform: 'rotate(15deg)' }}>
+                  <Trophy size={100} color="#f59e0b" />
+                </div>
+
+                <div style={{ position: 'relative' }}>
+                  <div style={{ position: 'absolute', inset: '-4px', background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', borderRadius: '50%', opacity: 0.5, filter: 'blur(8px)' }}></div>
+                  <img 
+                    src={match.manOfTheMatch.playerImage || `https://api.dicebear.com/7.x/avataaars/svg?seed=${match.manOfTheMatch.id}&backgroundColor=b6e3f4,c0aede`} 
+                    alt={match.manOfTheMatch.name} 
+                    style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f59e0b', position: 'relative' }} 
+                  />
+                  <div style={{ position: 'absolute', bottom: '-5px', right: '-5px', background: '#f59e0b', color: '#fff', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #1e293b' }}>
+                    <Trophy size={14} />
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'left', zIndex: 1 }}>
+                  <div style={{ color: '#fbbf24', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 800, marginBottom: '4px' }}>Player of the Match</div>
+                  <div style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.01em' }}>{match.manOfTheMatch.name}</div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#94a3b8', fontSize: '0.9rem', marginTop: '4px' }}>
+                    <Star size={14} fill="#f59e0b" color="#f59e0b" /> Exceptional Performance
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -98,13 +131,23 @@ const MatchScorecard: React.FC = () => {
          
          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
             <button className="btn btn-secondary" onClick={() => navigate('/matches')}>&larr; Matches</button>
-            <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}>
+            <div style={{ display: 'flex', gap: '0.6rem', overflowX: 'auto', paddingBottom: '0.75rem', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
                 {['Summary', 'Basic Info', '1st Innings', '2nd Innings', 'Squads'].map(tab => (
                     <button 
                         key={tab} 
                         onClick={() => setActiveTab(tab)} 
                         className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ whiteSpace: 'nowrap', borderRadius: '20px', padding: '0.5rem 1.25rem' }}>
+                        style={{ 
+                          whiteSpace: 'nowrap', 
+                          borderRadius: '30px', 
+                          padding: '0.6rem 1.5rem', 
+                          flexShrink: 0,
+                          minWidth: '100px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}>
                         {tab}
                     </button>
                 ))}
