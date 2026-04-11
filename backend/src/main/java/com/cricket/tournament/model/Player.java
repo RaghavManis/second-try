@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "players")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Player {
 
     public enum PlayerRole {
