@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { AutoScrollContainer } from '../components/AutoScrollContainer';
+import SEO from '../components/common/SEO';
+
 
 const Teams: React.FC = () => {
   const navigate = useNavigate();
@@ -120,6 +122,11 @@ const Teams: React.FC = () => {
 
   return (
     <div className="dashboard-wrapper">
+      <SEO 
+        title="Tournament Teams" 
+        description="Meet the franchises and teams competing for the championship in the Siddha Premier League (SPL). Track squad details and team information."
+      />
+
       {/* SECTION 1: HERO */}
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',

@@ -5,6 +5,8 @@ import { Users, Calendar, Trophy, ArrowRight, Shield, MapPin, Clock } from 'luci
 import type { Team, Match, Player, PointsTableEntry } from '../types';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { AutoScrollContainer } from '../components/AutoScrollContainer';
+import SEO from '../components/common/SEO';
+
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -105,6 +107,11 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-wrapper">
+      <SEO 
+        title="Dashboard" 
+        description="Official home of Siddha Premier League (SPL). Track live scores, matches, team standings, and star athletes from Siddha Ahilaspur, Madhuban Mau."
+      />
+
 
       {/* SECTION 1: PARALLAX HERO */}
       <div className="parallax-hero" style={{

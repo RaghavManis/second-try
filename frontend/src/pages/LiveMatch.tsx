@@ -5,6 +5,8 @@ import confetti from 'canvas-confetti';
 import type { LiveMatchDetailsDto, Match, ScorecardBatting, ScorecardBowling, Player } from '../types';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { Activity, Circle } from 'lucide-react';
+import SEO from '../components/common/SEO';
+
 
 const LiveMatch: React.FC = () => {
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
@@ -268,6 +270,11 @@ const LiveMatch: React.FC = () => {
 
   return (
     <div className="dashboard-wrapper" style={{ paddingBottom: '4rem' }}>
+      <SEO 
+        title="Live Match Score & Commentary" 
+        description="Real-time ball-by-ball commentary, live scores, and detailed statistics for the Siddha Premier League (SPL). Stay updated with every delivery."
+      />
+
       
       <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', marginTop: '0.25rem', paddingTop: '0.25rem' }}>
         

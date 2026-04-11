@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { AutoScrollContainer } from '../components/AutoScrollContainer';
+import SEO from '../components/common/SEO';
+
 
 const Matches: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -279,6 +281,11 @@ const Matches: React.FC = () => {
 
   return (
     <div className="dashboard-wrapper">
+      <SEO 
+        title="Match Fixtures & Results" 
+        description="Full schedule, live results, and scorecards for every match in the Siddha Premier League (SPL). Track upcoming fixtures and historical data."
+      />
+
       {/* SECTION 1: HERO */}
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',

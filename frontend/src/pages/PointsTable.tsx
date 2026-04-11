@@ -4,6 +4,8 @@ import type { PointsTableEntry, Team } from '../types';
 import { Trophy } from 'lucide-react';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { AutoScrollContainer } from '../components/AutoScrollContainer';
+import SEO from '../components/common/SEO';
+
 
 const PointsTable: React.FC = () => {
   const [points, setPoints] = useState<Record<'TOURNAMENT' | 'PRACTICE', PointsTableEntry[]>>({ TOURNAMENT: [], PRACTICE: [] });
@@ -72,6 +74,11 @@ const PointsTable: React.FC = () => {
 
   return (
     <div className="dashboard-wrapper">
+      <SEO 
+        title="Points Table & Leaderboard" 
+        description="Real-time standings, team points, and top performers of the Siddha Premier League (SPL). Track the journey of your favorite teams to the finals."
+      />
+
       {/* SECTION 1: HERO */}
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
