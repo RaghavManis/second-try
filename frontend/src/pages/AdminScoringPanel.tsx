@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MatchService, MatchScoringService, PlayerService } from '../services/api';
+import { MatchScoringService, PlayerService } from '../services/api';
 import type { Match, Player, LiveMatchDetailsDto, ScorecardBatting } from '../types';
 import toast from 'react-hot-toast';
 
