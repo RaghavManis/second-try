@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Team, Match, Score, PointsTableEntry, Player, LiveMatchSetupDto, BallSubmissionDto, LiveMatchDetailsDto, ScorecardBatting, ScorecardBowling, PlayerProfileDto } from '../types';
+import type { Team, Match, Score, PointsTableEntry, Player, LiveMatchSetupDto, BallSubmissionDto, LiveMatchDetailsDto, ScorecardBatting, ScorecardBowling, PlayerProfileDto, OverDetail } from '../types';
 import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
@@ -85,7 +85,7 @@ export const PointsService = {
 export const MatchScoringService = {
   getLiveMatches: () => api.get<Match[]>('/scoring/live'),
   getLiveDetails: (matchId: number, force: boolean = false) => api.get<LiveMatchDetailsDto>(`/scoring/${matchId}/live-details?_t=${Date.now()}${force ? '&force=true' : ''}`),
-  getCompleteScorecard: (matchId: number) => api.get<{ match: Match, batting: ScorecardBatting[], bowling: ScorecardBowling[] }>(`/scoring/${matchId}/scorecard`),
+  getCompleteScorecard: (matchId: number) => api.get<{ match: Match, batting: ScorecardBatting[], bowling: ScorecardBowling[], innings1Overs?: OverDetail[], innings2Overs?: OverDetail[] }>(`/scoring/${matchId}/scorecard`),
   startLiveScoring: (matchId: number, setup: LiveMatchSetupDto) => api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/setup`, setup),
   recordBall: (matchId: number, ballDto: BallSubmissionDto) => api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/ball`, ballDto),
   undoLastBall: (matchId: number) => api.delete<LiveMatchDetailsDto>(`/scoring/${matchId}/last-ball`),

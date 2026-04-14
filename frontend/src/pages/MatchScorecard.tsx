@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MatchScoringService } from '../services/api';
 import type { Match, ScorecardBatting, ScorecardBowling } from '../types';
-import { Trophy, Star, X, Crown, Medal, Zap, Target, TrendingUp } from 'lucide-react';
+import { X, Crown, Medal } from 'lucide-react';
 import { AnimatedSection } from '../components/AnimatedSection';
 import confetti from 'canvas-confetti';
 import type { OverDetail } from '../types';
@@ -71,6 +71,16 @@ const MatchScorecard: React.FC = () => {
     setMousePos({ x, y });
   };
 
+  // Core helpers (must be defined BEFORE any use of them above)
+  const calculateTotal = (batters: ScorecardBatting[]) =>
+    batters.reduce((acc, curr) => acc + curr.runs, 0);
+
+  const calculateWickets = (batters: ScorecardBatting[]) => {
+    const outs = batters.filter(b => b.howOut && b.howOut.toLowerCase() !== 'not out' && b.howOut !== '');
+    const uniqueOuts = Array.from(new Set(outs.map(b => b.player.id)));
+    return Math.min(10, uniqueOuts.length);
+  };
+
   // Separate by innings (innings number, NOT by team)
   const innings1Batting = batting.filter(b => b.innings === 1);
   const innings1Bowling = bowling.filter(b => b.innings === 1);
@@ -78,55 +88,38 @@ const MatchScorecard: React.FC = () => {
   const innings2Bowling = bowling.filter(b => b.innings === 2);
 
   // ── Determine which team batted in which innings ──
-  // We detect this from the actual data, NOT by assuming teamA = innings1
   const inn1Team = innings1Batting.length > 0 ? innings1Batting[0].team : null;
   const teamABattedFirst = inn1Team ? inn1Team.id === match.teamA.id : true;
 
-  // Team A's actual batting/bowling arrays
-  const teamABatting  = teamABattedFirst ? innings1Batting  : innings2Batting;
-  const teamABowling  = teamABattedFirst ? innings2Bowling  : innings1Bowling;
-  const teamAScore    = teamABattedFirst
-    ? (match.firstInningsScore  ?? calculateTotal(innings1Batting))
-    : (match.currentScore       ?? calculateTotal(innings2Batting));
-  const teamAWickets  = teamABattedFirst
-    ? (match.firstInningsWickets  ?? calculateWickets(innings1Batting))
-    : (match.currentWickets       ?? calculateWickets(innings2Batting));
-
-  // Team B's actual batting/bowling arrays
-  const teamBBatting  = teamABattedFirst ? innings2Batting  : innings1Batting;
-  const teamBBowling  = teamABattedFirst ? innings1Bowling  : innings2Bowling;
-  const teamBScore    = teamABattedFirst
-    ? (match.currentScore       ?? calculateTotal(innings2Batting))
-    : (match.firstInningsScore  ?? calculateTotal(innings1Batting));
-  const teamBWickets  = teamABattedFirst
-    ? (match.currentWickets       ?? calculateWickets(innings2Batting))
-    : (match.firstInningsWickets  ?? calculateWickets(innings1Batting));
+  // Scores per team (using correct innings mapping)
+  const teamAScore   = teamABattedFirst
+    ? (match.firstInningsScore   ?? calculateTotal(innings1Batting))
+    : (match.currentScore        ?? calculateTotal(innings2Batting));
+  const teamAWickets = teamABattedFirst
+    ? (match.firstInningsWickets ?? calculateWickets(innings1Batting))
+    : (match.currentWickets      ?? calculateWickets(innings2Batting));
+  const teamBScore   = teamABattedFirst
+    ? (match.currentScore        ?? calculateTotal(innings2Batting))
+    : (match.firstInningsScore   ?? calculateTotal(innings1Batting));
+  const teamBWickets = teamABattedFirst
+    ? (match.currentWickets      ?? calculateWickets(innings2Batting))
+    : (match.firstInningsWickets ?? calculateWickets(innings1Batting));
 
   // ── Display order: Innings 1 team = LEFT, Innings 2 team = RIGHT ──
-  // This ensures the hero and comparison cards always read: "Batted First | VS | Batted Second"
   const leftTeam     = teamABattedFirst ? match.teamA : match.teamB;
   const rightTeam    = teamABattedFirst ? match.teamB : match.teamA;
   const leftScore    = teamABattedFirst ? teamAScore   : teamBScore;
   const leftWickets  = teamABattedFirst ? teamAWickets : teamBWickets;
   const rightScore   = teamABattedFirst ? teamBScore   : teamAScore;
   const rightWickets = teamABattedFirst ? teamBWickets : teamAWickets;
-  const leftBatting  = innings1Batting;  // definitionally the 1st innings batch
-  const leftBowling  = innings2Bowling;  // bowlers in 2nd innings = those who bowled against left
+  const leftBatting  = innings1Batting;
+  const leftBowling  = innings2Bowling;
   const rightBatting = innings2Batting;
   const rightBowling = innings1Bowling;
 
   // Find POM Stats
   const pomBatting = batting.find(b => b.player.id === match.manOfTheMatch?.id);
   const pomBowling = bowling.find(b => b.player.id === match.manOfTheMatch?.id);
-
-  const calculateTotal = (batters: ScorecardBatting[]) => {
-    return batters.reduce((acc, curr) => acc + curr.runs, 0); 
-  };
-  const calculateWickets = (batters: ScorecardBatting[]) => {
-    const outs = batters.filter(b => b.howOut && b.howOut.toLowerCase() !== 'not out' && b.howOut !== '');
-    const uniqueOuts = Array.from(new Set(outs.map(b => b.player.id)));
-    return Math.min(10, uniqueOuts.length);
-  };
 
   const getTopBatter = (batters: ScorecardBatting[]) => {
     if (batters.length === 0) return null;
@@ -382,7 +375,7 @@ const MatchScorecard: React.FC = () => {
                             ? { label: 'Won By', value: `${wicketsM[1]} Wkts`, sub: `${match.winnerTeam?.teamName ?? 'Winner'}`, color: '#f59e0b' }
                             : match.status === 'COMPLETED'
                             ? { label: 'Result', value: 'Tied', sub: 'No winner', color: '#10b981' }
-                            : match.status === 'IN_PROGRESS'
+                            : match.status === 'ONGOING'
                             ? { label: 'Status', value: 'Live 🔴', sub: 'In Progress', color: '#ef4444' }
                             : { label: 'Status', value: 'Upcoming', sub: match.matchDate ?? '—', color: '#64748b' };
 
