@@ -216,8 +216,9 @@ const Dashboard: React.FC = () => {
       <div className="dashboard-sections">
 
         {/* SECTION SEO: TOURNAMENT INFO & INTERNAL LINKS */}
-        <AnimatedSection id="seo-content-section" className="bg-section-6" style={{ padding: '3rem 1.5rem', background: 'var(--bg-color)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+        <AnimatedSection id="seo-content-section" className="bg-section-6">
+          <div style={{ padding: '3rem 1.5rem', background: 'var(--bg-color)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
             <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--primary)' }}>Welcome to the Siddha Premier League (SPL)</h2>
             <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.1rem', marginBottom: '2rem' }}>
               The <strong>Siddha Premier League</strong> (SPL) is the most celebrated <strong>village cricket league in Siddha Ahilaspur</strong>, bringing together the finest talent from the region. Experience high-octane <strong>Madhuban Mau cricket tournament</strong> action, live scores, and thrilling match highlights.
@@ -237,6 +238,7 @@ const Dashboard: React.FC = () => {
                 color: var(--primary) !important;
               }
             `}</style>
+            </div>
           </div>
         </AnimatedSection>
 
