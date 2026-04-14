@@ -108,8 +108,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-wrapper">
       <SEO 
-        title="Dashboard" 
-        description="Official home of Siddha Premier League (SPL). Track live scores, matches, team standings, and star athletes from Siddha Ahilaspur, Madhuban Mau."
+        canonicalUrl="https://splcricket.live"
       />
 
 
@@ -141,7 +140,7 @@ const Dashboard: React.FC = () => {
           </div>
           
           <h1 className="spl-title" style={{ 
-            fontSize: 'clamp(3rem, 8vw, 6.5rem)', 
+            fontSize: 'clamp(2.5rem, 6vw, 5rem)', 
             fontWeight: 900, 
             marginBottom: '0.5rem', 
             letterSpacing: '-0.02em',
@@ -153,7 +152,7 @@ const Dashboard: React.FC = () => {
             position: 'relative',
             whiteSpace: 'pre-line'
           }}>
-            <span>SIDDHA PREMIER</span><span className="league-text"> LEAGUE</span>
+            <span style={{ display: 'block' }}>SIDDHA PREMIER LEAGUE (SPL),</span><span className="league-text" style={{ fontSize: '0.7em', display: 'block' }}>MADHUBAN MAU</span>
           </h1>
           
           <h2 style={{
@@ -215,6 +214,31 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="dashboard-sections">
+
+        {/* SECTION SEO: TOURNAMENT INFO & INTERNAL LINKS */}
+        <AnimatedSection id="seo-content-section" className="bg-section-6" style={{ padding: '3rem 1.5rem', background: 'var(--bg-color)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--primary)' }}>Welcome to the Siddha Premier League (SPL)</h2>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.1rem', marginBottom: '2rem' }}>
+              The <strong>Siddha Premier League</strong> (SPL) is the most celebrated <strong>village cricket league in Siddha Ahilaspur</strong>, bringing together the finest talent from the region. Experience high-octane <strong>Madhuban Mau cricket tournament</strong> action, live scores, and thrilling match highlights.
+            </p>
+            
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <NavLink to="/matches" className="seo-internal-link" style={{ padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', color: '#e2e8f0', textDecoration: 'none', fontWeight: 600, border: '1px solid rgba(255,255,255,0.1)' }}>Live SPL Matches</NavLink>
+              <NavLink to="/teams" className="seo-internal-link" style={{ padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', color: '#e2e8f0', textDecoration: 'none', fontWeight: 600, border: '1px solid rgba(255,255,255,0.1)' }}>Siddha League Teams</NavLink>
+              <NavLink to="/points-table" className="seo-internal-link" style={{ padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', color: '#e2e8f0', textDecoration: 'none', fontWeight: 600, border: '1px solid rgba(255,255,255,0.1)' }}>SPL Points Table</NavLink>
+              <NavLink to="/highlights" className="seo-internal-link" style={{ padding: '0.8rem 1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', color: '#e2e8f0', textDecoration: 'none', fontWeight: 600, border: '1px solid rgba(255,255,255,0.1)' }}>Tournament Highlights</NavLink>
+            </div>
+            
+            <style>{`
+              .seo-internal-link:hover {
+                background: rgba(255,255,255,0.1) !important;
+                border-color: var(--primary) !important;
+                color: var(--primary) !important;
+              }
+            `}</style>
+          </div>
+        </AnimatedSection>
 
         {/* SECTION 2: TOURNAMENT STATS */}
         <AnimatedSection id="stats-section" className="bg-section-1 theme-dark">

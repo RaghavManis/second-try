@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Trophy, Users, Calendar, BarChart2, LogIn, LogOut, User, Circle, Image as ImageIcon, Sun, Moon, Crown } from 'lucide-react';
+import { Trophy, Users, Calendar, BarChart2, LogIn, LogOut, User, Circle, Image as ImageIcon, Sun, Moon, Crown, Play } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { MatchScoringService } from '../../services/api';
 import './Navbar.css';
@@ -93,6 +93,12 @@ const Navbar: React.FC = () => {
           <NavLink to="/gallery" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <ImageIcon size={20} />
             <span>Gallery</span>
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/highlights" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <Play size={20} />
+            <span>Highlights</span>
           </NavLink>
         </li>
         <li>
