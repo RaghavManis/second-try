@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { MatchScoringService } from '../services/api';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
-import type { LiveMatchDetailsDto, Match, ScorecardBatting, ScorecardBowling, Player } from '../types';
+import type { LiveMatchDetailsDto, Match, ScorecardBatting, ScorecardBowling, Player, OverDetail } from '../types';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { Activity, Circle } from 'lucide-react';
 import SEO from '../components/common/SEO';
@@ -14,6 +14,8 @@ const LiveMatch: React.FC = () => {
   const [details, setDetails] = useState<LiveMatchDetailsDto | null>(null);
   const [battingCards, setBattingCards] = useState<ScorecardBatting[]>([]);
   const [bowlingCards, setBowlingCards] = useState<ScorecardBowling[]>([]);
+  const [innings1Overs, setInnings1Overs] = useState<OverDetail[]>([]);
+  const [innings2Overs, setInnings2Overs] = useState<OverDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('Live');
   const [boundaryAnim, setBoundaryAnim] = useState<'four' | 'six' | null>(null);
@@ -116,6 +118,8 @@ const LiveMatch: React.FC = () => {
         const cardRes = await MatchScoringService.getCompleteScorecard(selectedMatchId);
         setBattingCards(cardRes.data.batting);
         setBowlingCards(cardRes.data.bowling);
+        setInnings1Overs(cardRes.data.innings1Overs || []);
+        setInnings2Overs(cardRes.data.innings2Overs || []);
       } catch (err) {
         console.error('Failed fetching scorecard components', err);
       }
@@ -295,7 +299,7 @@ const LiveMatch: React.FC = () => {
 
         {/* TABS NAVIGATION */}
         <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingTop: '0.1rem', paddingBottom: '0.4rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-          {['Live', '1st Innings', '2nd Innings', 'Playing XI', 'Match Info'].map(tab => (
+          {['Live', '1st Innings', '2nd Innings', 'Over Details', 'Playing XI', 'Match Info'].map(tab => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab)} 
@@ -463,6 +467,105 @@ const LiveMatch: React.FC = () => {
       
       {renderTimeline()}
       </>
+      )}
+
+      {/* TAB: Over Details */}
+      {activeTab === 'Over Details' && (
+         <AnimatedSection>
+             <div className="glass-panel" style={{ padding: '1.5rem', width: '100%', marginBottom: '2rem' }}>
+                 <h3 className="gradient-text" style={{ marginBottom: '1.5rem', fontSize: '1.3rem' }}>Over-wise Data</h3>
+                 
+                 {innings1Overs && innings1Overs.length > 0 && (
+                     <div style={{ marginBottom: '2.5rem' }}>
+                        <h4 style={{ color: 'var(--primary)', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                            1st Innings - {firstInningsBatting.length > 0 ? firstInningsBatting[0].team.teamName : 'Batting Team'}
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {innings1Overs.map((over, idx) => (
+                                <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ width: '250px', flexShrink: 0, marginBottom: '0.5rem' }}>
+                                        <span style={{ fontWeight: 'bold', color: '#fff' }}>Over {over.overNumber}</span>
+                                        <span style={{ color: '#94a3b8', marginLeft: '0.5rem', fontSize: '0.9rem' }}>({over.bowlerName})</span>
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', flex: 1 }}>
+                                        {over.balls.map((b, bIdx) => {
+                                            let bgColor = 'rgba(255,255,255,0.05)';
+                                            let color = '#94a3b8';
+                                            if (b === 'W') { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
+                                            else if (b === '4') { bgColor = 'rgba(59, 130, 246, 0.2)'; color = '#3b82f6'; }
+                                            else if (b === '6') { bgColor = 'rgba(139, 92, 246, 0.2)'; color = '#8b5cf6'; }
+                                            else if (b !== '0' && b.length === 1) { bgColor = 'rgba(16, 185, 129, 0.2)'; color = '#10b981'; }
+                                            else if (b.length > 1) { bgColor = 'rgba(245, 158, 11, 0.2)'; color = '#f59e0b'; }
+                                            
+                                            return (
+                                                <div key={bIdx} style={{ 
+                                                    width: '32px', height: '32px', borderRadius: '50%', backgroundColor: bgColor, color: color,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
+                                                    fontSize: b.length > 3 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.9rem',
+                                                    border: `1px solid ${color}40`
+                                                }}>
+                                                    {b}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                    <div style={{ paddingLeft: '1rem', color: '#cbd5e1', fontSize: '0.9rem', minWidth: '80px', textAlign: 'right', fontWeight: 'bold' }}>
+                                        {over.runs} Runs {over.wickets > 0 ? `| ${over.wickets} W` : ''}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                     </div>
+                 )}
+
+                 {innings2Overs && innings2Overs.length > 0 && (
+                     <div>
+                        <h4 style={{ color: 'var(--primary)', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                            2nd Innings - {secondInningsBatting.length > 0 ? secondInningsBatting[0].team.teamName : 'Batting Team'}
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {innings2Overs.map((over, idx) => (
+                                <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ width: '250px', flexShrink: 0, marginBottom: '0.5rem' }}>
+                                        <span style={{ fontWeight: 'bold', color: '#fff' }}>Over {over.overNumber}</span>
+                                        <span style={{ color: '#94a3b8', marginLeft: '0.5rem', fontSize: '0.9rem' }}>({over.bowlerName})</span>
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', flex: 1 }}>
+                                        {over.balls.map((b, bIdx) => {
+                                            let bgColor = 'rgba(255,255,255,0.05)';
+                                            let color = '#94a3b8';
+                                            if (b === 'W') { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
+                                            else if (b === '4') { bgColor = 'rgba(59, 130, 246, 0.2)'; color = '#3b82f6'; }
+                                            else if (b === '6') { bgColor = 'rgba(139, 92, 246, 0.2)'; color = '#8b5cf6'; }
+                                            else if (b !== '0' && b.length === 1) { bgColor = 'rgba(16, 185, 129, 0.2)'; color = '#10b981'; }
+                                            else if (b.length > 1) { bgColor = 'rgba(245, 158, 11, 0.2)'; color = '#f59e0b'; }
+                                            
+                                            return (
+                                                <div key={bIdx} style={{ 
+                                                    width: '32px', height: '32px', borderRadius: '50%', backgroundColor: bgColor, color: color,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
+                                                    fontSize: b.length > 3 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.9rem',
+                                                    border: `1px solid ${color}40`
+                                                }}>
+                                                    {b}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                    <div style={{ paddingLeft: '1rem', color: '#cbd5e1', fontSize: '0.9rem', minWidth: '80px', textAlign: 'right', fontWeight: 'bold' }}>
+                                        {over.runs} Runs {over.wickets > 0 ? `| ${over.wickets} W` : ''}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                     </div>
+                 )}
+
+                 {(!innings1Overs || innings1Overs.length === 0) && (!innings2Overs || innings2Overs.length === 0) && (
+                     <div style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem' }}>No over details available yet.</div>
+                 )}
+             </div>
+         </AnimatedSection>
       )}
 
         {/* TAB: Match Info */}

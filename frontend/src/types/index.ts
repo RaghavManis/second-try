@@ -158,3 +158,12 @@ export interface GalleryImage {
   imageUrl: string;
   uploadedAt?: string;
 }
+
+export interface OverDetail {
+  overNumber: number;
+  bowlerName: string;
+  balls: string[];
+  runs: number;
+  wickets: number;
+}
+

@@ -6,6 +6,7 @@ import com.cricket.tournament.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.*;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ public class MatchScoringService {
     private PlayerMatchStatsRepository playerMatchStatsRepository;
 
     @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public LiveMatchDetailsDto startLiveScoring(Long matchId, LiveMatchSetupDto setup) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
@@ -113,6 +115,7 @@ public class MatchScoringService {
     }
 
     @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public LiveMatchDetailsDto recordBall(Long matchId, BallSubmissionDto ballDto) {
         if (ballDto.getRuns() != null && ballDto.getRuns() < 0) {
             throw new IllegalArgumentException("Runs cannot be negative");
@@ -364,6 +367,7 @@ public class MatchScoringService {
     }
 
     @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public LiveMatchDetailsDto updateBowler(Long matchId, Long newBowlerId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
@@ -373,6 +377,7 @@ public class MatchScoringService {
     }
     
     @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public LiveMatchDetailsDto swapBatsmen(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
@@ -386,6 +391,7 @@ public class MatchScoringService {
     }
     
     @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public LiveMatchDetailsDto undoLastBall(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
         if (match.getStatus() != Match.MatchStatus.ONGOING) throw new IllegalStateException("Match is not ongoing");
@@ -484,6 +490,7 @@ public class MatchScoringService {
 
     
     @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public LiveMatchDetailsDto endInnings(Long matchId, Long newStrikerId, Long newNonStrikerId, Long newBowlerId, Integer targetScore) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
@@ -662,6 +669,7 @@ public class MatchScoringService {
     }
 
     @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public LiveMatchDetailsDto completeMatch(Long matchId, Long winnerTeamId, Long manOfTheMatchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Match is already completed");
@@ -737,6 +745,66 @@ public class MatchScoringService {
         response.put("match", match);
         response.put("batting", scorecardBattingRepository.findByMatchId(matchId));
         response.put("bowling", scorecardBowlingRepository.findByMatchId(matchId));
+        
+        List<BallEvent> balls1 = ballEventRepository.findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(matchId, 1);
+        List<BallEvent> balls2 = ballEventRepository.findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(matchId, 2);
+        
+        response.put("innings1Overs", buildOversList(balls1));
+        response.put("innings2Overs", buildOversList(balls2));
+        
         return response;
+    }
+
+    private List<Map<String, Object>> buildOversList(List<BallEvent> events) {
+        Map<Integer, List<BallEvent>> oversMap = new TreeMap<>();
+        for (BallEvent e : events) {
+            oversMap.computeIfAbsent(e.getOverNumber(), k -> new ArrayList<>()).add(e);
+        }
+        
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map.Entry<Integer, List<BallEvent>> entry : oversMap.entrySet()) {
+            Map<String, Object> overDetails = new HashMap<>();
+            int overNum = entry.getKey() + 1;
+            overDetails.put("overNumber", overNum);
+            
+            if (!entry.getValue().isEmpty() && entry.getValue().get(0).getBowler() != null) {
+                overDetails.put("bowlerName", entry.getValue().get(0).getBowler().getName());
+            } else {
+                overDetails.put("bowlerName", "Unknown");
+            }
+            
+            List<String> balls = new ArrayList<>();
+            int runs = 0;
+            int wickets = 0;
+            
+            for (BallEvent e : entry.getValue()) {
+                String evStr;
+                if (Boolean.TRUE.equals(e.getIsWicket())) {
+                    evStr = "W";
+                    wickets++;
+                } else if ("WIDE".equals(e.getExtraType())) {
+                    evStr = "WD+" + e.getRuns();
+                } else if ("NO_BALL".equals(e.getExtraType())) {
+                    evStr = "NB+" + e.getRuns();
+                } else if ("BYE".equals(e.getExtraType())) {
+                    evStr = "B+" + e.getRuns();
+                } else if ("LEG_BYE".equals(e.getExtraType())) {
+                    evStr = "LB+" + e.getRuns();
+                } else {
+                    evStr = String.valueOf(e.getRuns());
+                }
+                balls.add(evStr);
+                
+                int r = e.getRuns() != null ? e.getRuns() : 0;
+                int ext = e.getExtraRuns() != null ? e.getExtraRuns() : 0;
+                runs += (r + ext);
+            }
+            
+            overDetails.put("balls", balls);
+            overDetails.put("runs", runs);
+            overDetails.put("wickets", wickets);
+            result.add(overDetails);
+        }
+        return result;
     }
 }
