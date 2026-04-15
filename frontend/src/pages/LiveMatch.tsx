@@ -161,6 +161,16 @@ const LiveMatch: React.FC = () => {
 
   if (!details) return null;
 
+  // ── Match Pressure Indicator Calculations (2nd innings only) ──────────────
+  const totalOvers = details.match.overs || 20;
+  const oversFloat = typeof details.currentOvers === 'number' ? details.currentOvers : parseFloat(String(details.currentOvers));
+  const fullOversCompleted = Math.floor(oversFloat);
+  const ballsInCurrentOver = Math.round((oversFloat % 1) * 10);
+  const ballsBowled = fullOversCompleted * 6 + ballsInCurrentOver;
+  const ballsRemaining = (totalOvers * 6) - ballsBowled;
+  const runsRequired = details.targetScore != null ? details.targetScore - details.currentScore : 0;
+  // ─────────────────────────────────────────────────────────────────────────
+
   const currentBattingTeam = details.match.currentInnings === 1 ? details.match.battingTeam : details.match.battingTeam; // Handled by backend accurately
   
   const currentInningsBatting = battingCards.filter(c => c.innings === details.match.currentInnings);
@@ -414,6 +424,58 @@ const LiveMatch: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Line 3.5: Match Pressure Indicator — 2nd Innings only */}
+            {details.match.currentInnings === 2 && runsRequired > 0 && ballsRemaining > 0 && (
+              <div style={{
+                marginBottom: '1rem',
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(239,68,68,0.10) 100%)',
+                border: '1px solid rgba(245,158,11,0.35)',
+                borderRadius: '14px',
+                padding: '0.7rem 1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                flexWrap: 'wrap',
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+                {/* Subtle animated glow pulse */}
+                <div style={{
+                  position: 'absolute', inset: 0, borderRadius: '14px',
+                  background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.08) 0%, transparent 70%)',
+                  animation: 'pulse 2s ease-in-out infinite',
+                  pointerEvents: 'none',
+                }} />
+                {/* Bolt icon */}
+                <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>⚡</span>
+                {/* Main pressure text */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap', justifyContent: 'center', zIndex: 1 }}>
+                  <span style={{ fontSize: 'clamp(1rem, 4vw, 1.25rem)', fontWeight: 900, color: '#fbbf24', lineHeight: 1 }}>
+                    {runsRequired}
+                  </span>
+                  <span style={{ fontSize: 'clamp(0.75rem, 3vw, 0.95rem)', color: '#e2e8f0', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    runs required in
+                  </span>
+                  <span style={{ fontSize: 'clamp(1rem, 4vw, 1.25rem)', fontWeight: 900, color: '#38bdf8', lineHeight: 1 }}>
+                    {ballsRemaining}
+                  </span>
+                  <span style={{ fontSize: 'clamp(0.75rem, 3vw, 0.95rem)', color: '#e2e8f0', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    balls
+                  </span>
+                </div>
+                {/* Divider */}
+                <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
+                {/* RRR inline */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', zIndex: 1 }}>
+                  <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>RRR</span>
+                  <span style={{ fontSize: 'clamp(0.9rem, 3.5vw, 1.1rem)', fontWeight: 900, color: '#f87171' }}>
+                    {details.requiredRunRate?.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Line 4: Unified Analytical Footer (Innings Conditional) */}
             <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '0.75rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)', gap: '4px' }}>
