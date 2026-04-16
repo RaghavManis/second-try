@@ -30,6 +30,7 @@ com\cricket\tournament\repository\ScorecardBowlingRepository.class
 com\cricket\tournament\model\Score.class
 com\cricket\tournament\config\CloudinaryConfig.class
 com\cricket\tournament\model\PlayerMatchStats.class
+com\cricket\tournament\config\PingFilter.class
 com\cricket\tournament\model\ScorecardBowling.class
 com\cricket\tournament\config\RequestLoggingInterceptor.class
 com\cricket\tournament\controller\PublicController.class
