@@ -609,6 +609,9 @@ public class MatchScoringService {
             });
         }
         
+        dto.setStreamUrl(match.getStreamUrl());
+        dto.setStreamDelaySeconds(match.getStreamDelaySeconds() != null ? match.getStreamDelaySeconds() : 0);
+        
         // Rule 16 Fallbacks: if they haven't been fetched yet but they exist in match, default to zero
         if (match.getCurrentStriker() != null && dto.getStrikerRuns() == null) {
             dto.setStrikerRuns(0); dto.setStrikerBalls(0);
@@ -670,11 +673,23 @@ public class MatchScoringService {
 
     @Transactional
     @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
+    public Match updateStreamConfig(Long matchId, StreamConfigDto configDto) {
+        Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
+        match.setStreamUrl(configDto.getStreamUrl());
+        match.setStreamDelaySeconds(configDto.getStreamDelaySeconds());
+        liveDetailsCache.invalidate(matchId);
+        return matchRepository.save(match);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
     public LiveMatchDetailsDto completeMatch(Long matchId, Long winnerTeamId, Long manOfTheMatchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Match is already completed");
         
         match.setStatus(Match.MatchStatus.COMPLETED);
+        match.setMatchEndTime(java.time.LocalDateTime.now());
+
         if (winnerTeamId != null) {
             match.setWinnerTeam(teamRepository.findById(winnerTeamId).orElse(null));
             if (match.getWinnerTeam().getId().equals(match.getBattingTeam().getId())) {

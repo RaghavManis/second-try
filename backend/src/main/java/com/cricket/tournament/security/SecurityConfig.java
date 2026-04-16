@@ -33,7 +33,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/error").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/contact").permitAll() // Allow contact form submissions
+                        .requestMatchers("/api/public/**").permitAll() // Allow lightweight keep-alive pings
                         .requestMatchers("/actuator/**").permitAll() // Allow health checks
+
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll() // Allow everyone to read data
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow OPTIONS requests
                         .anyRequest().authenticated() // Block POST, PUT, DELETE without token

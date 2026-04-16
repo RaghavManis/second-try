@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Youtube, Facebook, Twitter, Linkedin, Instagram, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ContactService } from '../../services/api';
 
 const Footer: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,29 +30,26 @@ const Footer: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          message: formData.message
-        }),
+      const response = await ContactService.submitContactForm({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success(data.message || 'Message sent successfully!');
+      if (response.status === 200) {
+        toast.success(response.data.message || 'Message sent successfully!');
         setIsModalOpen(false);
         setFormData({ name: '', mobile: '', email: '', message: '' });
       } else {
-        toast.error(data.message || 'Failed to send message');
+        toast.error(response.data.message || 'Failed to send message');
       }
-    } catch (err) {
-      toast.error('Connection error. Please try again later.');
+    } catch (err: any) {
+      // The API interceptor might have already shown a toast, but this acts as an ultimate fallback for this specific action
+      const errorMsg = err.response?.data?.message || 'Connection error. Please try again later.';
+      if (!err.response || err.response.status !== 429) { // Avoid duplicate toasts if the interceptor handled standard errors
+         // toast.error(errorMsg); // Optional if we consider the interceptor covers everything
+      }
+      console.error("Contact Form Error:", err);
     } finally {
       setIsSubmitting(false);
     }

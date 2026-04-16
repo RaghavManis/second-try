@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MatchScoringService } from '../services/api';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
@@ -307,6 +308,30 @@ const LiveMatch: React.FC = () => {
           </div>
         )}
 
+        {/* STREAMING NOTIFICATION */}
+        {details.match.status === 'ONGOING' && details.streamUrl && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+            <button 
+              onClick={() => window.open(`/live-stream/${details.match.id}`, '_blank')}
+              className="btn"
+              style={{
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                color: 'white',
+                fontWeight: 'bold',
+                borderRadius: '30px',
+                padding: '0.6rem 1.5rem',
+                border: 'none',
+                boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                animation: 'pulse 2s infinite'
+              }}>
+              <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>📺</span> Watch Live Stream
+            </button>
+          </div>
+        )}
+
         {/* TABS NAVIGATION */}
         <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingTop: '0.1rem', paddingBottom: '0.4rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
           {['Live', '1st Innings', '2nd Innings', 'Over Details', 'Playing XI', 'Match Info'].map(tab => (
@@ -370,6 +395,7 @@ const LiveMatch: React.FC = () => {
             {details.match.currentInnings === 2 && (
                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                   <div style={{ fontSize: '0.85rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>
+
                     1st Innings ({details.match.bowlingTeam?.teamName}): <span style={{ color: '#fff', fontWeight: 'bold', marginLeft: '8px' }}>{details.match.firstInningsScore}-{details.match.firstInningsWickets}</span>
                   </div>
                </div>
@@ -381,8 +407,10 @@ const LiveMatch: React.FC = () => {
                 <span style={{ fontSize: '2.8rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1 }}>{details.currentScore}</span>
                 <span style={{ fontSize: '1.6rem', color: '#cbd5e1', fontWeight: 700 }}>- {Math.min(10, details.currentWickets)}</span>
               </div>
-              <div style={{ fontSize: '1rem', color: '#94a3b8', marginTop: '0.2rem', fontWeight: '600' }}>
-                {details.currentOvers} <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'normal' }}>Overs</span>
+              <div style={{ fontSize: '1rem', color: '#94a3b8', marginTop: '0.2rem', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                {details.currentOvers} <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'normal' }}>/</span>{' '}
+                <span style={{ fontSize: '0.95rem', color: '#cbd5e1', fontWeight: 700 }}>{totalOvers}</span>{' '}
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 'normal' }}>ov</span>
               </div>
             </div>
 
@@ -393,7 +421,9 @@ const LiveMatch: React.FC = () => {
                 {details.currentStriker && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                     <div style={{ fontSize: '0.95rem', color: '#fff', fontWeight: 'bold' }}>
-                      {details.currentStriker.name} <span style={{ color: '#fbbf24' }}>*</span>
+                      <Link to={`/players/${details.currentStriker.id}`} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>
+                        {details.currentStriker.name}
+                      </Link> <span style={{ color: '#fbbf24' }}>*</span>
                     </div>
                     <div style={{ fontSize: '0.95rem', color: '#cbd5e1' }}>
                       {details.strikerRuns}<span style={{ fontSize: '0.8rem', color: '#64748b', marginLeft: '2px' }}>({details.strikerBalls})</span>
@@ -403,7 +433,9 @@ const LiveMatch: React.FC = () => {
                 {details.currentNonStriker && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>
-                      {details.currentNonStriker.name}
+                      <Link to={`/players/${details.currentNonStriker.id}`} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>
+                        {details.currentNonStriker.name}
+                      </Link>
                     </div>
                     <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
                       {details.nonStrikerRuns}<span style={{ fontSize: '0.75rem', color: '#475569', marginLeft: '2px' }}>({details.nonStrikerBalls})</span>
@@ -416,7 +448,11 @@ const LiveMatch: React.FC = () => {
               <div style={{ textAlign: 'right' }}>
                 {details.currentBowler && (
                   <>
-                    <div style={{ fontSize: '0.95rem', color: '#fbbf24', fontWeight: 'bold', marginBottom: '2px' }}>{details.currentBowler.name}</div>
+                    <div style={{ fontSize: '0.95rem', color: '#fbbf24', fontWeight: 'bold', marginBottom: '2px' }}>
+                      <Link to={`/players/${details.currentBowler.id}`} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>
+                        {details.currentBowler.name}
+                      </Link>
+                    </div>
                     <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 'bold' }}>
                       {details.bowlerWickets}-{details.bowlerRuns} <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'normal' }}>({details.bowlerOvers})</span>
                     </div>
@@ -653,7 +689,7 @@ const LiveMatch: React.FC = () => {
                   <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                      <span style={{ color: '#94a3b8' }}>Date & Time</span>
-                     <span>{new Date(details.match.matchDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                     <span>{new Date(details.match.matchDateTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
                   </div>
                   <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -681,7 +717,7 @@ const LiveMatch: React.FC = () => {
                     <h4 style={{ color: 'var(--primary)', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>{details.match.teamA.teamName}</h4>
                     <ul style={{ listStyleType: 'none', padding: 0, margin: 0, color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                        {details.match.playingXiTeamA?.map((p: Player) => (
-                         <li key={p.id}>• {p.name} {p.isCaptain ? '(C)' : ''} {p.isViceCaptain ? '(VC)' : ''} {p.role === 'WICKETKEEPER' ? '(WK)' : ''}</li>
+                         <li key={p.id}>• <Link to={'/players/' + p.id} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>{p.name}</Link> {p.isCaptain ? '(C)' : ''} {p.isViceCaptain ? '(VC)' : ''} {p.role === 'WICKETKEEPER' ? '(WK)' : ''}</li>
                        ))}
                        {(!details.match.playingXiTeamA || details.match.playingXiTeamA.length === 0) && <li style={{color: '#64748b'}}>Not announced</li>}
                     </ul>
@@ -690,7 +726,7 @@ const LiveMatch: React.FC = () => {
                     <h4 style={{ color: 'var(--primary)', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>{details.match.teamB.teamName}</h4>
                     <ul style={{ listStyleType: 'none', padding: 0, margin: 0, color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                        {details.match.playingXiTeamB?.map((p: Player) => (
-                         <li key={p.id}>• {p.name} {p.isCaptain ? '(C)' : ''} {p.isViceCaptain ? '(VC)' : ''} {p.role === 'WICKETKEEPER' ? '(WK)' : ''}</li>
+                         <li key={p.id}>• <Link to={'/players/' + p.id} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>{p.name}</Link> {p.isCaptain ? '(C)' : ''} {p.isViceCaptain ? '(VC)' : ''} {p.role === 'WICKETKEEPER' ? '(WK)' : ''}</li>
                        ))}
                        {(!details.match.playingXiTeamB || details.match.playingXiTeamB.length === 0) && <li style={{color: '#64748b'}}>Not announced</li>}
                     </ul>
@@ -728,9 +764,13 @@ const LiveMatch: React.FC = () => {
                             <tbody>
                                 {firstInningsBatting.map(card => (
                                     <tr key={card.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '0.5rem', color: '#fff' }}>{card.player.name} {card.howOut === 'not out' ? '*' : ''}</td>
+                                        <td style={{ padding: '0.5rem', color: '#fff' }}>
+                                          <Link to={`/players/${card.player.id}`} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>
+                                            {card.player.name}
+                                          </Link> {card.howOut === 'not out' ? '*' : ''}
+                                        </td>
                                         <td data-label="Status" style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>{card.howOut}</td>
-                                        <td data-label="R" style={{ textAlign: 'center', fontWeight: 'bold' }}>{card.runs}</td>
+                                        <td data-label="R" style={{ textAlign: 'center' }}><span style={{ fontWeight: 900, fontSize: '0.95rem', color: card.runs >= 50 ? '#f59e0b' : card.runs >= 30 ? '#10b981' : '#fff', background: card.runs >= 50 ? 'rgba(245,158,11,0.18)' : card.runs >= 30 ? 'rgba(16,185,129,0.14)' : 'transparent', borderRadius: '6px', padding: card.runs >= 30 ? '1px 6px' : '0', display: 'inline-block', minWidth: '24px', textAlign: 'center' }}>{card.runs}</span></td>
                                         <td data-label="B" style={{ textAlign: 'center' }}>{card.balls}</td>
                                         <td data-label="4s" style={{ textAlign: 'center' }}>{card.fours}</td>
                                         <td data-label="6s" style={{ textAlign: 'center' }}>{card.sixes}</td>
@@ -755,11 +795,15 @@ const LiveMatch: React.FC = () => {
                             <tbody>
                                 {firstInningsBowling.map(card => (
                                     <tr key={card.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '0.5rem', color: '#fff' }}>{card.player.name}</td>
+                                        <td style={{ padding: '0.5rem', color: '#fff' }}>
+                                          <Link to={`/players/${card.player.id}`} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>
+                                            {card.player.name}
+                                          </Link>
+                                        </td>
                                         <td style={{ textAlign: 'center' }}>{card.overs}</td>
                                         <td style={{ textAlign: 'center' }}>{card.maidens}</td>
                                         <td style={{ textAlign: 'center' }}>{card.runs}</td>
-                                        <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{card.wickets}</td>
+                                        <td style={{ textAlign: 'center' }}><span style={{ fontWeight: 900, fontSize: '0.95rem', color: card.wickets >= 3 ? '#ef4444' : card.wickets >= 1 ? '#f87171' : '#64748b', background: card.wickets >= 3 ? 'rgba(239,68,68,0.18)' : card.wickets >= 1 ? 'rgba(248,113,113,0.12)' : 'transparent', borderRadius: '6px', padding: card.wickets >= 1 ? '1px 6px' : '0', display: 'inline-block', minWidth: '24px', textAlign: 'center' }}>{card.wickets}</span></td>
                                         <td style={{ textAlign: 'right', paddingRight: '0.5rem' }}>{card.overs > 0 ? (card.runs / ((Math.floor(card.overs) * 6 + Math.round((card.overs % 1)*10)) / 6)).toFixed(1) : '0.0'}</td>
                                     </tr>
                                 ))}
@@ -809,12 +853,14 @@ const LiveMatch: React.FC = () => {
                       return (
                         <tr key={card.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: isAtCrease ? 'rgba(56, 189, 248, 0.05)' : 'transparent' }}>
                           <td style={{ padding: '0.8rem 0.5rem', fontWeight: isAtCrease ? 'bold' : 'normal', color: isAtCrease ? 'var(--primary)' : '#fff' }}>
-                            {card.player.name} {isStriker ? '*' : ''}
+                            <Link to={`/players/${card.player.id}`} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>
+                              {card.player.name}
+                            </Link> {isStriker ? '*' : ''}
                           </td>
                           <td data-label="Status" style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>
                             {card.howOut}
                           </td>
-                          <td data-label="R" style={{ textAlign: 'center', fontWeight: 'bold' }}>{card.runs}</td>
+                          <td data-label="R" style={{ textAlign: 'center' }}><span style={{ fontWeight: 900, fontSize: '0.95rem', color: card.runs >= 50 ? '#f59e0b' : card.runs >= 30 ? '#10b981' : '#fff', background: card.runs >= 50 ? 'rgba(245,158,11,0.18)' : card.runs >= 30 ? 'rgba(16,185,129,0.14)' : 'transparent', borderRadius: '6px', padding: card.runs >= 30 ? '1px 6px' : '0', display: 'inline-block', minWidth: '24px', textAlign: 'center' }}>{card.runs}</span></td>
                           <td data-label="B" style={{ textAlign: 'center' }}>{card.balls}</td>
                           <td data-label="4s" style={{ textAlign: 'center' }}>{card.fours}</td>
                           <td data-label="6s" style={{ textAlign: 'center' }}>{card.sixes}</td>
@@ -831,9 +877,10 @@ const LiveMatch: React.FC = () => {
                       <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Yet to bat:</p>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                           {yetToBat.map(p => (
-                              <span key={p.id} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.85rem' }}>
+                              <Link key={p.id} to={`/players/${p.id}`}
+                                style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(96,165,250,0.4)', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.85rem', color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', display: 'inline-block', textUnderlineOffset: '2px' }}>
                                   {p.name}
-                              </span>
+                              </Link>
                           ))}
                       </div>
                   </div>
@@ -863,12 +910,14 @@ const LiveMatch: React.FC = () => {
                       return (
                         <tr key={card.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: isBowling ? 'rgba(245, 158, 11, 0.05)' : 'transparent' }}>
                           <td style={{ padding: '0.8rem 0.5rem', fontWeight: isBowling ? 'bold' : 'normal', color: isBowling ? '#fbbf24' : '#fff' }}>
-                            {card.player.name} {isBowling ? '•' : ''}
+                            <Link to={`/players/${card.player.id}`} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>
+                              {card.player.name}
+                            </Link> {isBowling ? '•' : ''}
                           </td>
                           <td style={{ textAlign: 'center' }}>{card.overs}</td>
                           <td style={{ textAlign: 'center' }}>{card.maidens}</td>
                           <td style={{ textAlign: 'center' }}>{card.runs}</td>
-                          <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{card.wickets}</td>
+                          <td style={{ textAlign: 'center' }}><span style={{ fontWeight: 900, fontSize: '0.95rem', color: card.wickets >= 3 ? '#ef4444' : card.wickets >= 1 ? '#f87171' : '#64748b', background: card.wickets >= 3 ? 'rgba(239,68,68,0.18)' : card.wickets >= 1 ? 'rgba(248,113,113,0.12)' : 'transparent', borderRadius: '6px', padding: card.wickets >= 1 ? '1px 6px' : '0', display: 'inline-block', minWidth: '24px', textAlign: 'center' }}>{card.wickets}</span></td>
                           <td style={{ textAlign: 'right', paddingRight: '0.5rem' }}>{card.overs > 0 ? (card.runs / ((Math.floor(card.overs) * 6 + Math.round((card.overs % 1)*10)) / 6)).toFixed(1) : '0.0'}</td>
                         </tr>
                       );

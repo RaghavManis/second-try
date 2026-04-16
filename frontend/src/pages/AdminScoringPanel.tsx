@@ -38,6 +38,11 @@ const AdminScoringPanel: React.FC = () => {
   const [nextBowlerId, setNextBowlerId] = useState<number | ''>('');
   const [manOfTheMatchId, setManOfTheMatchId] = useState<number | ''>('');
   
+  // Stream settings state
+  const [streamUrl, setStreamUrl] = useState<string>('');
+  const [streamDelaySeconds, setStreamDelaySeconds] = useState<number>(0);
+  const [isUpdatingStream, setIsUpdatingStream] = useState(false);
+
   // Interaction Safety State
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -77,6 +82,10 @@ const AdminScoringPanel: React.FC = () => {
     setDetails(detailsData);
     setMatch(detailsData.match);
     
+    // Default stream config from DTO
+    if (detailsData.streamUrl !== undefined) setStreamUrl(detailsData.streamUrl || '');
+    if (detailsData.streamDelaySeconds !== undefined) setStreamDelaySeconds(detailsData.streamDelaySeconds || 0);
+
     // Background fetch for the full scorecard if ongoing
     if (detailsData.match.status === 'ONGOING') {
       try {
@@ -286,6 +295,20 @@ const AdminScoringPanel: React.FC = () => {
       toast.error('Failed to complete match');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleStreamUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!matchId) return;
+    try {
+      setIsUpdatingStream(true);
+      await MatchScoringService.updateStreamConfig(parseInt(matchId), { streamUrl, streamDelaySeconds });
+      toast.success('Live stream configuration updated!');
+    } catch (err) {
+      toast.error('Failed to update stream configuration');
+    } finally {
+      setIsUpdatingStream(false);
     }
   };
 
@@ -505,6 +528,37 @@ const AdminScoringPanel: React.FC = () => {
       )}
 
       {!isAwaitingSecondInnings && !isMatchOverWarning && (
+        <>
+          {/* STREAM SETTINGS */}
+          <div className="glass-panel" style={{ marginBottom: '1.5rem' }}>
+            <h3 className="gradient-text" style={{ margin: '0 0 1rem 0' }}>Live Stream Settings</h3>
+            <form onSubmit={handleStreamUpdate} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
+              <div className="form-group" style={{ margin: 0, flex: '1 1 250px' }}>
+                <label>YouTube URL</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="e.g. https://youtube.com/watch?v=..." 
+                  value={streamUrl} 
+                  onChange={e => setStreamUrl(e.target.value)}
+                />
+              </div>
+              <div className="form-group" style={{ margin: 0, flex: '0 1 120px' }}>
+                <label>Stream Delay (sec)</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  min="0" 
+                  value={streamDelaySeconds} 
+                  onChange={e => setStreamDelaySeconds(parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary" disabled={isUpdatingStream} style={{ padding: '0.6rem 1.2rem', height: '42px' }}>
+                {isUpdatingStream ? 'Saving...' : 'Save Settings'}
+              </button>
+            </form>
+          </div>
+
         <div className="glass-panel">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h3 className="gradient-text" style={{ margin: 0 }}>Control Panel</h3>
@@ -711,6 +765,7 @@ const AdminScoringPanel: React.FC = () => {
           </>
           )}
         </div>
+        </>
       )}
 
     </div>

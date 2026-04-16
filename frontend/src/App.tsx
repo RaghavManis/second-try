@@ -12,6 +12,7 @@ import PlayersList from './pages/PlayersList';
 import PlayerProfile from './pages/PlayerProfile';
 import AdminLogin from './pages/AdminLogin';
 import LiveMatch from './pages/LiveMatch';
+import LiveStreamOverlay from './components/LiveStreamOverlay';
 import AdminScoringPanel from './pages/AdminScoringPanel';
 import MatchScorecard from './pages/MatchScorecard';
 import Gallery from './pages/Gallery';
@@ -49,6 +50,7 @@ const App: React.FC = () => {
                   <Route path="/matches/:matchId/score-live" element={<ProtectedRoute><AdminScoringPanel /></ProtectedRoute>} />
                   <Route path="/matches/:matchId/scorecard" element={<MatchScorecard />} />
                   <Route path="/live-match" element={<LiveMatch />} />
+                  <Route path="/live-stream/:matchId" element={<LiveStreamOverlay />} />
                   <Route path="/points-table" element={<PointsTable />} />
                   <Route path="/gallery" element={<Gallery />} />
                   <Route path="/highlights" element={<Highlights />} />

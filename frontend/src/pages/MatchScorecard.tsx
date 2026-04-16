@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MatchScoringService } from '../services/api';
 import type { Match, ScorecardBatting, ScorecardBowling } from '../types';
 import { X, Crown, Medal } from 'lucide-react';
@@ -268,7 +268,7 @@ const MatchScorecard: React.FC = () => {
             {/* Center VS */}
             <div className="hero-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', minWidth: '70px' }}>
               <h1 className="gradient-text" style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0 }}>VS</h1>
-              <div style={{ color: '#64748b', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{match.matchDate}</div>
+              <div style={{ color: '#64748b', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{new Date(match.matchDateTime).toLocaleDateString()}</div>
               {match.status === 'COMPLETED' && match.winnerTeam && (
                 <div style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '2px 10px', borderRadius: '12px', color: '#fbbf24', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px' }}>
                   🏆 Winner
@@ -377,7 +377,7 @@ const MatchScorecard: React.FC = () => {
                             ? { label: 'Result', value: 'Tied', sub: 'No winner', color: '#10b981' }
                             : match.status === 'ONGOING'
                             ? { label: 'Status', value: 'Live 🔴', sub: 'In Progress', color: '#ef4444' }
-                            : { label: 'Status', value: 'Upcoming', sub: match.matchDate ?? '—', color: '#64748b' };
+                            : { label: 'Status', value: 'Upcoming', sub: match.matchDateTime ? new Date(match.matchDateTime).toLocaleDateString() : '-', color: '#64748b' };
 
                           return [
                             { label: '1st Inn', value: `${leftScore}-${leftWickets}`,  sub: leftTeam.teamName,  color: '#3b82f6' },
@@ -577,7 +577,7 @@ const MatchScorecard: React.FC = () => {
                           { label: 'Venue', value: 'Siddha Cricket Ground, Mau' },
                           { label: 'Match Type', value: match.matchType },
                           { label: 'Match Duration', value: `${match.overs} Overs Match` },
-                          { label: 'Date', value: match.matchDate }
+                          { label: 'Date', value: new Date(match.matchDateTime).toLocaleDateString() }
                         ].map((info, idx) => (
                           <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,b,b,0.05)' }}>
                               <div style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.25rem' }}>{info.label}</div>
@@ -691,11 +691,11 @@ const MatchScorecard: React.FC = () => {
                             {(activeTab === '1st Innings' ? innings1Batting : innings2Batting).map(b => (
                                 <div key={b.id} style={{ display: 'flex', padding: '0.75rem 1rem', borderTop: '1px solid rgba(255,255,255,0.03)', alignItems: 'center' }}>
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.player.name}</div>
+                                        <Link to={'/players/' + b.player.id} style={{ fontWeight: 700, color: '#60a5fa', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer', display: 'block' }}>{b.player.name}</Link>
                                         <div style={{ fontSize: '0.7rem', color: b.howOut?.toLowerCase() === 'not out' ? 'var(--primary)' : '#64748b' }}>{b.howOut || 'not out'}</div>
                                     </div>
                                     <div style={{ display: 'flex', width: '200px', justifyContent: 'flex-end', gap: '0.5rem', alignItems: 'center' }}>
-                                        <div style={{ width: '35px', textAlign: 'right', fontWeight: 900, fontSize: '1rem', color: '#fff' }}>{b.runs}</div>
+                                        <div style={{ width: '40px', textAlign: 'right', fontWeight: 900, fontSize: '0.95rem', color: b.runs >= 50 ? '#f59e0b' : b.runs >= 30 ? '#10b981' : '#fff', background: b.runs >= 50 ? 'rgba(245,158,11,0.15)' : b.runs >= 30 ? 'rgba(16,185,129,0.12)' : 'transparent', borderRadius: '6px', padding: b.runs >= 30 ? '1px 4px' : '0', minWidth: '28px', display: 'inline-block', textAlign: 'center' }}>{b.runs}</div>
                                         <div style={{ width: '35px', textAlign: 'right', fontSize: '0.85rem', color: '#94a3b8' }}>{b.balls}</div>
                                         <div style={{ width: '30px', textAlign: 'right', fontSize: '0.85rem', color: '#64748b' }}>{b.fours}</div>
                                         <div style={{ width: '30px', textAlign: 'right', fontSize: '0.85rem', color: '#64748b' }}>{b.sixes}</div>
@@ -733,12 +733,12 @@ const MatchScorecard: React.FC = () => {
                             
                             {(activeTab === '1st Innings' ? innings1Bowling : innings2Bowling).map(b => (
                                 <div key={b.id} style={{ display: 'flex', padding: '0.6rem 0', borderTop: '1px solid rgba(255,255,255,0.03)', alignItems: 'center' }}>
-                                    <div style={{ flex: 1, fontWeight: 700, color: '#f1f5f9', fontSize: '0.85rem' }}>{b.player.name}</div>
+                                    <Link to={'/players/' + b.player.id} style={{ flex: 1, fontWeight: 700, color: '#60a5fa', fontSize: '0.85rem', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer' }}>{b.player.name}</Link>
                                     <div style={{ display: 'flex', width: '180px', justifyContent: 'flex-end', gap: '0.5rem', alignItems: 'center' }}>
                                         <div style={{ width: '35px', textAlign: 'right', fontSize: '0.85rem', color: '#f1f5f9' }}>{b.overs}</div>
                                         <div style={{ width: '25px', textAlign: 'right', fontSize: '0.85rem', color: '#94a3b8' }}>{b.maidens || 0}</div>
                                         <div style={{ width: '35px', textAlign: 'right', fontSize: '0.85rem', color: '#f1f5f9' }}>{b.runs}</div>
-                                        <div style={{ width: '35px', textAlign: 'right', fontWeight: 900, color: 'var(--primary)', fontSize: '0.95rem' }}>{b.wickets}</div>
+                                        <div style={{ width: '35px', textAlign: 'right', fontWeight: 900, fontSize: '0.95rem', color: b.wickets >= 3 ? '#ef4444' : b.wickets >= 1 ? '#f87171' : '#64748b', background: b.wickets >= 3 ? 'rgba(239,68,68,0.15)' : b.wickets >= 1 ? 'rgba(248,113,113,0.1)' : 'transparent', borderRadius: '6px', padding: b.wickets >= 1 ? '1px 4px' : '0', minWidth: '24px', display: 'inline-block', textAlign: 'center' }}>{b.wickets}</div>
                                         <div style={{ width: '40px', textAlign: 'right', fontSize: '0.8rem', color: '#64748b' }}>{b.economyRate?.toFixed(1) || '0.0'}</div>
                                     </div>
                                 </div>
@@ -770,7 +770,7 @@ const MatchScorecard: React.FC = () => {
                                   {s.players?.map(p => (
                                       <div key={p.id} style={{ color: '#cbd5e1', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }}></div>
-                                        {p.name} {p.isCaptain ? <span style={{ color: '#f59e0b', fontSize: '0.7rem', fontWeight: 900 }}>(C)</span> : ''} {p.isViceCaptain ? <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>(VC)</span> : ''}
+                                        <Link to={'/players/' + p.id} style={{ color: '#60a5fa', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer' }}>{p.name}</Link> {p.isCaptain ? <span style={{ color: '#f59e0b', fontSize: '0.7rem', fontWeight: 900 }}>(C)</span> : ''} {p.isViceCaptain ? <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>(VC)</span> : ''}
                                       </div>
                                   ))}
                               </div>

@@ -35,8 +35,10 @@ export interface Match {
   matchType?: 'TOURNAMENT' | 'PRACTICE';
   teamA: Team;
   teamB: Team;
-  matchDate: string;
+  matchDateTime: string;
+  matchEndTime?: string;
   overs: number;
+
   status: 'SCHEDULED' | 'ONGOING' | 'COMPLETED';
   winnerTeam?: Team;
   
@@ -53,6 +55,8 @@ export interface Match {
   playingXiTeamB?: Player[];
   result?: string;
   manOfTheMatch?: Player;
+  streamUrl?: string;
+  streamDelaySeconds?: number;
   currentScore?: number;
   currentWickets?: number;
   firstInningsScore?: number;
@@ -103,6 +107,9 @@ export interface LiveMatchDetailsDto {
   bowlerWickets?: number;
   recentBalls: string[];
   thisOverBalls: string[];
+  
+  streamUrl?: string;
+  streamDelaySeconds?: number;
 }
 
 export interface ScorecardBatting {

@@ -324,8 +324,9 @@ const Dashboard: React.FC = () => {
                    }}>
                     <div style={{ padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#e2e8f0', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
-                        <Clock size={16} color="var(--primary)" /> {new Date(match.matchDate).toLocaleDateString()}
+                        <Clock size={16} color="var(--primary)" /> {new Date(match.matchDateTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                       </div>
+
                       <div style={{
                         background: `${getStatusColor(match.status)}15`, color: getStatusColor(match.status),
                         padding: '4px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase'

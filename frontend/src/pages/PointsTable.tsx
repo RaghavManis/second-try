@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PointsService, TeamService } from '../services/api';
 import type { PointsTableEntry, Team } from '../types';
 import { Trophy } from 'lucide-react';
@@ -159,14 +160,16 @@ const PointsTable: React.FC = () => {
                       <td className="font-bold">{index + 1}</td>
                       <td className="team-name">
                         <img src={(teamObj && teamObj.teamLogo) || getRandomLogo(pt.teamId || 0)} alt={pt.teamName} style={{ width: 24, height: 24, borderRadius: '50%', marginRight: '10px', objectFit: 'cover' }} />
-                        {pt.teamName}
+                        <Link to={`/teams/${pt.teamId}`} style={{ color: '#60a5fa', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer', fontWeight: 700 }}>{pt.teamName}</Link>
                       </td>
                       <td>{pt.matchesPlayed}</td>
                       <td className="text-green">{pt.wins}</td>
                       <td className="text-red">{pt.losses}</td>
                       <td>{pt.ties}</td>
                       <td>{pt.netRunRate ? pt.netRunRate.toFixed(3) : '0.000'}</td>
-                      <td className="font-bold text-primary" style={{fontSize: '1.1rem'}}>{pt.points}</td>
+                      <td className="font-bold" style={{ fontSize: '1.1rem' }}>
+                        <span style={{ color: index === 0 ? '#f59e0b' : index === 1 ? '#94a3b8' : index === 2 ? '#cd7f32' : 'var(--primary)', background: index === 0 ? 'rgba(245,158,11,0.15)' : index === 1 ? 'rgba(148,163,184,0.1)' : index === 2 ? 'rgba(205,127,50,0.12)' : 'transparent', borderRadius: '8px', padding: index <= 2 ? '2px 8px' : '0', fontWeight: 900, display: 'inline-block' }}>{pt.points}</span>
+                      </td>
                     </tr>
                   )}
                   )
@@ -200,9 +203,16 @@ const PointsTable: React.FC = () => {
                                currentTopScorers.map((ts: any, i: number) => (
                                    <tr key={i} style={{ background: i === 0 ? 'rgba(249, 115, 22, 0.15)' : 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                        <td style={{color: '#cbd5e1', padding: '1rem'}}>{i + 1}</td>
-                                       <td className="font-bold" style={{ color: i === 0 ? '#ffedd5' : '#ffffff', fontSize: i === 0 ? '1.1rem' : '1rem' }}>{ts.player?.name || ts.playerName || '-'}</td>
+                                       <td className="font-bold" style={{ fontSize: i === 0 ? '1.1rem' : '1rem' }}>
+                                          {ts.player?.id
+                                            ? <Link to={`/players/${ts.player.id}`} style={{ color: i === 0 ? '#fb923c' : '#60a5fa', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer' }}>{ts.player?.name || ts.playerName || '-'}</Link>
+                                            : <span style={{ color: i === 0 ? '#ffedd5' : '#ffffff' }}>{ts.player?.name || ts.playerName || '-'}</span>
+                                          }
+                                        </td>
                                        <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{ts.teamName || '-'}</td>
-                                       <td style={{ textAlign: 'right', fontWeight: 'bold', fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#f97316' : '#fed7aa', paddingRight: '1rem' }}>{ts.totalRuns}</td>
+                                       <td style={{ textAlign: 'right', paddingRight: '1rem' }}>
+                                          <span style={{ fontWeight: 900, fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#f97316' : ts.totalRuns >= 200 ? '#f59e0b' : ts.totalRuns >= 100 ? '#10b981' : '#fed7aa', background: i === 0 ? 'rgba(249,115,22,0.2)' : ts.totalRuns >= 200 ? 'rgba(245,158,11,0.15)' : ts.totalRuns >= 100 ? 'rgba(16,185,129,0.12)' : 'transparent', borderRadius: '8px', padding: i === 0 || ts.totalRuns >= 100 ? '2px 8px' : '0', display: 'inline-block' }}>{ts.totalRuns}</span>
+                                        </td>
                                    </tr>
                                ))
                              }
@@ -228,9 +238,16 @@ const PointsTable: React.FC = () => {
                                currentTopWickets.map((tw: any, i: number) => (
                                    <tr key={i} style={{ background: i === 0 ? 'rgba(168, 85, 247, 0.15)' : 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                        <td style={{color: '#cbd5e1', padding: '1rem'}}>{i + 1}</td>
-                                       <td className="font-bold" style={{ color: i === 0 ? '#f3e8ff' : '#ffffff', fontSize: i === 0 ? '1.1rem' : '1rem' }}>{tw.player?.name || tw.playerName || '-'}</td>
+                                       <td className="font-bold" style={{ fontSize: i === 0 ? '1.1rem' : '1rem' }}>
+                                          {tw.player?.id
+                                            ? <Link to={`/players/${tw.player.id}`} style={{ color: i === 0 ? '#c084fc' : '#60a5fa', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer' }}>{tw.player?.name || tw.playerName || '-'}</Link>
+                                            : <span style={{ color: i === 0 ? '#f3e8ff' : '#ffffff' }}>{tw.player?.name || tw.playerName || '-'}</span>
+                                          }
+                                        </td>
                                        <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{tw.teamName || '-'}</td>
-                                       <td style={{ textAlign: 'right', fontWeight: 'bold', fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#a855f7' : '#e9d5ff', paddingRight: '1rem' }}>{tw.totalWickets}</td>
+                                       <td style={{ textAlign: 'right', paddingRight: '1rem' }}>
+                                          <span style={{ fontWeight: 900, fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#a855f7' : tw.totalWickets >= 10 ? '#ef4444' : tw.totalWickets >= 5 ? '#f87171' : '#e9d5ff', background: i === 0 ? 'rgba(168,85,247,0.2)' : tw.totalWickets >= 10 ? 'rgba(239,68,68,0.15)' : tw.totalWickets >= 5 ? 'rgba(248,113,113,0.12)' : 'transparent', borderRadius: '8px', padding: i === 0 || tw.totalWickets >= 5 ? '2px 8px' : '0', display: 'inline-block' }}>{tw.totalWickets}</span>
+                                        </td>
                                    </tr>
                                ))
                              }

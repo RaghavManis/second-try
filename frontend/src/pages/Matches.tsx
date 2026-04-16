@@ -13,6 +13,8 @@ import SEO from '../components/common/SEO';
 const Matches: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
+  const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
+  const [completedMatches, setCompletedMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingMatchId, setEditingMatchId] = useState<number | null>(null);
@@ -21,7 +23,7 @@ const Matches: React.FC = () => {
   const [newMatch, setNewMatch] = useState({ 
     teamAId: '', 
     teamBId: '', 
-    matchDate: '', 
+    matchDateTime: '', 
     overs: 20,
     status: 'SCHEDULED' as const,
     matchType: 'TOURNAMENT' as 'TOURNAMENT' | 'PRACTICE'
@@ -43,11 +45,15 @@ const Matches: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const [matchesRes, teamsRes] = await Promise.all([
+      const [matchesRes, upcomingRes, completedRes, teamsRes] = await Promise.all([
         MatchService.getAllMatches(),
+        MatchService.getUpcomingMatches(),
+        MatchService.getCompletedMatches(),
         TeamService.getAllTeams()
       ]);
       setMatches(matchesRes.data);
+      setUpcomingMatches(upcomingRes.data);
+      setCompletedMatches(completedRes.data);
       setTeams(teamsRes.data);
     } catch (e) {
       console.error('Failed to fetch data', e);
@@ -62,9 +68,6 @@ const Matches: React.FC = () => {
       return;
     }
     
-    // Convert datetime-local string to LocalDate format (YYYY-MM-DD) expected by backend
-    const dateOnly = newMatch.matchDate.split('T')[0];
-    
     const teamA = teams.find(t => t.id === Number(newMatch.teamAId));
     const teamB = teams.find(t => t.id === Number(newMatch.teamBId));
     
@@ -75,7 +78,7 @@ const Matches: React.FC = () => {
       const matchData = {
         teamA,
         teamB,
-        matchDate: dateOnly,
+        matchDateTime: newMatch.matchDateTime,
         overs: newMatch.overs,
         status: newMatch.status,
         matchType: newMatch.matchType
@@ -90,7 +93,7 @@ const Matches: React.FC = () => {
       }
       
       setShowModal(false);
-      setNewMatch({ teamAId: '', teamBId: '', matchDate: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' });
+      setNewMatch({ teamAId: '', teamBId: '', matchDateTime: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' });
       setEditingMatchId(null);
       fetchData();
     } catch (error: any) {
@@ -105,15 +108,10 @@ const Matches: React.FC = () => {
     e.stopPropagation();
     setEditingMatchId(match.id!);
     
-    let dateStr = match.matchDate as string;
-    if (dateStr && !dateStr.includes('T')) {
-       dateStr = `${dateStr}T09:00`;
-    }
-    
     setNewMatch({ 
       teamAId: match.teamA.id!.toString(), 
       teamBId: match.teamB.id!.toString(), 
-      matchDate: dateStr, 
+      matchDateTime: match.matchDateTime, 
       overs: match.overs,
       status: match.status as any,
       matchType: match.matchType as any
@@ -242,7 +240,9 @@ const Matches: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
           <Clock size={16} />
-          <span>{match.matchDate}</span>
+          <span style={{ whiteSpace: 'nowrap' }}>
+            {new Date(match.matchDateTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}, {new Date(match.matchDateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+          </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
           <MapPin size={16} />
@@ -276,8 +276,7 @@ const Matches: React.FC = () => {
   );
 };
 
-  const completedOrOngoing = matches.filter(m => m.status === 'COMPLETED');
-  const upcoming = matches.filter(m => m.status === 'SCHEDULED');
+// Removed local filtering to rely on backend sorting
 
   return (
     <div className="dashboard-wrapper">
@@ -312,12 +311,12 @@ const Matches: React.FC = () => {
       <div id="matches-content" className="dashboard-sections">
         
         {/* SECTION 2: MATCH HIGHLIGHTS */}
-        {completedOrOngoing.length > 0 && (
+        {completedMatches.length > 0 && (
         <AnimatedSection className="bg-section-2 theme-light">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Match Highlights</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Latest completed and ongoing matches.</p>
           <AutoScrollContainer className="horizontal-scroller">
-            {completedOrOngoing.slice(0, 10).map(match => (
+            {completedMatches.slice(0, 10).map(match => (
               <div key={match.id} style={{ height: '100%' }}>
                 <MatchCard match={match} />
               </div>
@@ -327,12 +326,12 @@ const Matches: React.FC = () => {
         )}
 
         {/* SECTION 3: UPCOMING FIXTURES */}
-        {upcoming.length > 0 && (
+        {upcomingMatches.length > 0 && (
         <AnimatedSection className="bg-section-3 theme-dark">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Upcoming Fixtures</h2>
           <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Scheduled matches eagerly awaited.</p>
           <AutoScrollContainer className="horizontal-scroller">
-            {upcoming.slice(0, 10).map(match => (
+            {upcomingMatches.slice(0, 10).map(match => (
               <div key={match.id} style={{ height: '100%' }}>
                 <MatchCard match={match} />
               </div>
@@ -351,7 +350,7 @@ const Matches: React.FC = () => {
             {isAuthenticated && (
               <button className="btn btn-primary hover-lift" onClick={() => {
                  setEditingMatchId(null);
-                 setNewMatch({ teamAId: '', teamBId: '', matchDate: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' });
+                 setNewMatch({ teamAId: '', teamBId: '', matchDateTime: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' });
                  setShowModal(true);
               }}>
                 <CalendarPlus size={18} /> Schedule Match
@@ -418,7 +417,7 @@ const Matches: React.FC = () => {
               <div className="form-group" style={{ marginTop: '1.5rem' }}>
                 <label className="form-label">Date and Time</label>
                 <input required type="datetime-local" className="form-input" 
-                  value={newMatch.matchDate} onChange={e => setNewMatch({...newMatch, matchDate: e.target.value})} />
+                  value={newMatch.matchDateTime} onChange={e => setNewMatch({...newMatch, matchDateTime: e.target.value})} />
               </div>
 
               <div className="form-group">
@@ -429,7 +428,8 @@ const Matches: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowModal(false); setEditingMatchId(null); setNewMatch({ teamAId: '', teamBId: '', matchDate: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' }); }} style={{ flex: 1 }} disabled={isSubmitting}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowModal(false); setEditingMatchId(null); setNewMatch({ teamAId: '', teamBId: '', matchDateTime: '', overs: 20, status: 'SCHEDULED', matchType: 'TOURNAMENT' }); }} style={{ flex: 1 }} disabled={isSubmitting}>Cancel</button>
+
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting}>
                   {isSubmitting ? (editingMatchId ? 'Updating...' : 'Scheduling...') : (editingMatchId ? 'Update' : 'Schedule')}
                 </button>

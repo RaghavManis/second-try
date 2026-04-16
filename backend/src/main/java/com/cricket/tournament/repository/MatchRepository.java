@@ -9,11 +9,12 @@ import java.util.List;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
-    @EntityGraph(attributePaths = {"playingXiTeamA", "playingXiTeamB", "teamA", "teamB"})
-    List<Match> findAll();
+    List<Match> findAllByOrderByMatchDateTimeAsc();
 
-    @EntityGraph(attributePaths = {"playingXiTeamA", "playingXiTeamB", "teamA", "teamB"})
-    List<Match> findByStatus(Match.MatchStatus status);
+    List<Match> findByStatusOrderByMatchDateTimeAsc(Match.MatchStatus status);
+
+    List<Match> findByStatusOrderByMatchEndTimeDescMatchDateTimeDesc(Match.MatchStatus status);
+
     boolean existsByTeamAIdOrTeamBId(Long teamAId, Long teamBId);
 
     @org.springframework.data.jpa.repository.Modifying

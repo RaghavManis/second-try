@@ -40,7 +40,11 @@ public class Match {
 
     @NotNull(message = "Match date is required")
     @Column(name = "match_date", nullable = false)
-    private LocalDate matchDate;
+    private java.time.LocalDateTime matchDateTime;
+
+    @Column(name = "match_end_time")
+    private java.time.LocalDateTime matchEndTime;
+
 
     @NotNull(message = "Overs is required")
     @Column(name = "overs", nullable = false)
@@ -128,6 +132,12 @@ public class Match {
     @JoinColumn(name = "man_of_the_match_id")
     private Player manOfTheMatch;
 
+    @Column(name = "stream_url")
+    private String streamUrl;
+
+    @Column(name = "stream_delay_seconds")
+    private Integer streamDelaySeconds = 0;
+
     public enum MatchStatus {
         SCHEDULED,
         ONGOING,
@@ -137,10 +147,10 @@ public class Match {
     public Match() {
     }
 
-    public Match(Team teamA, Team teamB, LocalDate matchDate, Integer overs, MatchStatus status) {
+    public Match(Team teamA, Team teamB, java.time.LocalDateTime matchDateTime, Integer overs, MatchStatus status) {
         this.teamA = teamA;
         this.teamB = teamB;
-        this.matchDate = matchDate;
+        this.matchDateTime = matchDateTime;
         this.overs = overs;
         this.status = status;
     }
@@ -169,12 +179,20 @@ public class Match {
         this.teamB = teamB;
     }
 
-    public LocalDate getMatchDate() {
-        return matchDate;
+    public java.time.LocalDateTime getMatchDateTime() {
+        return matchDateTime;
     }
 
-    public void setMatchDate(LocalDate matchDate) {
-        this.matchDate = matchDate;
+    public void setMatchDateTime(java.time.LocalDateTime matchDateTime) {
+        this.matchDateTime = matchDateTime;
+    }
+
+    public java.time.LocalDateTime getMatchEndTime() {
+        return matchEndTime;
+    }
+
+    public void setMatchEndTime(java.time.LocalDateTime matchEndTime) {
+        this.matchEndTime = matchEndTime;
     }
 
     public Integer getOvers() {
@@ -359,5 +377,21 @@ public class Match {
 
     public void setManOfTheMatch(Player manOfTheMatch) {
         this.manOfTheMatch = manOfTheMatch;
+    }
+
+    public String getStreamUrl() {
+        return streamUrl;
+    }
+
+    public void setStreamUrl(String streamUrl) {
+        this.streamUrl = streamUrl;
+    }
+
+    public Integer getStreamDelaySeconds() {
+        return streamDelaySeconds;
+    }
+
+    public void setStreamDelaySeconds(Integer streamDelaySeconds) {
+        this.streamDelaySeconds = streamDelaySeconds;
     }
 }

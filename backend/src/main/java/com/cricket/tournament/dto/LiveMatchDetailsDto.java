@@ -35,6 +35,9 @@ public class LiveMatchDetailsDto {
     private List<String> recentBalls; 
     private List<String> thisOverBalls; 
 
+    private String streamUrl;
+    private Integer streamDelaySeconds;
+
     public LiveMatchDetailsDto() {}
     
     // ... Getters and Setters omitted for brevity are untouched ...
@@ -80,4 +83,8 @@ public class LiveMatchDetailsDto {
     public void setRecentBalls(List<String> recentBalls) { this.recentBalls = recentBalls; }
     public List<String> getThisOverBalls() { return thisOverBalls; }
     public void setThisOverBalls(List<String> thisOverBalls) { this.thisOverBalls = thisOverBalls; }
+    public String getStreamUrl() { return streamUrl; }
+    public void setStreamUrl(String streamUrl) { this.streamUrl = streamUrl; }
+    public Integer getStreamDelaySeconds() { return streamDelaySeconds; }
+    public void setStreamDelaySeconds(Integer streamDelaySeconds) { this.streamDelaySeconds = streamDelaySeconds; }
 }

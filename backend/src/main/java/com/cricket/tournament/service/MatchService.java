@@ -36,7 +36,7 @@ public class MatchService {
 
     @Cacheable(value = "matches")
     public List<Match> getAllMatches() {
-        return matchRepository.findAll();
+        return matchRepository.findAllByOrderByMatchDateTimeAsc();
     }
 
     @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
@@ -50,12 +50,12 @@ public class MatchService {
 
     @Cacheable(value = "upcomingMatches")
     public List<Match> getUpcomingMatches() {
-        return matchRepository.findByStatus(Match.MatchStatus.SCHEDULED);
+        return matchRepository.findByStatusOrderByMatchDateTimeAsc(Match.MatchStatus.SCHEDULED);
     }
 
     @Cacheable(value = "completedMatches")
     public List<Match> getCompletedMatches() {
-        return matchRepository.findByStatus(Match.MatchStatus.COMPLETED);
+        return matchRepository.findByStatusOrderByMatchEndTimeDescMatchDateTimeDesc(Match.MatchStatus.COMPLETED);
     }
 
     public Match getMatchById(Long id) {
@@ -82,8 +82,9 @@ public class MatchService {
 
         existingMatch.setTeamA(updatedMatch.getTeamA());
         existingMatch.setTeamB(updatedMatch.getTeamB());
-        existingMatch.setMatchDate(updatedMatch.getMatchDate());
+        existingMatch.setMatchDateTime(updatedMatch.getMatchDateTime());
         existingMatch.setOvers(updatedMatch.getOvers());
+
         existingMatch.setMatchType(updatedMatch.getMatchType());
         
         return matchRepository.save(existingMatch);

@@ -61,6 +61,11 @@ public class MatchScoringController {
         return ResponseEntity.ok(matchScoringService.getLiveDetails(matchId, force));
     }
 
+    @PutMapping("/{matchId}/stream-config")
+    public ResponseEntity<Match> updateStreamConfig(@PathVariable Long matchId, @RequestBody StreamConfigDto configDto) {
+        return ResponseEntity.ok(matchScoringService.updateStreamConfig(matchId, configDto));
+    }
+
     @GetMapping("/{matchId}/scorecard")
     public ResponseEntity<java.util.Map<String, Object>> getCompleteScorecard(@PathVariable Long matchId) {
         return ResponseEntity.ok(matchScoringService.getCompleteScorecard(matchId));
