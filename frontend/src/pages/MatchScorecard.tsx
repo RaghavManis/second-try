@@ -695,7 +695,7 @@ const MatchScorecard: React.FC = () => {
                                         <div style={{ fontSize: '0.7rem', color: b.howOut?.toLowerCase() === 'not out' ? 'var(--primary)' : '#64748b' }}>{b.howOut || 'not out'}</div>
                                     </div>
                                     <div style={{ display: 'flex', width: '200px', justifyContent: 'flex-end', gap: '0.5rem', alignItems: 'center' }}>
-                                        <div style={{ width: '40px', textAlign: 'right', fontWeight: 900, fontSize: '0.95rem', color: b.runs >= 50 ? '#f59e0b' : b.runs >= 30 ? '#10b981' : '#fff', background: b.runs >= 50 ? 'rgba(245,158,11,0.15)' : b.runs >= 30 ? 'rgba(16,185,129,0.12)' : 'transparent', borderRadius: '6px', padding: b.runs >= 30 ? '1px 4px' : '0', minWidth: '28px', display: 'inline-block', textAlign: 'center' }}>{b.runs}</div>
+                                        <div style={{ width: '40px', textAlign: 'right', fontWeight: 900, fontSize: '0.95rem', color: b.runs >= 50 ? '#f59e0b' : b.runs >= 30 ? '#10b981' : '#fff', background: b.runs >= 50 ? 'rgba(245,158,11,0.15)' : b.runs >= 30 ? 'rgba(16,185,129,0.12)' : 'transparent', borderRadius: '6px', padding: b.runs >= 30 ? '1px 4px' : '0', minWidth: '28px', display: 'inline-block' }}>{b.runs}</div>
                                         <div style={{ width: '35px', textAlign: 'right', fontSize: '0.85rem', color: '#94a3b8' }}>{b.balls}</div>
                                         <div style={{ width: '30px', textAlign: 'right', fontSize: '0.85rem', color: '#64748b' }}>{b.fours}</div>
                                         <div style={{ width: '30px', textAlign: 'right', fontSize: '0.85rem', color: '#64748b' }}>{b.sixes}</div>
@@ -738,7 +738,7 @@ const MatchScorecard: React.FC = () => {
                                         <div style={{ width: '35px', textAlign: 'right', fontSize: '0.85rem', color: '#f1f5f9' }}>{b.overs}</div>
                                         <div style={{ width: '25px', textAlign: 'right', fontSize: '0.85rem', color: '#94a3b8' }}>{b.maidens || 0}</div>
                                         <div style={{ width: '35px', textAlign: 'right', fontSize: '0.85rem', color: '#f1f5f9' }}>{b.runs}</div>
-                                        <div style={{ width: '35px', textAlign: 'right', fontWeight: 900, fontSize: '0.95rem', color: b.wickets >= 3 ? '#ef4444' : b.wickets >= 1 ? '#f87171' : '#64748b', background: b.wickets >= 3 ? 'rgba(239,68,68,0.15)' : b.wickets >= 1 ? 'rgba(248,113,113,0.1)' : 'transparent', borderRadius: '6px', padding: b.wickets >= 1 ? '1px 4px' : '0', minWidth: '24px', display: 'inline-block', textAlign: 'center' }}>{b.wickets}</div>
+                                        <div style={{ width: '35px', textAlign: 'right', fontWeight: 900, fontSize: '0.95rem', color: b.wickets >= 3 ? '#ef4444' : b.wickets >= 1 ? '#f87171' : '#64748b', background: b.wickets >= 3 ? 'rgba(239,68,68,0.15)' : b.wickets >= 1 ? 'rgba(248,113,113,0.1)' : 'transparent', borderRadius: '6px', padding: b.wickets >= 1 ? '1px 4px' : '0', minWidth: '24px', display: 'inline-block' }}>{b.wickets}</div>
                                         <div style={{ width: '40px', textAlign: 'right', fontSize: '0.8rem', color: '#64748b' }}>{b.economyRate?.toFixed(1) || '0.0'}</div>
                                     </div>
                                 </div>

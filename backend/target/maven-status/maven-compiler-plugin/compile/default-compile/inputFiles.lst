@@ -39,6 +39,7 @@ C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\j
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\service\PointsService.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\dto\PlayerProfileDto.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\security\JwtAuthenticationFilter.java
+C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\PublicController.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\service\CloudinaryService.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\model\PlayerMatchStats.java
 C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\src\main\java\com\cricket\tournament\controller\GalleryController.java

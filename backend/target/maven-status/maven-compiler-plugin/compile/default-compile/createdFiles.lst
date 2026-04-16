@@ -32,6 +32,7 @@ com\cricket\tournament\config\CloudinaryConfig.class
 com\cricket\tournament\model\PlayerMatchStats.class
 com\cricket\tournament\model\ScorecardBowling.class
 com\cricket\tournament\config\RequestLoggingInterceptor.class
+com\cricket\tournament\controller\PublicController.class
 com\cricket\tournament\model\Match.class
 com\cricket\tournament\controller\UploadController.class
 com\cricket\tournament\service\ScoreService.class
@@ -51,6 +52,7 @@ com\cricket\tournament\service\EmailService.class
 com\cricket\tournament\dto\ErrorResponse.class
 com\cricket\tournament\dto\LiveMatchDetailsDto.class
 com\cricket\tournament\dto\PlayerProfileDto.class
+com\cricket\tournament\dto\StreamConfigDto.class
 com\cricket\tournament\service\PlayerService.class
 com\cricket\tournament\model\Player.class
 com\cricket\tournament\model\GalleryImage.class

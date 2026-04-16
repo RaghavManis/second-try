@@ -45,8 +45,8 @@ const Footer: React.FC = () => {
       }
     } catch (err: any) {
       // The API interceptor might have already shown a toast, but this acts as an ultimate fallback for this specific action
-      const errorMsg = err.response?.data?.message || 'Connection error. Please try again later.';
       if (!err.response || err.response.status !== 429) { // Avoid duplicate toasts if the interceptor handled standard errors
+         // const errorMsg = err.response?.data?.message || 'Connection error. Please try again later.';
          // toast.error(errorMsg); // Optional if we consider the interceptor covers everything
       }
       console.error("Contact Form Error:", err);

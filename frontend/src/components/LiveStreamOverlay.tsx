@@ -18,8 +18,7 @@ const LiveStreamOverlay: React.FC = () => {
     // Polling logic with stream delay support
     useEffect(() => {
         if (!matchIdNum) return;
-
-        let delayTimer: NodeJS.Timeout | null = null;
+        let delayTimer: ReturnType<typeof setTimeout> | null = null;
         
         const fetchLiveDetails = async () => {
             try {
