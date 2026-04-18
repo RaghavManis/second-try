@@ -51,10 +51,10 @@ const Matches: React.FC = () => {
         MatchService.getCompletedMatches(),
         TeamService.getAllTeams()
       ]);
-      setMatches(matchesRes.data);
-      setUpcomingMatches(upcomingRes.data);
-      setCompletedMatches(completedRes.data);
-      setTeams(teamsRes.data);
+      setMatches(Array.isArray(matchesRes.data) ? matchesRes.data : []);
+      setUpcomingMatches(Array.isArray(upcomingRes.data) ? upcomingRes.data : []);
+      setCompletedMatches(Array.isArray(completedRes.data) ? completedRes.data : []);
+      setTeams(Array.isArray(teamsRes.data) ? teamsRes.data : []);
     } catch (e) {
       console.error('Failed to fetch data', e);
     }
@@ -285,7 +285,7 @@ const Matches: React.FC = () => {
         description="Full schedule, live results, and scorecards for every match in the Siddha Premier League (SPL). Track upcoming fixtures and historical data."
       />
 
-      {/* SECTION 1: HERO */}
+      {/* SECTION 1: HERO - COMMENTED OUT AS PER REQUEST
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
         backgroundAttachment: 'fixed', backgroundImage: 'url("/matches-bg.jpg")',
@@ -307,8 +307,9 @@ const Matches: React.FC = () => {
           </button>
         </div>
       </div>
+      */}
 
-      <div id="matches-content" className="dashboard-sections">
+      <div id="matches-content" className="dashboard-sections" style={{ paddingTop: '80px' }}>
         
         {/* SECTION 2: MATCH HIGHLIGHTS */}
         {completedMatches.length > 0 && (

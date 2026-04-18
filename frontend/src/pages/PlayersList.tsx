@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { PlayerService, UploadService } from '../services/api';
+import { PlayerService, UploadService, PointsService } from '../services/api';
 import type { Player, PlayerRole } from '../types';
-import { User, Star, UserPlus, Edit, Trash2, Upload } from 'lucide-react';
+import { User, UserPlus, Edit, Trash2, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { AnimatedSection } from '../components/AnimatedSection';
@@ -14,6 +14,7 @@ const PlayersList: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
+  const [topPerformers, setTopPerformers] = useState<any>(null);
 
   // Modal State for Player Create/Edit
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,11 +29,21 @@ const PlayersList: React.FC = () => {
 
   const fetchPlayers = async () => {
     try {
-      const res = await PlayerService.getAllPlayers();
-      const sorted = res.data.sort((a, b) => a.name.localeCompare(b.name));
-      setPlayers(sorted);
+      const playersRes = await PlayerService.getAllPlayers();
+      const rawPlayers = Array.isArray(playersRes.data) ? playersRes.data : [];
+      setPlayers([...rawPlayers].sort((a, b) => a.name.localeCompare(b.name)));
+      
+      try {
+        const performersRes = await PointsService.getTopPerformers();
+        if (performersRes.data && performersRes.data.TOURNAMENT) {
+          setTopPerformers(performersRes.data.TOURNAMENT);
+        }
+      } catch (perfErr) {
+        console.warn('Leaderboard data currently unavailable', perfErr);
+      }
     } catch (error) {
-      console.error('Failed to fetch players', error);
+      console.error('Critical failure: Could not fetch players list', error);
+      toast.error('Failed to load players directory');
     } finally {
       setLoading(false);
     }
@@ -132,7 +143,9 @@ const PlayersList: React.FC = () => {
 
   const getRandomAvatar = (id: number) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffdfbf`;
 
-  const PlayerCard = ({ player }: { player: Player }) => (
+  const PlayerCard = ({ player }: { player: Player }) => {
+    if (!player || !player.id) return null;
+    return (
     <div className="hover-lift" style={{ 
         cursor: 'pointer', 
         padding: '3rem 1.5rem 1.5rem 1.5rem', 
@@ -190,18 +203,58 @@ const PlayersList: React.FC = () => {
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
   if (loading) return <div className="loader" style={{ textAlign: 'center', marginTop: '20vh' }}>Loading players...</div>;
 
-  const starPlayers = players.slice(0, 6);
-  const batsmen = players.filter(p => p.role === 'BATSMAN');
-  const bowlers = players.filter(p => p.role === 'BOWLER');
-  const allRounders = players.filter(p => p.role === 'ALL_ROUNDER');
+  // Extraction Logic for Sections
+  const getPlayerFromStat = (stat: any) => stat?.player;
+  const uniquePlayers = (list: Player[]) => {
+     const seen = new Set();
+     return list.filter(p => {
+       if (!p || seen.has(p.id)) return false;
+       seen.add(p.id);
+       return true;
+     });
+  };
+
+  const orangeCap = (topPerformers?.topRunScorers || []).map(getPlayerFromStat).filter(Boolean);
+  const purpleCap = (topPerformers?.topWicketTakers || []).map(getPlayerFromStat).filter(Boolean);
+  const sixHitters = (topPerformers?.topSixHitters || []).map(getPlayerFromStat).filter(Boolean);
+  const fourHitters = (topPerformers?.topFourHitters || []).map(getPlayerFromStat).filter(Boolean);
+  const catchTakers = (topPerformers?.topCatchTakers || []).map(getPlayerFromStat).filter(Boolean);
+
+  // Fallback: Captains and Vice Captains if no stats
+  const leadershipFallback = players.filter(p => p.isCaptain || p.isViceCaptain);
+
+  // Section 2: Star Players (Top 1 from each category, randomized)
+  let starPlayers = uniquePlayers([
+    orangeCap[0], purpleCap[0], sixHitters[0], fourHitters[0], catchTakers[0]
+  ].filter(Boolean));
+  
+  if (starPlayers.length === 0) starPlayers = leadershipFallback.slice(0, 6);
+  else starPlayers = [...starPlayers].sort(() => Math.random() - 0.5);
+
+  // Section 3: Top Batsmen (Orange Cap)
+  let batsmenSection = orangeCap.length > 0 ? orangeCap.slice(0, 8) : players.filter(p => p.role === 'BATSMAN').slice(0, 8);
+  if (batsmenSection.length === 0) batsmenSection = leadershipFallback.filter(p => p.role === 'BATSMAN');
+
+  // Section 4: Key Bowlers (Purple Cap)
+  let bowlersSection = purpleCap.length > 0 ? purpleCap.slice(0, 8) : players.filter(p => p.role === 'BOWLER').slice(0, 8);
+  if (bowlersSection.length === 0) bowlersSection = leadershipFallback.filter(p => p.role === 'BOWLER');
+
+  // Section 5: Game Changers (6/4/Catch)
+  let gameChangers = uniquePlayers([
+    ...sixHitters.slice(0, 3), 
+    ...fourHitters.slice(0, 3), 
+    ...catchTakers.slice(0, 3)
+  ]);
+  if (gameChangers.length === 0) gameChangers = leadershipFallback.filter(p => p.role === 'ALL_ROUNDER' || p.role === 'WICKETKEEPER');
 
   return (
     <div className="dashboard-wrapper">
-      {/* SECTION 1: HERO */}
+      {/* SECTION 1: HERO - COMMENTED OUT AS PER REQUEST
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
         backgroundAttachment: 'fixed', backgroundImage: 'url("/players-bg.jpg")',
@@ -230,8 +283,18 @@ const PlayersList: React.FC = () => {
           </div>
         </div>
       </div>
+      */}
 
-      <div id="players-content" className="dashboard-sections">
+      <div id="players-content" className="dashboard-sections" style={{ paddingTop: '80px' }}>
+        
+        {/* ADD PLAYER BUTTON FOR ADMIN (WHEN HERO IS REMOVED) */}
+        {isAuthenticated && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', padding: '0 2rem' }}>
+            <button onClick={() => setIsModalOpen(true)} className="btn btn-primary hover-lift" style={{ padding: '0.75rem 1.5rem', borderRadius: '20px', fontSize: '0.9rem' }}>
+              <UserPlus size={18} style={{ marginRight: '8px' }}/> Add New Player
+            </button>
+          </div>
+        )}
         
         {/* SECTION 2: STAR PLAYERS */}
         {starPlayers.length > 0 && (
@@ -249,12 +312,12 @@ const PlayersList: React.FC = () => {
         )}
 
         {/* SECTION 3: TOP BATSMEN */}
-        {batsmen.length > 0 && (
+        {batsmenSection.length > 0 && (
         <AnimatedSection className="bg-section-3 theme-dark">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Top Batsmen</h2>
-          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The run machines of the tournament.</p>
+          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>{orangeCap.length > 0 ? 'Orange Cap contenders.' : 'The run machines of the tournament.'}</p>
           <AutoScrollContainer className="horizontal-scroller">
-            {batsmen.map(player => (
+            {batsmenSection.map((player: Player) => (
               <div key={player.id} style={{ height: '100%' }}>
                 <PlayerCard player={player} />
               </div>
@@ -264,12 +327,12 @@ const PlayersList: React.FC = () => {
         )}
 
         {/* SECTION 4: KEY BOWLERS */}
-        {bowlers.length > 0 && (
+        {bowlersSection.length > 0 && (
         <AnimatedSection className="bg-section-4 theme-light">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Key Bowlers</h2>
-          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>Taking wickets and restricting runs.</p>
+          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>{purpleCap.length > 0 ? 'Purple Cap leaders.' : 'Taking wickets and restricting runs.'}</p>
           <AutoScrollContainer className="horizontal-scroller">
-            {bowlers.map(player => (
+            {bowlersSection.map((player: Player) => (
               <div key={player.id} style={{ height: '100%' }}>
                 <PlayerCard player={player} />
               </div>
@@ -278,13 +341,13 @@ const PlayersList: React.FC = () => {
         </AnimatedSection>
         )}
 
-        {/* SECTION 5: ALL-ROUNDERS */}
-        {allRounders.length > 0 && (
+        {/* SECTION 5: ALL-ROUNDERS (GAME CHANGERS) */}
+        {gameChangers.length > 0 && (
         <AnimatedSection className="bg-section-5 theme-dark">
           <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginBottom: '0.25rem' }}>Game Changers</h2>
-          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>The ultimate match winners.</p>
+          <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2.5rem' }}>{sixHitters.length > 0 ? 'Leading the charts in Sixes, Fours, and Catches.' : 'The ultimate match winners.'}</p>
           <AutoScrollContainer className="horizontal-scroller">
-            {allRounders.map(player => (
+            {gameChangers.map((player: Player) => (
               <div key={player.id} style={{ height: '100%' }}>
                 <PlayerCard player={player} />
               </div>

@@ -22,7 +22,7 @@ const Gallery: React.FC = () => {
   const fetchImages = async () => {
     try {
       const res = await GalleryService.getAllImages();
-      setImages(res.data);
+      setImages(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load gallery images');

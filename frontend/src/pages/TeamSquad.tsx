@@ -35,7 +35,7 @@ const TeamSquad: React.FC = () => {
         PlayerService.getPlayersByTeam(id)
       ]);
       setTeam(teamRes.data);
-      setPlayers(playersRes.data);
+      setPlayers(Array.isArray(playersRes.data) ? playersRes.data : []);
     } catch (e) {
       console.error('Failed to load squad data', e);
       toast.error('Failed to load team details.');
@@ -48,8 +48,8 @@ const TeamSquad: React.FC = () => {
   const openManageModal = async () => {
     try {
       const res = await PlayerService.getAllPlayers();
-      setGlobalPlayers(res.data);
-      setSelectedPlayerIds(players.map(p => p.id!));
+      setGlobalPlayers(Array.isArray(res.data) ? res.data : []);
+      setSelectedPlayerIds(Array.isArray(players) ? players.map(p => p.id!) : []);
       setIsManageModalOpen(true);
     } catch (err) {
       toast.error('Failed to load global players');
@@ -109,7 +109,9 @@ const TeamSquad: React.FC = () => {
   if (!team) return null;
 
   const captain = players.find(p => p.isCaptain);
+  const viceCaptain = players.find(p => p.isViceCaptain);
   const captainDisplay = captain ? captain.name : 'Not Assigned';
+  const vcDisplay = viceCaptain ? viceCaptain.name : 'Not Assigned';
 
   const getLogo = (id?: number) => `https://api.dicebear.com/7.x/identicon/svg?seed=Team${id || 0}&backgroundColor=1e293b`;
   const teamBgImage = team.teamLogo || getLogo(team.id);
@@ -149,8 +151,10 @@ const TeamSquad: React.FC = () => {
             </button>
             <h1 className="page-title gradient-text" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '0.5rem', letterSpacing: '-0.02em', textShadow: '0 4px 15px rgba(0,0,0,0.5)', lineHeight: 1.1 }}>{team.teamName}</h1>
             <div style={{ display: 'flex', gap: '1rem', color: '#cbd5e1', fontSize: '0.9rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}><Shield size={14} color="var(--primary)" /> Coach: <strong style={{color: '#fff'}}>{team.coachName}</strong></span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}><User size={14} color="var(--primary)" /> Captain: <strong style={{color: '#fff'}}>{captainDisplay}</strong></span>
+              {viceCaptain && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}><User size={14} color="#fbbf24" /> VC: <strong style={{color: '#fff'}}>{vcDisplay}</strong></span>
+              )}
             </div>
           </div>
           

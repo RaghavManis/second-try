@@ -51,13 +51,34 @@ public interface PlayerMatchStatsRepository extends JpaRepository<PlayerMatchSta
            "FROM PlayerMatchStats pms " +
            "WHERE pms.matchType = :matchType " +
            "GROUP BY pms.player " +
-           "ORDER BY SUM(pms.runsScored) DESC LIMIT 5")
+           "ORDER BY SUM(pms.runsScored) DESC")
     List<Map<String, Object>> getTopRunScorersByMatchType(@Param("matchType") Match.MatchType matchType);
 
     @Query("SELECT new map(pms.player as player, SUM(pms.wickets) as totalWickets) " +
            "FROM PlayerMatchStats pms " +
            "WHERE pms.matchType = :matchType " +
            "GROUP BY pms.player " +
-           "ORDER BY SUM(pms.wickets) DESC LIMIT 5")
+           "ORDER BY SUM(pms.wickets) DESC")
     List<Map<String, Object>> getTopWicketTakersByMatchType(@Param("matchType") Match.MatchType matchType);
+
+    @Query("SELECT new map(pms.player as player, SUM(pms.sixes) as totalSixes) " +
+           "FROM PlayerMatchStats pms " +
+           "WHERE pms.matchType = :matchType " +
+           "GROUP BY pms.player " +
+           "ORDER BY SUM(pms.sixes) DESC")
+    List<Map<String, Object>> getTopSixHittersByMatchType(@Param("matchType") Match.MatchType matchType);
+
+    @Query("SELECT new map(pms.player as player, SUM(pms.fours) as totalFours) " +
+           "FROM PlayerMatchStats pms " +
+           "WHERE pms.matchType = :matchType " +
+           "GROUP BY pms.player " +
+           "ORDER BY SUM(pms.fours) DESC")
+    List<Map<String, Object>> getTopFourHittersByMatchType(@Param("matchType") Match.MatchType matchType);
+
+    @Query("SELECT new map(pms.player as player, SUM(pms.catches) as totalCatches) " +
+           "FROM PlayerMatchStats pms " +
+           "WHERE pms.matchType = :matchType " +
+           "GROUP BY pms.player " +
+           "ORDER BY SUM(pms.catches) DESC")
+    List<Map<String, Object>> getTopCatchTakersByMatchType(@Param("matchType") Match.MatchType matchType);
 }

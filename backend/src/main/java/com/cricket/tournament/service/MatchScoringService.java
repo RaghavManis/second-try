@@ -140,11 +140,13 @@ public class MatchScoringService {
         boolean isLegal = (exType == null || "BYE".equals(exType) || "LEG_BYE".equals(exType));
 
         // Rule 3: Team score must always increase by: runs + extraRuns
-        // Under new logic: extraRuns is 1 for WIDES and NO_BALLS, 0 for others. batRuns is simply the "selectedRuns"
         int selectedRuns = batRuns;
-        int penaltyRuns = 0;
+        int penaltyRuns = (ballDto.getExtraRuns() != null && ballDto.getExtraRuns() > 0) ? ballDto.getExtraRuns() : 0;
         
-        if ("WIDE".equals(exType) || "NO_BALL".equals(exType)) penaltyRuns = 1;
+        // Default penalty of 1 for Wides/NoBalls if not explicitly provided
+        if (penaltyRuns == 0 && ("WIDE".equals(exType) || "NO_BALL".equals(exType))) {
+            penaltyRuns = 1;
+        }
         
         int totalRuns = selectedRuns + penaltyRuns;
 
@@ -163,8 +165,11 @@ public class MatchScoringService {
         int bowlerCreditRuns = ("WIDE".equals(exType) || "NO_BALL".equals(exType) || exType == null) ? totalRuns : 0;
 
         // Rule 6 & 7: Rotation runs
-        // Strike rotation must depend ONLY on runs taken by running (selectedRuns)
+        // Strike rotation depends on runs taken (selectedRuns) AND explicit crossing (for Run Outs/Catches)
         boolean rotate = (selectedRuns % 2 != 0);
+        if (Boolean.TRUE.equals(ballDto.getCrossed())) {
+            rotate = !rotate;
+        }
 
         // Update Match totals
         int currentScore = match.getCurrentScore() == null ? 0 : match.getCurrentScore();
@@ -204,7 +209,7 @@ public class MatchScoringService {
             event.setNonStriker(match.getCurrentNonStriker());
             event.setRuns(batRuns);
             event.setExtraType(exType);
-            event.setExtraRuns(extRuns);
+            event.setExtraRuns(penaltyRuns);
             event.setIsWicket(isWicket);
             
             if (isWicket) {
@@ -639,20 +644,27 @@ public class MatchScoringService {
 
         for (int i = 0; i < events.size(); i++) {
             BallEvent e = events.get(i);
-            String evStr;
+            StringBuilder sb = new StringBuilder();
+            
+            // 1. Handle Extra Prefix
+            if ("WIDE".equals(e.getExtraType())) sb.append("WD");
+            else if ("NO_BALL".equals(e.getExtraType())) sb.append("NB");
+            else if ("BYE".equals(e.getExtraType())) sb.append("B");
+            else if ("LEG_BYE".equals(e.getExtraType())) sb.append("LB");
+
+            // 2. Handle Wicket
             if (Boolean.TRUE.equals(e.getIsWicket())) {
-                evStr = "W";
-            } else if ("WIDE".equals(e.getExtraType())) {
-                evStr = "WD+" + e.getRuns();
-            } else if ("NO_BALL".equals(e.getExtraType())) {
-                evStr = "NB+" + e.getRuns();
-            } else if ("BYE".equals(e.getExtraType())) {
-                evStr = "B+" + e.getRuns();
-            } else if ("LEG_BYE".equals(e.getExtraType())) {
-                evStr = "LB+" + e.getRuns();
-            } else {
-                evStr = String.valueOf(e.getRuns());
+                if (sb.length() > 0) sb.append("+");
+                sb.append("W");
             }
+            
+            // 3. Handle Runs (Always show if runs > 0 OR if it's a legal dot ball)
+            if (e.getRuns() != null && (e.getRuns() > 0 || sb.length() == 0)) {
+                if (sb.length() > 0) sb.append("+");
+                sb.append(e.getRuns());
+            }
+            
+            String evStr = sb.toString();
             
             if (e.getOverNumber() != null && e.getOverNumber() == activeOverNumber) {
                 thisOverBalls.add(evStr);
@@ -793,21 +805,24 @@ public class MatchScoringService {
             int wickets = 0;
             
             for (BallEvent e : entry.getValue()) {
-                String evStr;
+                StringBuilder sb = new StringBuilder();
+                if ("WIDE".equals(e.getExtraType())) sb.append("WD");
+                else if ("NO_BALL".equals(e.getExtraType())) sb.append("NB");
+                else if ("BYE".equals(e.getExtraType())) sb.append("B");
+                else if ("LEG_BYE".equals(e.getExtraType())) sb.append("LB");
+
                 if (Boolean.TRUE.equals(e.getIsWicket())) {
-                    evStr = "W";
+                    if (sb.length() > 0) sb.append("+");
+                    sb.append("W");
                     wickets++;
-                } else if ("WIDE".equals(e.getExtraType())) {
-                    evStr = "WD+" + e.getRuns();
-                } else if ("NO_BALL".equals(e.getExtraType())) {
-                    evStr = "NB+" + e.getRuns();
-                } else if ("BYE".equals(e.getExtraType())) {
-                    evStr = "B+" + e.getRuns();
-                } else if ("LEG_BYE".equals(e.getExtraType())) {
-                    evStr = "LB+" + e.getRuns();
-                } else {
-                    evStr = String.valueOf(e.getRuns());
                 }
+                
+                if (e.getRuns() != null && (e.getRuns() > 0 || sb.length() == 0)) {
+                    if (sb.length() > 0) sb.append("+");
+                    sb.append(e.getRuns());
+                }
+                
+                String evStr = sb.toString();
                 balls.add(evStr);
                 
                 int r = e.getRuns() != null ? e.getRuns() : 0;

@@ -21,47 +21,83 @@ public class PointsService {
     private MatchService matchService;
 
     @Autowired
+    private com.cricket.tournament.repository.TeamRepository teamRepository;
+
+    @Autowired
     private com.cricket.tournament.repository.PlayerMatchStatsRepository statsRepository;
 
+    @Autowired
+    private com.cricket.tournament.repository.ScorecardBattingRepository battingRepository;
+
+    @Autowired
+    private com.cricket.tournament.repository.ScorecardBowlingRepository bowlingRepository;
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Map<String, Object> getTopPerformers() {
         Map<String, Object> response = new HashMap<>();
 
         Map<Long, String> tournamentPlayerTeamMap = new HashMap<>();
-        for (Team t : teamService.getAllTeams()) {
+        // Use repository directly to ensure EntityGraph is applied and bypass cache if needed
+        List<Team> allTeams = teamRepository.findAll();
+        for (Team t : allTeams) {
             if (t.getTeamType() == null || t.getTeamType() == Team.TeamType.TOURNAMENT) {
                 for (Player p : t.getPlayers()) {
-                    tournamentPlayerTeamMap.put(p.getId(), t.getTeamName());
+                    if (p.getId() != null) {
+                        tournamentPlayerTeamMap.put(p.getId(), t.getTeamName());
+                    }
                 }
             }
         }
 
-        Map<String, Object> tournament = new HashMap<>();
-        tournament.put("topRunScorers", fetchWithTeamName(Match.MatchType.TOURNAMENT, true, tournamentPlayerTeamMap));
-        tournament.put("topWicketTakers", fetchWithTeamName(Match.MatchType.TOURNAMENT, false, tournamentPlayerTeamMap));
-
-        Map<String, Object> practice = new HashMap<>();
-        practice.put("topRunScorers", fetchWithTeamName(Match.MatchType.PRACTICE, true, new HashMap<>())); 
-        practice.put("topWicketTakers", fetchWithTeamName(Match.MatchType.PRACTICE, false, new HashMap<>()));
-
-        response.put("TOURNAMENT", tournament);
-        response.put("PRACTICE", practice);
+        response.put("TOURNAMENT", buildPerformersMap(Match.MatchType.TOURNAMENT, tournamentPlayerTeamMap));
+        response.put("PRACTICE", buildPerformersMap(Match.MatchType.PRACTICE, new HashMap<>()));
 
         return response;
     }
 
-    private List<Map<String, Object>> fetchWithTeamName(Match.MatchType matchType, boolean isBatting, Map<Long, String> teamMap) {
-        List<Map<String, Object>> rawStats = isBatting 
-            ? statsRepository.getTopRunScorersByMatchType(matchType)
-            : statsRepository.getTopWicketTakersByMatchType(matchType);
+    private Map<String, Object> buildPerformersMap(Match.MatchType matchType, Map<Long, String> teamMap) {
+        Map<String, Object> performers = new HashMap<>();
+        performers.put("topRunScorers", fetchWithTeamName(matchType, "runs", teamMap));
+        performers.put("topWicketTakers", fetchWithTeamName(matchType, "wickets", teamMap));
+        performers.put("topSixHitters", fetchWithTeamName(matchType, "sixes", teamMap));
+        performers.put("topFourHitters", fetchWithTeamName(matchType, "fours", teamMap));
+        performers.put("topCatchTakers", fetchWithTeamName(matchType, "catches", teamMap));
+        return performers;
+    }
+
+    private List<Map<String, Object>> fetchWithTeamName(Match.MatchType matchType, String type, Map<Long, String> teamMap) {
+        List<Map<String, Object>> rawStats;
+        switch (type) {
+            case "wickets":
+                rawStats = bowlingRepository.getTopWicketTakersByMatchType(matchType);
+                break;
+            case "sixes":
+                rawStats = battingRepository.getTopSixHittersByMatchType(matchType);
+                break;
+            case "fours":
+                rawStats = battingRepository.getTopFourHittersByMatchType(matchType);
+                break;
+            case "catches":
+                rawStats = statsRepository.getTopCatchTakersByMatchType(matchType);
+                break;
+            case "runs":
+            default:
+                rawStats = battingRepository.getTopRunScorersByMatchType(matchType);
+                break;
+        }
 
         return rawStats.stream().map(map -> {
             Map<String, Object> newMap = new HashMap<>(map);
-            Player p = (Player) map.get("player");
-            if (p != null) {
-                newMap.put("teamName", teamMap.get(p.getId()));
+            // If the query didn't find a team name (e.g. for practice matches), 
+            // try to look it up from our manual map as a fallback
+            if (newMap.get("teamName") == null) {
+                Player p = (Player) map.get("player");
+                if (p != null) {
+                    newMap.put("teamName", teamMap.get(p.getId()));
+                }
             }
             return newMap;
-        }).toList();
+        }).limit(5).toList();
     }
 
     public Map<String, List<Map<String, Object>>> getPointsTable() {

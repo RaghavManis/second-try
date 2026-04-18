@@ -51,7 +51,14 @@ const MatchScorecard: React.FC = () => {
   const fetchScorecard = async (id: number) => {
     try {
       const res = await MatchScoringService.getCompleteScorecard(id);
-      setData(res.data);
+      const rawData = res.data || {};
+      setData({
+        ...rawData,
+        batting: Array.isArray(rawData.batting) ? rawData.batting : [],
+        bowling: Array.isArray(rawData.bowling) ? rawData.bowling : [],
+        innings1Overs: Array.isArray(rawData.innings1Overs) ? rawData.innings1Overs : [],
+        innings2Overs: Array.isArray(rawData.innings2Overs) ? rawData.innings2Overs : []
+      });
     } catch (err) {
       console.error(err);
     } finally {

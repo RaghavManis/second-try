@@ -28,9 +28,9 @@ const PointsTable: React.FC = () => {
          PointsService.getTopPerformers(),
          TeamService.getAllTeams()
       ]);
-      setPoints(ptRes.data);
+      setPoints(ptRes.data || { TOURNAMENT: [], PRACTICE: [] });
       setPerfData(perfRes.data);
-      setTeams(teamsRes.data);
+      setTeams(Array.isArray(teamsRes.data) ? teamsRes.data : []);
       setLoading(false);
     } catch (err) {
       setError('Failed to load points table.');
@@ -72,6 +72,95 @@ const PointsTable: React.FC = () => {
 
   const currentTopScorers = perfData?.[leaderboardType]?.topRunScorers || [];
   const currentTopWickets = perfData?.[leaderboardType]?.topWicketTakers || [];
+  const currentTopSixes = perfData?.[leaderboardType]?.topSixHitters || [];
+  const currentTopFours = perfData?.[leaderboardType]?.topFourHitters || [];
+  const currentTopCatches = perfData?.[leaderboardType]?.topCatchTakers || [];
+
+  const LeaderboardPanel = ({ 
+    title, 
+    emoji, 
+    data, 
+    statKey, 
+    statLabel, 
+    color, 
+    accentColor, 
+    bgOpacity = '0.15' 
+  }: { 
+    title: string, 
+    emoji: string, 
+    data: any[], 
+    statKey: string, 
+    statLabel: string, 
+    color: string, 
+    accentColor: string, 
+    bgOpacity?: string 
+  }) => (
+    <div className="glass-panel hover-lift" style={{ padding: '0', overflow: 'hidden', height: '100%' }}>
+      <div style={{ background: '#0f172a', padding: '1.25rem', borderBottom: `2px solid ${accentColor}` }}>
+        <h3 style={{ margin: 0, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.3rem' }}>
+          {title} {emoji}
+        </h3>
+      </div>
+      <div style={{ overflowX: 'auto', width: '100%', background: 'rgba(15, 23, 42, 0.6)' }}>
+        <table className="data-table" style={{ background: 'transparent', width: '100%', minWidth: '350px' }}>
+          <thead>
+            <tr>
+              <th style={{ color: color, padding: '1rem', width: '60px' }}>Rank</th>
+              <th style={{ color: color }}>Player</th>
+              <th style={{ textAlign: 'right', color: color, paddingRight: '1rem' }}>{statLabel}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.length === 0 ? (
+              <tr><td colSpan={3} className="text-center" style={{ color: '#94a3b8', padding: '2rem' }}>No data available</td></tr>
+            ) : (
+              data.map((item, i) => (
+                <tr key={i} style={{ 
+                  background: i === 0 ? `rgba(${accentColor.replace(/[^\d,]/g, '') || '249, 115, 22'}, ${bgOpacity})` : 'transparent', 
+                  borderBottom: '1px solid rgba(255,255,255,0.05)' 
+                }}>
+                  <td style={{ color: '#cbd5e1', padding: '0.85rem 1rem' }}>{i + 1}</td>
+                  <td className="font-bold">
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      {item.player?.id ? (
+                        <Link to={`/players/${item.player.id}`} style={{ color: accentColor, textDecoration: 'none', fontWeight: 700 }}>
+                          {item.player?.name || 'Unknown'}
+                        </Link>
+                      ) : (
+                        <span style={{ color: accentColor, fontWeight: 700 }}>{item.player?.name || 'Unknown'}</span>
+                      )}
+                      <span style={{ 
+                        fontSize: '0.8rem', 
+                        color: 'rgba(255, 255, 255, 0.7)', 
+                        fontWeight: 500,
+                        letterSpacing: '0.025em',
+                        marginTop: '2px'
+                      }}>
+                        {item.teamName || '-'}
+                      </span>
+                    </div>
+                  </td>
+                  <td style={{ textAlign: 'right', paddingRight: '1rem' }}>
+                    <span style={{ 
+                      fontWeight: 900, 
+                      fontSize: i === 0 ? '1.2rem' : '1.1rem', 
+                      color: i === 0 ? color : '#f8fafc',
+                      background: i === 0 ? `rgba(${accentColor.replace(/[^\d,]/g, '') || '249, 115, 22'}, 0.2)` : 'transparent',
+                      borderRadius: '6px',
+                      padding: '2px 8px',
+                      display: 'inline-block'
+                    }}>
+                      {item[statKey]}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   return (
     <div className="dashboard-wrapper">
@@ -184,78 +273,56 @@ const PointsTable: React.FC = () => {
            <h2 className="scroll-section-title gradient-text" style={{ textAlign: 'left', marginTop: '2rem', marginBottom: '0.25rem' }}>Top {leaderboardType} Performers</h2>
            <p className="scroll-section-subtitle" style={{ textAlign: 'left', marginBottom: '2rem' }}>Stats strictly from {leaderboardType.toLowerCase()} matches.</p>
            
-           <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))' }}>
-               
-               {/* ORANGE CAP */}
-               <div className="glass-panel hover-lift" style={{ padding: '0', overflow: 'hidden' }}>
-                   <div style={{ background: '#0f172a', padding: '1.5rem', borderBottom: '2px solid rgba(249, 115, 22, 0.8)' }}>
-                      <h3 style={{ margin: 0, color: '#ffedd5', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.4rem' }}>
-                         Top Scorer 🟠
-                      </h3>
-                   </div>
-                   <div style={{ overflowX: 'auto', width: '100%', background: 'rgba(15, 23, 42, 0.6)' }}>
-                     <table className="data-table" style={{ background: 'transparent', width: '100%', minWidth: '400px' }}>
-                         <thead>
-                             <tr><th style={{color: '#fdba74', padding: '1rem'}}>Rank</th><th style={{color: '#fdba74'}}>Player</th><th style={{color: '#fdba74'}}>Team</th><th style={{textAlign: 'right', color: '#fdba74', paddingRight: '1rem'}}>Runs</th></tr>
-                         </thead>
-                         <tbody>
-                             {currentTopScorers.length === 0 ? <tr><td colSpan={4} className="text-center" style={{color: '#fff', padding: '1rem'}}>No runs recorded</td></tr> : 
-                               currentTopScorers.map((ts: any, i: number) => (
-                                   <tr key={i} style={{ background: i === 0 ? 'rgba(249, 115, 22, 0.15)' : 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                       <td style={{color: '#cbd5e1', padding: '1rem'}}>{i + 1}</td>
-                                       <td className="font-bold" style={{ fontSize: i === 0 ? '1.1rem' : '1rem' }}>
-                                          {ts.player?.id
-                                            ? <Link to={`/players/${ts.player.id}`} style={{ color: i === 0 ? '#fb923c' : '#60a5fa', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer' }}>{ts.player?.name || ts.playerName || '-'}</Link>
-                                            : <span style={{ color: i === 0 ? '#ffedd5' : '#ffffff' }}>{ts.player?.name || ts.playerName || '-'}</span>
-                                          }
-                                        </td>
-                                       <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{ts.teamName || '-'}</td>
-                                       <td style={{ textAlign: 'right', paddingRight: '1rem' }}>
-                                          <span style={{ fontWeight: 900, fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#f97316' : ts.totalRuns >= 200 ? '#f59e0b' : ts.totalRuns >= 100 ? '#10b981' : '#fed7aa', background: i === 0 ? 'rgba(249,115,22,0.2)' : ts.totalRuns >= 200 ? 'rgba(245,158,11,0.15)' : ts.totalRuns >= 100 ? 'rgba(16,185,129,0.12)' : 'transparent', borderRadius: '8px', padding: i === 0 || ts.totalRuns >= 100 ? '2px 8px' : '0', display: 'inline-block' }}>{ts.totalRuns}</span>
-                                        </td>
-                                   </tr>
-                               ))
-                             }
-                         </tbody>
-                     </table>
-                   </div>
-               </div>
+           <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
+                <LeaderboardPanel 
+                  title="Orange Cap" 
+                  emoji="🟠" 
+                  data={currentTopScorers} 
+                  statKey="totalRuns" 
+                  statLabel="Runs" 
+                  color="#fdba74" 
+                  accentColor="#f97316"
+                />
+                
+                <LeaderboardPanel 
+                  title="Purple Cap" 
+                  emoji="🟣" 
+                  data={currentTopWickets} 
+                  statKey="totalWickets" 
+                  statLabel="Wickets" 
+                  color="#d8b4fe" 
+                  accentColor="#a855f7"
+                />
 
-               {/* PURPLE CAP */}
-               <div className="glass-panel hover-lift" style={{ padding: '0', overflow: 'hidden' }}>
-                   <div style={{ background: '#0f172a', padding: '1.5rem', borderBottom: '2px solid rgba(168, 85, 247, 0.8)' }}>
-                      <h3 style={{ margin: 0, color: '#f3e8ff', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.4rem' }}>
-                         Top Wicket Taker 🟣
-                      </h3>
-                   </div>
-                   <div style={{ overflowX: 'auto', width: '100%', background: 'rgba(15, 23, 42, 0.6)' }}>
-                     <table className="data-table" style={{ background: 'transparent', width: '100%', minWidth: '400px' }}>
-                         <thead>
-                             <tr><th style={{color: '#d8b4fe', padding: '1rem'}}>Rank</th><th style={{color: '#d8b4fe'}}>Player</th><th style={{color: '#d8b4fe'}}>Team</th><th style={{textAlign: 'right', color: '#d8b4fe', paddingRight: '1rem'}}>Wickets</th></tr>
-                         </thead>
-                         <tbody>
-                             {currentTopWickets.length === 0 ? <tr><td colSpan={4} className="text-center" style={{color: '#fff', padding: '1rem'}}>No wickets recorded</td></tr> : 
-                               currentTopWickets.map((tw: any, i: number) => (
-                                   <tr key={i} style={{ background: i === 0 ? 'rgba(168, 85, 247, 0.15)' : 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                       <td style={{color: '#cbd5e1', padding: '1rem'}}>{i + 1}</td>
-                                       <td className="font-bold" style={{ fontSize: i === 0 ? '1.1rem' : '1rem' }}>
-                                          {tw.player?.id
-                                            ? <Link to={`/players/${tw.player.id}`} style={{ color: i === 0 ? '#c084fc' : '#60a5fa', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer' }}>{tw.player?.name || tw.playerName || '-'}</Link>
-                                            : <span style={{ color: i === 0 ? '#f3e8ff' : '#ffffff' }}>{tw.player?.name || tw.playerName || '-'}</span>
-                                          }
-                                        </td>
-                                       <td style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{tw.teamName || '-'}</td>
-                                       <td style={{ textAlign: 'right', paddingRight: '1rem' }}>
-                                          <span style={{ fontWeight: 900, fontSize: i === 0 ? '1.3rem' : '1.1rem', color: i === 0 ? '#a855f7' : tw.totalWickets >= 10 ? '#ef4444' : tw.totalWickets >= 5 ? '#f87171' : '#e9d5ff', background: i === 0 ? 'rgba(168,85,247,0.2)' : tw.totalWickets >= 10 ? 'rgba(239,68,68,0.15)' : tw.totalWickets >= 5 ? 'rgba(248,113,113,0.12)' : 'transparent', borderRadius: '8px', padding: i === 0 || tw.totalWickets >= 5 ? '2px 8px' : '0', display: 'inline-block' }}>{tw.totalWickets}</span>
-                                        </td>
-                                   </tr>
-                               ))
-                             }
-                         </tbody>
-                     </table>
-                   </div>
-               </div>
+                <LeaderboardPanel 
+                  title="Maximum Sixes" 
+                  emoji="🔥" 
+                  data={currentTopSixes} 
+                  statKey="totalSixes" 
+                  statLabel="Sixes" 
+                  color="#fca5a5" 
+                  accentColor="#ef4444"
+                />
 
+                <LeaderboardPanel 
+                  title="Boundary King" 
+                  emoji="🚀" 
+                  data={currentTopFours} 
+                  statKey="totalFours" 
+                  statLabel="Fours" 
+                  color="#86efac" 
+                  accentColor="#22c55e"
+                />
+
+                <LeaderboardPanel 
+                  title="Safe Hands" 
+                  emoji="🧤" 
+                  data={currentTopCatches} 
+                  statKey="totalCatches" 
+                  statLabel="Catches" 
+                  color="#67e8f9" 
+                  accentColor="#06b6d4"
+                />
            </div>
         </AnimatedSection>
       </div>

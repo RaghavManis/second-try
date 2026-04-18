@@ -237,9 +237,9 @@ const LiveMatch: React.FC = () => {
                   
                   return (
                     <div key={i} style={{ 
-                      flexShrink: 0, width: '40px', height: '40px', borderRadius: '50%', backgroundColor: bgColor, 
+                      flexShrink: 0, width: '42px', height: '42px', borderRadius: '50%', backgroundColor: bgColor, 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
-                      fontSize: b.length > 3 ? '0.7rem' : b.length > 2 ? '0.8rem' : '1.1rem',
+                      fontSize: b.length > 5 ? '0.5rem' : b.length > 4 ? '0.6rem' : b.length > 2 ? '0.75rem' : '1.1rem',
                       lineHeight: 1, padding: '2px', boxSizing: 'border-box', overflow: 'hidden', textAlign: 'center',
                       boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '2px solid rgba(255,255,255,0.1)'
                     }}>
@@ -265,9 +265,9 @@ const LiveMatch: React.FC = () => {
                   
                   return (
                     <div key={i} style={{ 
-                      flexShrink: 0, width: '32px', height: '32px', borderRadius: '50%', backgroundColor: bgColor, color: color,
+                      flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', backgroundColor: bgColor, color: color,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
-                      fontSize: b.length > 3 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.9rem',
+                      fontSize: b.length > 5 ? '0.45rem' : b.length > 4 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.9rem',
                       lineHeight: 1, padding: '2px', boxSizing: 'border-box', overflow: 'hidden', textAlign: 'center',
                       border: `1px solid ${color}40`
                     }}>
@@ -580,35 +580,48 @@ const LiveMatch: React.FC = () => {
                         </h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {innings1Overs.map((over, idx) => (
-                                <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ width: '250px', flexShrink: 0, marginBottom: '0.5rem' }}>
-                                        <span style={{ fontWeight: 'bold', color: '#fff' }}>Over {over.overNumber}</span>
-                                        <span style={{ color: '#94a3b8', marginLeft: '0.5rem', fontSize: '0.9rem' }}>({over.bowlerName})</span>
+                                <div key={idx} style={{ 
+                                    display: 'flex', flexDirection: 'column', gap: '0.75rem', 
+                                    background: 'rgba(255,255,255,0.02)', padding: '1rem', 
+                                    borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)',
+                                    marginBottom: '0.5rem'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span style={{ fontWeight: '900', color: 'var(--primary)', fontSize: '1.1rem' }}>Over {over.overNumber}</span>
+                                            <span style={{ color: '#94a3b8', fontSize: '0.85rem', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>({over.bowlerName})</span>
+                                        </div>
+                                        <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                            {over.runs} Runs {over.wickets > 0 ? `• ${over.wickets} W` : ''}
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', flex: 1 }}>
+                                    <div style={{ 
+                                        display: 'flex', gap: '0.4rem', width: '100%', 
+                                        overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', 
+                                        WebkitOverflowScrolling: 'touch', flexWrap: 'nowrap'
+                                    }}>
                                         {over.balls.map((b, bIdx) => {
                                             let bgColor = 'rgba(255,255,255,0.05)';
                                             let color = '#94a3b8';
-                                            if (b === 'W') { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
+                                            if (b === 'W' || b.includes('+W')) { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
                                             else if (b === '4') { bgColor = 'rgba(59, 130, 246, 0.2)'; color = '#3b82f6'; }
                                             else if (b === '6') { bgColor = 'rgba(139, 92, 246, 0.2)'; color = '#8b5cf6'; }
-                                            else if (b !== '0' && b.length === 1) { bgColor = 'rgba(16, 185, 129, 0.2)'; color = '#10b981'; }
-                                            else if (b.length > 1) { bgColor = 'rgba(245, 158, 11, 0.2)'; color = '#f59e0b'; }
+                                            else if (b !== '0' && (b.length === 1 || b.startsWith('NB') || b.startsWith('WD'))) { 
+                                                if (b.length === 1) { bgColor = 'rgba(16, 185, 129, 0.2)'; color = '#10b981'; }
+                                                else { bgColor = 'rgba(245, 158, 11, 0.2)'; color = '#f59e0b'; }
+                                            }
                                             
                                             return (
                                                 <div key={bIdx} style={{ 
-                                                    width: '32px', height: '32px', borderRadius: '50%', backgroundColor: bgColor, color: color,
+                                                    flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', backgroundColor: bgColor, color: color,
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
-                                                    fontSize: b.length > 3 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.9rem',
+                                                    fontSize: b.length > 5 ? '0.45rem' : b.length > 4 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.9rem',
                                                     border: `1px solid ${color}40`
                                                 }}>
                                                     {b}
                                                 </div>
                                             )
                                         })}
-                                    </div>
-                                    <div style={{ paddingLeft: '1rem', color: '#cbd5e1', fontSize: '0.9rem', minWidth: '80px', textAlign: 'right', fontWeight: 'bold' }}>
-                                        {over.runs} Runs {over.wickets > 0 ? `| ${over.wickets} W` : ''}
                                     </div>
                                 </div>
                             ))}
@@ -623,35 +636,48 @@ const LiveMatch: React.FC = () => {
                         </h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {innings2Overs.map((over, idx) => (
-                                <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ width: '250px', flexShrink: 0, marginBottom: '0.5rem' }}>
-                                        <span style={{ fontWeight: 'bold', color: '#fff' }}>Over {over.overNumber}</span>
-                                        <span style={{ color: '#94a3b8', marginLeft: '0.5rem', fontSize: '0.9rem' }}>({over.bowlerName})</span>
+                                <div key={idx} style={{ 
+                                    display: 'flex', flexDirection: 'column', gap: '0.75rem', 
+                                    background: 'rgba(255,255,255,0.02)', padding: '1rem', 
+                                    borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)',
+                                    marginBottom: '0.5rem'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span style={{ fontWeight: '900', color: 'var(--primary)', fontSize: '1.1rem' }}>Over {over.overNumber}</span>
+                                            <span style={{ color: '#94a3b8', fontSize: '0.85rem', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>({over.bowlerName})</span>
+                                        </div>
+                                        <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                            {over.runs} Runs {over.wickets > 0 ? `• ${over.wickets} W` : ''}
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', flex: 1 }}>
+                                    <div style={{ 
+                                        display: 'flex', gap: '0.4rem', width: '100%', 
+                                        overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', 
+                                        WebkitOverflowScrolling: 'touch', flexWrap: 'nowrap'
+                                    }}>
                                         {over.balls.map((b, bIdx) => {
                                             let bgColor = 'rgba(255,255,255,0.05)';
                                             let color = '#94a3b8';
-                                            if (b === 'W') { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
+                                            if (b === 'W' || b.includes('+W')) { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
                                             else if (b === '4') { bgColor = 'rgba(59, 130, 246, 0.2)'; color = '#3b82f6'; }
                                             else if (b === '6') { bgColor = 'rgba(139, 92, 246, 0.2)'; color = '#8b5cf6'; }
-                                            else if (b !== '0' && b.length === 1) { bgColor = 'rgba(16, 185, 129, 0.2)'; color = '#10b981'; }
-                                            else if (b.length > 1) { bgColor = 'rgba(245, 158, 11, 0.2)'; color = '#f59e0b'; }
+                                            else if (b !== '0' && (b.length === 1 || b.startsWith('NB') || b.startsWith('WD'))) { 
+                                                if (b.length === 1) { bgColor = 'rgba(16, 185, 129, 0.2)'; color = '#10b981'; }
+                                                else { bgColor = 'rgba(245, 158, 11, 0.2)'; color = '#f59e0b'; }
+                                            }
                                             
                                             return (
                                                 <div key={bIdx} style={{ 
-                                                    width: '32px', height: '32px', borderRadius: '50%', backgroundColor: bgColor, color: color,
+                                                    flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', backgroundColor: bgColor, color: color,
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
-                                                    fontSize: b.length > 3 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.9rem',
+                                                    fontSize: b.length > 5 ? '0.45rem' : b.length > 4 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.9rem',
                                                     border: `1px solid ${color}40`
                                                 }}>
                                                     {b}
                                                 </div>
                                             )
                                         })}
-                                    </div>
-                                    <div style={{ paddingLeft: '1rem', color: '#cbd5e1', fontSize: '0.9rem', minWidth: '80px', textAlign: 'right', fontWeight: 'bold' }}>
-                                        {over.runs} Runs {over.wickets > 0 ? `| ${over.wickets} W` : ''}
                                     </div>
                                 </div>
                             ))}

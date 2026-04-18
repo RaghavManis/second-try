@@ -16,12 +16,10 @@ public interface ScorecardBowlingRepository extends JpaRepository<ScorecardBowli
     @org.springframework.data.jpa.repository.Query("DELETE FROM ScorecardBowling s WHERE s.match.id = :matchId")
     void deleteByMatchId(@org.springframework.data.repository.query.Param("matchId") Long matchId);
     
-    @org.springframework.data.jpa.repository.Query(value = "SELECT p.name AS playerName, t.team_name AS teamName, CAST(SUM(s.wickets) AS SIGNED) AS totalWickets " +
-           "FROM scorecard_bowling s " +
-           "JOIN players p ON s.player_id = p.id " +
-           "JOIN teams t ON s.team_id = t.id " +
-           "GROUP BY s.player_id, p.name, t.team_name " +
-           "ORDER BY totalWickets DESC " +
-           "LIMIT 5", nativeQuery = true)
-    List<java.util.Map<String, Object>> getTopWicketTakers();
+    @org.springframework.data.jpa.repository.Query("SELECT new map(s.player as player, SUM(s.wickets) as totalWickets) " +
+           "FROM ScorecardBowling s " +
+           "WHERE s.match.matchType = :matchType " +
+           "GROUP BY s.player " +
+           "ORDER BY SUM(s.wickets) DESC")
+    List<java.util.Map<String, Object>> getTopWicketTakersByMatchType(@org.springframework.data.repository.query.Param("matchType") com.cricket.tournament.model.Match.MatchType matchType);
 }

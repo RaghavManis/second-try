@@ -13,7 +13,7 @@ import SEO from '../components/common/SEO';
 const Teams: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [teams, setTeams] = useState<(Team & { captainName?: string })[]>([]);
+  const [teams, setTeams] = useState<(Team & { captainName?: string, viceCaptainName?: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
@@ -28,15 +28,20 @@ const Teams: React.FC = () => {
   const fetchTeams = async () => {
     try {
       const res = await TeamService.getAllTeams();
-      const teamsData = res.data;
+      const teamsData = Array.isArray(res.data) ? res.data : [];
       
       const enhancedTeams = await Promise.all(teamsData.map(async (team) => {
         try {
           const playersRes = await PlayerService.getPlayersByTeam(team.id!);
           const captain = playersRes.data.find(p => p.isCaptain);
-          return { ...team, captainName: captain ? captain.name : 'TBD' };
+          const viceCaptain = playersRes.data.find(p => p.isViceCaptain);
+          return { 
+            ...team, 
+            captainName: captain ? captain.name : 'TBD',
+            viceCaptainName: viceCaptain ? viceCaptain.name : 'TBD'
+          };
         } catch {
-          return { ...team, captainName: 'TBD' };
+          return { ...team, captainName: 'TBD', viceCaptainName: 'TBD' };
         }
       }));
       setTeams(enhancedTeams);
@@ -128,6 +133,7 @@ const Teams: React.FC = () => {
       />
 
       {/* SECTION 1: HERO */}
+      {/* SECTION 1: HERO - COMMENTED OUT AS PER REQUEST
       <div className="parallax-hero" style={{ 
         height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
         backgroundAttachment: 'fixed', backgroundImage: 'url("/teams-bg.jpg")',
@@ -149,8 +155,9 @@ const Teams: React.FC = () => {
           </button>
         </div>
       </div>
+      */}
 
-      <div id="teams-content" className="dashboard-sections">
+      <div id="teams-content" className="dashboard-sections" style={{ paddingTop: '80px' }}>
         
         {/* SECTION 2: FEATURED TEAMS */}
         {featuredTeams.length > 0 && (
@@ -183,8 +190,15 @@ const Teams: React.FC = () => {
 
                 <div style={{ zIndex: 1, paddingRight: '1rem' }}>
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.4rem 0', color: '#fff', letterSpacing: '-0.01em' }}>{team.teamName}</h3>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 600 }}>
-                    <User size={12} color="var(--primary)" /> {team.captainName}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem', color: '#cbd5e1', fontWeight: 600, width: 'fit-content' }}>
+                      <User size={10} color="var(--primary)" /> C: {team.captainName}
+                    </div>
+                    {team.viceCaptainName !== 'TBD' && (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem', color: '#cbd5e1', fontWeight: 600, width: 'fit-content' }}>
+                        <User size={10} color="#fbbf24" /> VC: {team.viceCaptainName}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -242,8 +256,15 @@ const Teams: React.FC = () => {
                       <img src={getLogo(team)} alt={team.teamName} style={{ width: '100%', height: '100%', borderRadius: '18px', objectFit: 'cover', background: 'var(--bg-color)' }} />
                     </div>
                     <h3 style={{ fontSize: '1.6rem', fontWeight: 900, margin: '0 0 0.5rem 0', color: '#fff', letterSpacing: '-0.02em', padding: '0 1rem', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{team.teamName}</h3>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 16px', borderRadius: '20px', fontSize: '0.85rem', color: '#e2e8f0', fontWeight: 600, marginBottom: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
-                      <User size={14} color="var(--primary)" /> Captain: {team.captainName}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 16px', borderRadius: '20px', fontSize: '0.85rem', color: '#e2e8f0', fontWeight: 600, boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+                        <User size={14} color="var(--primary)" /> Captain: {team.captainName}
+                      </div>
+                      {team.viceCaptainName !== 'TBD' && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 16px', borderRadius: '20px', fontSize: '0.85rem', color: '#e2e8f0', fontWeight: 600, boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+                          <User size={14} color="#fbbf24" /> VC: {team.viceCaptainName}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -283,9 +304,9 @@ const Teams: React.FC = () => {
                   value={newTeam.teamName} onChange={e => setNewTeam({...newTeam, teamName: e.target.value})} 
                   placeholder="e.g. Royal Challengers" />
               </div>
-              <div className="form-group">
+              <div className="form-group" style={{ display: 'none' }}>
                 <label className="form-label">Coach Name</label>
-                <input required type="text" className="form-input" 
+                <input type="text" className="form-input" 
                   value={newTeam.coachName} onChange={e => setNewTeam({...newTeam, coachName: e.target.value})} 
                   placeholder="Coach Full Name" />
               </div>

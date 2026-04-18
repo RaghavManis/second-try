@@ -34,6 +34,7 @@ const AdminScoringPanel: React.FC = () => {
   const [wicketType, setWicketType] = useState<string>('BOWLED');
   const [playerOutId, setPlayerOutId] = useState<number | ''>('');
   const [fielderId, setFielderId] = useState<number | ''>('');
+  const [crossed, setCrossed] = useState<boolean>(false);
   const [nextBatsmanId, setNextBatsmanId] = useState<number | ''>('');
   const [nextBowlerId, setNextBowlerId] = useState<number | ''>('');
   const [manOfTheMatchId, setManOfTheMatchId] = useState<number | ''>('');
@@ -45,6 +46,19 @@ const AdminScoringPanel: React.FC = () => {
 
   // Interaction Safety State
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Auto-reset wicket type when extra type changes to ensure valid options
+  useEffect(() => {
+    if (isWicket) {
+      if (extraType === 'NO_BALL') {
+        setWicketType('RUN_OUT');
+      } else if (extraType === 'WIDE') {
+        setWicketType('STUMPED');
+      } else {
+        setWicketType('BOWLED');
+      }
+    }
+  }, [extraType, isWicket]);
 
   useEffect(() => {
     if (matchId) {
@@ -151,12 +165,13 @@ const AdminScoringPanel: React.FC = () => {
         wicketType: isWicket ? wicketType : undefined,
         playerOutId: isWicket ? Number(playerOutId) : undefined,
         fielderId: (isWicket && ['CAUGHT', 'RUN_OUT', 'STUMPED'].includes(wicketType)) ? Number(fielderId) : undefined,
+        crossed: isWicket ? crossed : undefined,
         nextBatsmanId: (isWicket && nextBatsmanId !== '') ? Number(nextBatsmanId) : undefined,
         nextBowlerId: nextBowlerId !== '' ? Number(nextBowlerId) : undefined
       });
       toast.success('Ball Recorded');
       // Reset form
-      setRuns(0); setExtraType(''); setIsWicket(false);
+      setRuns(0); setExtraType(''); setIsWicket(false); setCrossed(false);
       setWicketType('BOWLED'); setPlayerOutId(''); setFielderId(''); setNextBatsmanId(''); setNextBowlerId('');
       
       await applyDetailsUpdate(res.data);
@@ -529,35 +544,6 @@ const AdminScoringPanel: React.FC = () => {
 
       {!isAwaitingSecondInnings && !isMatchOverWarning && (
         <>
-          {/* STREAM SETTINGS */}
-          <div className="glass-panel" style={{ marginBottom: '1.5rem' }}>
-            <h3 className="gradient-text" style={{ margin: '0 0 1rem 0' }}>Live Stream Settings</h3>
-            <form onSubmit={handleStreamUpdate} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
-              <div className="form-group" style={{ margin: 0, flex: '1 1 250px' }}>
-                <label>YouTube URL</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  placeholder="e.g. https://youtube.com/watch?v=..." 
-                  value={streamUrl} 
-                  onChange={e => setStreamUrl(e.target.value)}
-                />
-              </div>
-              <div className="form-group" style={{ margin: 0, flex: '0 1 120px' }}>
-                <label>Stream Delay (sec)</label>
-                <input 
-                  type="number" 
-                  className="form-input" 
-                  min="0" 
-                  value={streamDelaySeconds} 
-                  onChange={e => setStreamDelaySeconds(parseInt(e.target.value) || 0)}
-                />
-              </div>
-              <button type="submit" className="btn btn-primary" disabled={isUpdatingStream} style={{ padding: '0.6rem 1.2rem', height: '42px' }}>
-                {isUpdatingStream ? 'Saving...' : 'Save Settings'}
-              </button>
-            </form>
-          </div>
 
         <div className="glass-panel">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -610,9 +596,9 @@ const AdminScoringPanel: React.FC = () => {
                 
                 return (
                   <div key={i} style={{ 
-                    flexShrink: 0, width: '36px', height: '36px', borderRadius: '50%', backgroundColor: bgColor, 
+                    flexShrink: 0, width: '42px', height: '42px', borderRadius: '50%', backgroundColor: bgColor, 
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
-                    fontSize: b.length > 3 ? '0.65rem' : b.length > 2 ? '0.75rem' : '0.95rem',
+                    fontSize: b.length > 5 ? '0.5rem' : b.length > 4 ? '0.6rem' : b.length > 2 ? '0.75rem' : '1.1rem',
                     lineHeight: 1, padding: '2px', boxSizing: 'border-box', overflow: 'hidden', textAlign: 'center',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)'
                   }}>
@@ -639,9 +625,9 @@ const AdminScoringPanel: React.FC = () => {
                 
                 return (
                   <div key={i} style={{ 
-                    flexShrink: 0, width: '30px', height: '30px', borderRadius: '50%', backgroundColor: bgColor, color: color,
+                    flexShrink: 0, width: '34px', height: '34px', borderRadius: '50%', backgroundColor: bgColor, color: color,
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', 
-                    fontSize: b.length > 3 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.85rem',
+                    fontSize: b.length > 5 ? '0.45rem' : b.length > 4 ? '0.55rem' : b.length > 2 ? '0.65rem' : '0.85rem',
                     lineHeight: 1, padding: '2px', boxSizing: 'border-box', overflow: 'hidden', textAlign: 'center',
                     border: `1px solid ${color}40`
                   }}>
@@ -686,8 +672,8 @@ const AdminScoringPanel: React.FC = () => {
                 {[0, 1, 2, 3, 4, 5, 6].map(r => (
                   <button 
                     key={r} 
-                    className={`btn ${runs === r && !isWicket ? 'btn-primary' : ''}`}
-                    onClick={() => { setRuns(r); setIsWicket(false); setExtraType(''); }}
+                    className={`btn ${runs === r ? 'btn-primary' : ''}`}
+                    onClick={() => setRuns(r)}
                     style={{ width: '55px', height: '55px', padding: '0', borderRadius: '50%', fontSize: '1.4rem', fontWeight: 'bold', border: runs !== r ? '1px solid var(--glass-border)' : 'none' }}>
                     {r}
                   </button>
@@ -719,12 +705,30 @@ const AdminScoringPanel: React.FC = () => {
                 {isWicket && (
                   <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.5rem' }}>
                     <select className="form-input" value={wicketType} onChange={e => setWicketType(e.target.value)}>
-                      <option value="BOWLED">Bowled</option>
-                      <option value="CAUGHT">Caught</option>
-                      <option value="LBW">LBW</option>
-                      <option value="RUN_OUT">Run Out</option>
-                      <option value="STUMPED">Stumped</option>
-                      <option value="HIT_WICKET">Hit Wicket</option>
+                      {extraType === 'NO_BALL' ? (
+                        <>
+                          <option value="RUN_OUT">Run Out</option>
+                          <option value="HANDLED_BALL">Handled Ball</option>
+                          <option value="OBSTRUCTING_FIELD">Obstructing Field</option>
+                          <option value="HIT_TWICE">Hit Ball Twice</option>
+                        </>
+                      ) : extraType === 'WIDE' ? (
+                        <>
+                          <option value="STUMPED">Stumped</option>
+                          <option value="RUN_OUT">Run Out</option>
+                          <option value="HIT_WICKET">Hit Wicket</option>
+                          <option value="OBSTRUCTING_FIELD">Obstructing Field</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="BOWLED">Bowled</option>
+                          <option value="CAUGHT">Caught</option>
+                          <option value="LBW">LBW</option>
+                          <option value="RUN_OUT">Run Out</option>
+                          <option value="STUMPED">Stumped</option>
+                          <option value="HIT_WICKET">Hit Wicket</option>
+                        </>
+                      )}
                     </select>
                     
                     <select className="form-input" value={playerOutId} onChange={e => setPlayerOutId(Number(e.target.value))}>
@@ -740,6 +744,18 @@ const AdminScoringPanel: React.FC = () => {
                             <option key={p.id} value={p.id}>{p.name}</option>
                           ))}
                         </select>
+                    )}
+
+                    {wicketType === 'RUN_OUT' && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '8px' }}>
+                        <input 
+                          type="checkbox" 
+                          id="crossed-checkbox"
+                          checked={crossed} 
+                          onChange={e => setCrossed(e.target.checked)} 
+                        />
+                        <label htmlFor="crossed-checkbox" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>Batsmen Crossed?</label>
+                      </div>
                     )}
 
                     {details.currentWickets < 9 && (
@@ -761,7 +777,37 @@ const AdminScoringPanel: React.FC = () => {
               <button className="btn btn-primary" disabled={isSubmitting} onClick={submitBall} style={{ width: '100%', height: '54px', fontSize: '1.2rem', fontWeight: 'bold' }}>{isSubmitting ? 'Recording...' : 'Record Delivery'}</button>
             </div>
             
-            <div className="mobile-spacer" style={{ height: '420px' }}></div>
+            <div className="mobile-spacer" style={{ height: '100px' }}></div>
+
+            {/* STREAM SETTINGS - MOVED TO BOTTOM */}
+            <div className="glass-panel" style={{ marginBottom: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <h3 className="gradient-text" style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>Live Stream Settings</h3>
+              <form onSubmit={handleStreamUpdate} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
+                <div className="form-group" style={{ margin: 0, flex: '1 1 250px' }}>
+                  <label>YouTube URL</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="e.g. https://youtube.com/watch?v=..." 
+                    value={streamUrl} 
+                    onChange={e => setStreamUrl(e.target.value)}
+                  />
+                </div>
+                <div className="form-group" style={{ margin: 0, flex: '0 1 100px' }}>
+                  <label>Delay (s)</label>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    min="0" 
+                    value={streamDelaySeconds} 
+                    onChange={e => setStreamDelaySeconds(parseInt(e.target.value) || 0)}
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary" disabled={isUpdatingStream} style={{ padding: '0.6rem 1.2rem', height: '42px', fontSize: '0.9rem' }}>
+                  {isUpdatingStream ? 'Saving...' : 'Update Stream'}
+                </button>
+              </form>
+            </div>
           </>
           )}
         </div>

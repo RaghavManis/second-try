@@ -84,6 +84,7 @@ export interface BallSubmissionDto {
   fielderId?: number;
   nextBatsmanId?: number;
   nextBowlerId?: number;
+  crossed?: boolean;
 }
 
 export interface LiveMatchDetailsDto {

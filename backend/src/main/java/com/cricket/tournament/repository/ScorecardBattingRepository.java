@@ -16,12 +16,24 @@ public interface ScorecardBattingRepository extends JpaRepository<ScorecardBatti
     @org.springframework.data.jpa.repository.Query("DELETE FROM ScorecardBatting s WHERE s.match.id = :matchId")
     void deleteByMatchId(@org.springframework.data.repository.query.Param("matchId") Long matchId);
     
-    @org.springframework.data.jpa.repository.Query(value = "SELECT p.name AS playerName, t.team_name AS teamName, SUM(s.runs) AS totalRuns " +
-           "FROM scorecard_batting s " +
-           "JOIN players p ON s.player_id = p.id " +
-           "JOIN teams t ON s.team_id = t.id " +
-           "GROUP BY s.player_id, p.name, t.team_name " +
-           "ORDER BY totalRuns DESC " +
-           "LIMIT 5", nativeQuery = true)
-    List<java.util.Map<String, Object>> getTopRunScorers();
+    @org.springframework.data.jpa.repository.Query("SELECT new map(s.player as player, SUM(s.runs) as totalRuns) " +
+           "FROM ScorecardBatting s " +
+           "WHERE s.match.matchType = :matchType " +
+           "GROUP BY s.player " +
+           "ORDER BY SUM(s.runs) DESC")
+    List<java.util.Map<String, Object>> getTopRunScorersByMatchType(@org.springframework.data.repository.query.Param("matchType") com.cricket.tournament.model.Match.MatchType matchType);
+
+    @org.springframework.data.jpa.repository.Query("SELECT new map(s.player as player, SUM(s.sixes) as totalSixes) " +
+           "FROM ScorecardBatting s " +
+           "WHERE s.match.matchType = :matchType " +
+           "GROUP BY s.player " +
+           "ORDER BY SUM(s.sixes) DESC")
+    List<java.util.Map<String, Object>> getTopSixHittersByMatchType(@org.springframework.data.repository.query.Param("matchType") com.cricket.tournament.model.Match.MatchType matchType);
+
+    @org.springframework.data.jpa.repository.Query("SELECT new map(s.player as player, SUM(s.fours) as totalFours) " +
+           "FROM ScorecardBatting s " +
+           "WHERE s.match.matchType = :matchType " +
+           "GROUP BY s.player " +
+           "ORDER BY SUM(s.fours) DESC")
+    List<java.util.Map<String, Object>> getTopFourHittersByMatchType(@org.springframework.data.repository.query.Param("matchType") com.cricket.tournament.model.Match.MatchType matchType);
 }

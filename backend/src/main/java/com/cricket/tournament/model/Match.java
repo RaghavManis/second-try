@@ -115,6 +115,7 @@ public class Match {
         joinColumns = @JoinColumn(name = "match_id"),
         inverseJoinColumns = @JoinColumn(name = "player_id")
     )
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private java.util.Set<Player> playingXiTeamA = new java.util.HashSet<>();
 
     @ManyToMany
@@ -123,6 +124,7 @@ public class Match {
         joinColumns = @JoinColumn(name = "match_id"),
         inverseJoinColumns = @JoinColumn(name = "player_id")
     )
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private java.util.Set<Player> playingXiTeamB = new java.util.HashSet<>();
 
     @Column(name = "result")

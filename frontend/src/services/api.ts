@@ -3,7 +3,7 @@ import type { Team, Match, Score, PointsTableEntry, Player, LiveMatchSetupDto, B
 import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-console.log("API URL:", API_URL);
+
 
 const api = axios.create({
   baseURL: API_URL,

@@ -10,6 +10,7 @@ public class BallSubmissionDto {
     private Long fielderId; // For "CAUGHT" wicket
     private Long nextBatsmanId; // For when a wicket falls
     private Long nextBowlerId; // For end of over handling
+    private Boolean crossed; // For strike rotation on Run Out/Catch
 
     public Integer getRuns() { return runs; }
     public void setRuns(Integer runs) { this.runs = runs; }
@@ -29,4 +30,6 @@ public class BallSubmissionDto {
     public void setFielderId(Long fielderId) { this.fielderId = fielderId; }
     public Long getNextBowlerId() { return nextBowlerId; }
     public void setNextBowlerId(Long nextBowlerId) { this.nextBowlerId = nextBowlerId; }
+    public Boolean getCrossed() { return crossed; }
+    public void setCrossed(Boolean crossed) { this.crossed = crossed; }
 }

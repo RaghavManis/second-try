@@ -30,9 +30,9 @@ const Dashboard: React.FC = () => {
           PointsService.getTopPerformers()
         ]);
 
-        const allMatches = matchesRes.data;
+        const allMatches = Array.isArray(matchesRes.data) ? matchesRes.data : [];
         const completed = allMatches.filter((m: Match) => m.status === 'COMPLETED').length;
-        const tournamentTeams = teamsRes.data.filter((t: Team) => t.teamType === 'TOURNAMENT' || t.teamType == null);
+        const tournamentTeams = Array.isArray(teamsRes.data) ? teamsRes.data.filter((t: Team) => t.teamType === 'TOURNAMENT' || t.teamType == null) : [];
 
         setStats({
           teams: tournamentTeams.length,

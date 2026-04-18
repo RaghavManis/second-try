@@ -31,8 +31,26 @@ const App: React.FC = () => {
         <BrowserRouter>
           <ScrollToTop />
           <div className="app-container">
-            <Toaster position="top-right" toastOptions={{
-              style: { background: '#1a1a2e', color: '#fff', border: '1px solid #ffffff20' }
+            <Toaster position="top-center" toastOptions={{
+              style: { 
+                background: '#1a1a2e', 
+                color: '#fff', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                padding: '16px 24px',
+                fontSize: 'clamp(1rem, 4vw, 1.2rem)',
+                width: '90%',
+                maxWidth: '400px',
+                fontWeight: '800',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+                borderRadius: '12px',
+                textAlign: 'center'
+              },
+              success: {
+                style: { border: '2px solid #10b981', background: 'linear-gradient(135deg, #1a1a2e 0%, #064e3b 100%)' }
+              },
+              error: {
+                style: { border: '2px solid #ef4444', background: 'linear-gradient(135deg, #1a1a2e 0%, #450a0a 100%)' }
+              }
             }} />
             <Navbar />
             <main className="main-content" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 64px)' }}>
