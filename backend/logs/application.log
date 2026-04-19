@@ -3058,3 +3058,97 @@ This generated password is for development use only. Your security configuration
 2026-04-20 02:19:42 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
 2026-04-20 02:19:42 [restartedMain] INFO  c.c.t.CricketTournamentApplication - Started CricketTournamentApplication in 5.28 seconds (process running for 10296.321)
 2026-04-20 02:19:42 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-04-20 02:38:14 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 21 class path changes (0 additions, 0 deletions, 21 modifications)
+2026-04-20 02:38:14 [Thread-66] INFO  o.a.coyote.http11.Http11NioProtocol - Stopping ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-20 02:38:14 [Thread-66] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-20 02:38:15 [Thread-66] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-16 - Shutdown initiated...
+2026-04-20 02:38:15 [Thread-66] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-16 - Shutdown completed.
+2026-04-20 02:38:16 [restartedMain] INFO  c.c.t.CricketTournamentApplication - Starting CricketTournamentApplication using Java 23.0.1 with PID 17728 (C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\target\classes started by ragha in C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend)
+2026-04-20 02:38:16 [restartedMain] INFO  c.c.t.CricketTournamentApplication - The following 1 profile is active: "dev"
+2026-04-20 02:38:17 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-20 02:38:17 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 100 ms. Found 9 JPA repository interfaces.
+2026-04-20 02:38:18 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-20 02:38:18 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-20 02:38:18 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-20 02:38:18 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-04-20 02:38:18 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-20 02:38:18 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2055 ms
+2026-04-20 02:38:18 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-17 - Starting...
+2026-04-20 02:38:19 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-17 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4bab88b8
+2026-04-20 02:38:19 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-17 - Start completed.
+2026-04-20 02:38:19 [restartedMain] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:mysql://localhost:3306/cricket_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true'
+2026-04-20 02:38:19 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-20 02:38:19 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-20 02:38:19 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-20 02:38:20 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-20 02:38:21 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-20 02:38:22 [restartedMain] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-20 02:38:22 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 7ced3bec-e9f7-43d6-a112-c55135d7041d
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-20 02:38:23 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2026-04-20 02:38:23 [restartedMain] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7b9ed9ab, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@d039bf, org.springframework.security.web.context.SecurityContextHolderFilter@34a680db, org.springframework.security.web.header.HeaderWriterFilter@7ee416e8, org.springframework.web.filter.CorsFilter@4b8bf7b4, org.springframework.security.web.authentication.logout.LogoutFilter@34721630, com.cricket.tournament.security.JwtAuthenticationFilter@189a1069, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@397c4424, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@310df253, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@4079eba5, org.springframework.security.web.session.SessionManagementFilter@5c1e198d, org.springframework.security.web.access.ExceptionTranslationFilter@73f1f043, org.springframework.security.web.access.intercept.AuthorizationFilter@7e20a2ad]
+2026-04-20 02:38:24 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-04-20 02:38:24 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-20 02:38:24 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-04-20 02:38:24 [restartedMain] INFO  c.c.t.CricketTournamentApplication - Started CricketTournamentApplication in 8.345 seconds (process running for 11418.639)
+2026-04-20 02:38:24 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-04-20 02:38:29 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 62 class path changes (0 additions, 59 deletions, 3 modifications)
+2026-04-20 02:38:29 [Thread-73] INFO  o.a.coyote.http11.Http11NioProtocol - Stopping ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-20 02:38:29 [Thread-73] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-20 02:38:29 [Thread-73] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-17 - Shutdown initiated...
+2026-04-20 02:38:29 [Thread-73] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-17 - Shutdown completed.
+2026-04-20 02:38:29 [restartedMain] INFO  c.c.t.CricketTournamentApplication - Starting CricketTournamentApplication using Java 23.0.1 with PID 17728 (C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\target\classes started by ragha in C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend)
+2026-04-20 02:38:29 [restartedMain] INFO  c.c.t.CricketTournamentApplication - The following 1 profile is active: "dev"
+2026-04-20 02:38:29 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-20 02:38:29 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 JPA repository interfaces.
+2026-04-20 02:38:30 [restartedMain] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: java.lang.NullPointerException: Cannot read field "generatedClass" because "data" is null
+2026-04-20 02:38:30 [restartedMain] INFO  o.s.b.a.l.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-04-20 02:38:30 [restartedMain] ERROR o.s.boot.SpringApplication - Application run failed
+java.lang.NullPointerException: Cannot read field "generatedClass" because "data" is null
+	at org.springframework.cglib.proxy.Enhancer.nextInstance(Enhancer.java:783)
+	at org.springframework.cglib.core.AbstractClassGenerator.create(AbstractClassGenerator.java:321)
+	at org.springframework.cglib.proxy.Enhancer.createHelper(Enhancer.java:562)
+	at org.springframework.cglib.proxy.Enhancer.createClass(Enhancer.java:407)
+	at org.springframework.context.annotation.ConfigurationClassEnhancer.createClass(ConfigurationClassEnhancer.java:138)
+	at org.springframework.context.annotation.ConfigurationClassEnhancer.enhance(ConfigurationClassEnhancer.java:109)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.enhanceConfigurationClasses(ConfigurationClassPostProcessor.java:533)
+	at org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanFactory(ConfigurationClassPostProcessor.java:310)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:363)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:153)
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:788)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:606)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1343)
+	at com.cricket.tournament.CricketTournamentApplication.main(CricketTournamentApplication.java:10)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
+2026-04-20 02:38:35 [restartedMain] INFO  c.c.t.CricketTournamentApplication - Starting CricketTournamentApplication using Java 23.0.1 with PID 17728 (C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\target\classes started by ragha in C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend)
+2026-04-20 02:38:35 [restartedMain] INFO  c.c.t.CricketTournamentApplication - The following 1 profile is active: "dev"
+2026-04-20 02:38:36 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-20 02:38:36 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 55 ms. Found 9 JPA repository interfaces.
+2026-04-20 02:38:36 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-20 02:38:36 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-20 02:38:36 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-20 02:38:36 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-04-20 02:38:36 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-20 02:38:36 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1227 ms
+2026-04-20 02:38:36 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-18 - Starting...
+2026-04-20 02:38:36 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-18 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7e11f6f5
+2026-04-20 02:38:36 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-18 - Start completed.
+2026-04-20 02:38:36 [restartedMain] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:mysql://localhost:3306/cricket_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true'
+2026-04-20 02:38:37 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-20 02:38:37 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-20 02:38:37 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-20 02:38:37 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-20 02:38:37 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
