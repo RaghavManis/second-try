@@ -79,6 +79,7 @@ public interface PlayerMatchStatsRepository extends JpaRepository<PlayerMatchSta
            "FROM PlayerMatchStats pms " +
            "WHERE pms.matchType = :matchType " +
            "GROUP BY pms.player " +
+           "HAVING SUM(pms.catches) > 0 " +
            "ORDER BY SUM(pms.catches) DESC")
     List<Map<String, Object>> getTopCatchTakersByMatchType(@Param("matchType") Match.MatchType matchType);
 }

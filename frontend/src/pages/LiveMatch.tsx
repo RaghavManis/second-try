@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { MatchScoringService } from '../services/api';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
-import type { LiveMatchDetailsDto, Match, ScorecardBatting, ScorecardBowling, Player, OverDetail } from '../types';
+import type { LiveMatchDetailsDto, Match, ScorecardBatting, ScorecardBowling, Player } from '../types';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { Activity, Circle } from 'lucide-react';
 import SEO from '../components/common/SEO';
@@ -15,8 +15,15 @@ const LiveMatch: React.FC = () => {
   const [details, setDetails] = useState<LiveMatchDetailsDto | null>(null);
   const [battingCards, setBattingCards] = useState<ScorecardBatting[]>([]);
   const [bowlingCards, setBowlingCards] = useState<ScorecardBowling[]>([]);
-  const [innings1Overs, setInnings1Overs] = useState<OverDetail[]>([]);
-  const [innings2Overs, setInnings2Overs] = useState<OverDetail[]>([]);
+  const [innings1Overs, setInnings1Overs] = useState<any[]>([]);
+  const [innings2Overs, setInnings2Overs] = useState<any[]>([]);
+  const [innings1Extras, setInnings1Extras] = useState<any>(null);
+  const [innings2Extras, setInnings2Extras] = useState<any>(null);
+
+  const [innings1Fow, setInnings1Fow] = useState<any[]>([]);
+  const [innings1Partnerships, setInnings1Partnerships] = useState<any[]>([]);
+  const [innings2Fow, setInnings2Fow] = useState<any[]>([]);
+  const [innings2Partnerships, setInnings2Partnerships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('Live');
   const [boundaryAnim, setBoundaryAnim] = useState<'four' | 'six' | null>(null);
@@ -121,6 +128,13 @@ const LiveMatch: React.FC = () => {
         setBowlingCards(cardRes.data.bowling);
         setInnings1Overs(cardRes.data.innings1Overs || []);
         setInnings2Overs(cardRes.data.innings2Overs || []);
+        setInnings1Extras(cardRes.data.innings1Extras || null);
+        setInnings2Extras(cardRes.data.innings2Extras || null);
+
+        setInnings1Fow(cardRes.data.innings1Fow || []);
+        setInnings1Partnerships(cardRes.data.innings1Partnerships || []);
+        setInnings2Fow(cardRes.data.innings2Fow || []);
+        setInnings2Partnerships(cardRes.data.innings2Partnerships || []);
       } catch (err) {
         console.error('Failed fetching scorecard components', err);
       }
@@ -144,6 +158,46 @@ const LiveMatch: React.FC = () => {
   }, [selectedMatchId]);
 
   if (loading) return <div className="loader" style={{ textAlign: 'center', marginTop: '20vh' }}>Loading Live Feed...</div>;
+
+  const renderFowAndPartnerships = (fow: any[], partnerships: any[]) => {
+    if (!fow?.length && !partnerships?.length) return null;
+    return (
+        <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {fow?.length > 0 && (
+                <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <h4 style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Fall of Wickets</h4>
+                    <div style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                        {fow.map((f: any, idx: number) => (
+                            <span key={idx}>
+                                <strong>{f.runs}-{f.wickets}</strong> ({f.playerOutName}, {f.overNumber}.{f.ballNumber}){idx < fow.length - 1 ? ', ' : ''}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+            
+            {partnerships?.length > 0 && (
+                <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <h4 style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Partnerships</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {partnerships.map((p: any, idx: number) => (
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.5rem', borderBottom: idx < partnerships.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                                <div style={{ flex: 1, color: '#cbd5e1', fontSize: '0.9rem' }}>
+                                    <span style={{ color: '#fff', fontWeight: 'bold' }}>{p.runs}</span> runs ({p.balls} balls) {p.unbeaten ? <span style={{fontSize: '0.75rem', color: '#10b981', marginLeft: '4px'}}>(Unbeaten)</span> : ''}
+                                </div>
+                                <div style={{ flex: 1, textAlign: 'right', color: '#94a3b8', fontSize: '0.85rem' }}>
+                                    {p.batter1 && <span>{p.batter1.name} <strong>{p.batter1.runs}</strong>({p.batter1.balls})</span>}
+                                    {p.batter1 && p.batter2 && <span style={{ margin: '0 6px', color: '#475569' }}>|</span>}
+                                    {p.batter2 && <span>{p.batter2.name} <strong>{p.batter2.runs}</strong>({p.batter2.balls})</span>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+  };
 
   if (liveMatches.length === 0) {
     return (
@@ -395,8 +449,7 @@ const LiveMatch: React.FC = () => {
             {details.match.currentInnings === 2 && (
                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                   <div style={{ fontSize: '0.85rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>
-
-                    1st Innings ({details.match.bowlingTeam?.teamName}): <span style={{ color: '#fff', fontWeight: 'bold', marginLeft: '8px' }}>{details.match.firstInningsScore}-{details.match.firstInningsWickets}</span>
+                    1st Innings ({details.match.bowlingTeam?.teamName}): <span style={{ color: '#fff', fontWeight: 'bold', marginLeft: '8px' }}>{details.match.firstInningsScore}-{details.match.firstInningsWickets} <span style={{fontSize: '0.75rem', fontWeight: 'normal', color: '#cbd5e1'}}>({Math.floor((details.match.firstInningsBalls || 0)/6)}.{(details.match.firstInningsBalls || 0)%6} ov)</span></span>
                   </div>
                </div>
             )}
@@ -600,7 +653,7 @@ const LiveMatch: React.FC = () => {
                                         overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', 
                                         WebkitOverflowScrolling: 'touch', flexWrap: 'nowrap'
                                     }}>
-                                        {over.balls.map((b, bIdx) => {
+                                        {over.balls.map((b: string, bIdx: number) => {
                                             let bgColor = 'rgba(255,255,255,0.05)';
                                             let color = '#94a3b8';
                                             if (b === 'W' || b.includes('+W')) { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
@@ -656,7 +709,7 @@ const LiveMatch: React.FC = () => {
                                         overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', 
                                         WebkitOverflowScrolling: 'touch', flexWrap: 'nowrap'
                                     }}>
-                                        {over.balls.map((b, bIdx) => {
+                                        {over.balls.map((b: string, bIdx: number) => {
                                             let bgColor = 'rgba(255,255,255,0.05)';
                                             let color = '#94a3b8';
                                             if (b === 'W' || b.includes('+W')) { bgColor = 'rgba(239, 68, 68, 0.2)'; color = '#ef4444'; }
@@ -733,34 +786,60 @@ const LiveMatch: React.FC = () => {
         )}
 
         {/* TAB: Playing XI */}
-        {activeTab === 'Playing XI' && (details.match.playingXiTeamA?.length || details.match.playingXiTeamB?.length) ? (
-          <AnimatedSection>
-            <div className="glass-panel" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
-              <h3 className="gradient-text" style={{ margin: 0, borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', marginBottom: '1rem' }}>Playing XI</h3>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
-                 <div>
-                    <h4 style={{ color: 'var(--primary)', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>{details.match.teamA.teamName}</h4>
-                    <ul style={{ listStyleType: 'none', padding: 0, margin: 0, color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       {details.match.playingXiTeamA?.map((p: Player) => (
-                         <li key={p.id}>• <Link to={'/players/' + p.id} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>{p.name}</Link> {p.isCaptain ? '(C)' : ''} {p.isViceCaptain ? '(VC)' : ''} {p.role === 'WICKETKEEPER' ? '(WK)' : ''}</li>
-                       ))}
-                       {(!details.match.playingXiTeamA || details.match.playingXiTeamA.length === 0) && <li style={{color: '#64748b'}}>Not announced</li>}
-                    </ul>
+        {activeTab === 'Playing XI' && (
+             <AnimatedSection>
+                 <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ width: '4px', height: '20px', background: 'var(--primary)' }}></div>
+                      <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px' }}>Playing XI</h3>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+                        {[
+                          { 
+                            team: details.match.teamA, 
+                            players: details.match.playingXiTeamA || [], 
+                            bench: details.match.teamA.players?.filter((p: any) => !(details.match.playingXiTeamA || []).some((pxi: any) => pxi.id === p.id)) || []
+                          },
+                          { 
+                            team: details.match.teamB, 
+                            players: details.match.playingXiTeamB || [],
+                            bench: details.match.teamB.players?.filter((p: any) => !(details.match.playingXiTeamB || []).some((pxi: any) => pxi.id === p.id)) || []
+                          }
+                        ].map((s, idx) => (
+                          <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.75rem' }}>
+                                  <img src={s.team.teamLogo || getRandomLogo(s.team.id || 0)} style={{ width: 32, height: 32, borderRadius: '50%' }} alt="Logo" />
+                                  <h4 style={{ color: 'var(--primary)', margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>{s.team.teamName}</h4>
+                              </div>
+                              <div style={{ marginBottom: '0.5rem', color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Playing XI</div>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                                  {s.players?.length > 0 ? s.players.map((p: any) => (
+                                      <div key={p.id} style={{ color: '#cbd5e1', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }}></div>
+                                        <Link to={'/players/' + p.id} style={{ color: '#60a5fa', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer' }}>{p.name}</Link> {p.isCaptain ? <span style={{ color: '#f59e0b', fontSize: '0.7rem', fontWeight: 900 }}>(C)</span> : ''} {p.isViceCaptain ? <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>(VC)</span> : ''} {p.role === 'WICKETKEEPER' ? <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>(WK)</span> : ''}
+                                      </div>
+                                  )) : <div style={{color: '#64748b', fontSize: '0.85rem'}}>Not announced</div>}
+                              </div>
+
+                              {s.bench?.length > 0 && (
+                                <>
+                                  <div style={{ marginBottom: '0.5rem', color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>Bench Strength</div>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
+                                      {s.bench.map((p: any) => (
+                                          <div key={p.id} style={{ color: '#94a3b8', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }}></div>
+                                            <Link to={'/players/' + p.id} style={{ color: '#94a3b8', textDecoration: 'none', cursor: 'pointer' }}>{p.name}</Link>
+                                          </div>
+                                      ))}
+                                  </div>
+                                </>
+                              )}
+                          </div>
+                        ))}
+                    </div>
                  </div>
-                 <div>
-                    <h4 style={{ color: 'var(--primary)', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>{details.match.teamB.teamName}</h4>
-                    <ul style={{ listStyleType: 'none', padding: 0, margin: 0, color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       {details.match.playingXiTeamB?.map((p: Player) => (
-                         <li key={p.id}>• <Link to={'/players/' + p.id} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer', textUnderlineOffset: '2px' }}>{p.name}</Link> {p.isCaptain ? '(C)' : ''} {p.isViceCaptain ? '(VC)' : ''} {p.role === 'WICKETKEEPER' ? '(WK)' : ''}</li>
-                       ))}
-                       {(!details.match.playingXiTeamB || details.match.playingXiTeamB.length === 0) && <li style={{color: '#64748b'}}>Not announced</li>}
-                    </ul>
-                 </div>
-              </div>
-            </div>
-          </AnimatedSection>
-        ) : null}
+             </AnimatedSection>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '100%' }}>
           
@@ -803,6 +882,12 @@ const LiveMatch: React.FC = () => {
                                         <td data-label="SR" style={{ textAlign: 'right', paddingRight: '0.5rem' }}>{card.balls > 0 ? ((card.runs / card.balls) * 100).toFixed(1) : '0.0'}</td>
                                     </tr>
                                 ))}
+                                <tr>
+                                   <td colSpan={2} style={{ padding: '0.75rem 0.5rem', color: '#94a3b8', fontWeight: 'bold' }}>Extras</td>
+                                   <td colSpan={5} style={{ padding: '0.75rem 0.5rem', textAlign: 'right', color: '#f1f5f9', fontWeight: 'bold' }}>
+                                     {innings1Extras ? <span><strong style={{color: 'var(--primary)', fontSize: '1rem'}}>{innings1Extras.total}</strong> <span style={{fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal'}}>(W {innings1Extras.WIDE}, NB {innings1Extras.NO_BALL}, B {innings1Extras.BYE}, LB {innings1Extras.LEG_BYE})</span></span> : '-'}
+                                   </td>
+                                </tr>
                             </tbody>
                         </table>
                         
@@ -836,6 +921,7 @@ const LiveMatch: React.FC = () => {
                             </tbody>
                         </table>
                       </div>
+                      {renderFowAndPartnerships(innings1Fow, innings1Partnerships)}
                     </div>
                 </AnimatedSection>
             </div>
@@ -894,6 +980,12 @@ const LiveMatch: React.FC = () => {
                         </tr>
                       );
                   })}
+                                <tr>
+                                   <td colSpan={2} style={{ padding: '0.75rem 0.5rem', color: '#94a3b8', fontWeight: 'bold' }}>Extras</td>
+                                   <td colSpan={5} style={{ padding: '0.75rem 0.5rem', textAlign: 'right', color: '#f1f5f9', fontWeight: 'bold' }}>
+                                     {innings2Extras ? <span><strong style={{color: 'var(--primary)', fontSize: '1rem'}}>{innings2Extras.total}</strong> <span style={{fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal'}}>(W {innings2Extras.WIDE}, NB {innings2Extras.NO_BALL}, B {innings2Extras.BYE}, LB {innings2Extras.LEG_BYE})</span></span> : '-'}
+                                   </td>
+                                </tr>
                 </tbody>
               </table>
              </div>
@@ -951,6 +1043,7 @@ const LiveMatch: React.FC = () => {
                 </tbody>
               </table>
              </div>
+             {renderFowAndPartnerships(innings2Fow, innings2Partnerships)}
             </div>
           </AnimatedSection>
          </div>

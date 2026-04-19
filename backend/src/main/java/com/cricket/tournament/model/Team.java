@@ -76,7 +76,6 @@ public class Team {
         joinColumns = @JoinColumn(name = "team_id"),
         inverseJoinColumns = @JoinColumn(name = "player_id")
     )
-    @com.fasterxml.jackson.annotation.JsonIgnore
     private java.util.List<Player> players = new java.util.ArrayList<>();
 
     public TeamType getTeamType() {

@@ -265,7 +265,7 @@ const TeamSquad: React.FC = () => {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {globalPlayers.map(p => {
+                  {[...globalPlayers].sort((a, b) => a.name.localeCompare(b.name)).map(p => {
                     const isSelected = selectedPlayerIds.includes(p.id!);
                     return (
                       <div 

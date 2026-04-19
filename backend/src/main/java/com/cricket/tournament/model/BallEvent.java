@@ -57,6 +57,10 @@ public class BallEvent {
     @JoinColumn(name = "player_out_id")
     private Player playerOut; // Who got out (can be non-striker in runout)
 
+    @ManyToOne
+    @JoinColumn(name = "fielder_id")
+    private Player fielder; // Fielder involved in catch, run out, stumping
+
     public BallEvent() {}
 
     public Long getId() { return id; }
@@ -87,4 +91,6 @@ public class BallEvent {
     public void setWicketType(String wicketType) { this.wicketType = wicketType; }
     public Player getPlayerOut() { return playerOut; }
     public void setPlayerOut(Player playerOut) { this.playerOut = playerOut; }
+    public Player getFielder() { return fielder; }
+    public void setFielder(Player fielder) { this.fielder = fielder; }
 }

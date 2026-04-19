@@ -13,6 +13,12 @@ interface ScorecardData {
   bowling: ScorecardBowling[];
   innings1Overs?: OverDetail[];
   innings2Overs?: OverDetail[];
+  innings1Extras?: any;
+  innings2Extras?: any;
+  innings1Fow?: any[];
+  innings2Fow?: any[];
+  innings1Partnerships?: any[];
+  innings2Partnerships?: any[];
 }
 
 const MatchScorecard: React.FC = () => {
@@ -66,17 +72,59 @@ const MatchScorecard: React.FC = () => {
     }
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100,
+    });
+  };
+
+  const renderFowAndPartnerships = (fow: any[], partnerships: any[]) => {
+    if (!fow?.length && !partnerships?.length) return null;
+    return (
+        <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {fow?.length > 0 && (
+                <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <h4 style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Fall of Wickets</h4>
+                    <div style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                        {fow.map((f: any, idx: number) => (
+                            <span key={idx}>
+                                <strong>{f.runs}-{f.wickets}</strong> ({f.playerOutName}, {f.overNumber}.{f.ballNumber}){idx < fow.length - 1 ? ', ' : ''}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+            
+            {partnerships?.length > 0 && (
+                <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <h4 style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Partnerships</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {partnerships.map((p: any, idx: number) => (
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.5rem', borderBottom: idx < partnerships.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                                <div style={{ flex: 1, color: '#cbd5e1', fontSize: '0.9rem' }}>
+                                    <span style={{ color: '#fff', fontWeight: 'bold' }}>{p.runs}</span> runs ({p.balls} balls) {p.unbeaten ? <span style={{fontSize: '0.75rem', color: '#10b981', marginLeft: '4px'}}>(Unbeaten)</span> : ''}
+                                </div>
+                                <div style={{ flex: 1, textAlign: 'right', color: '#94a3b8', fontSize: '0.85rem' }}>
+                                    {p.batter1 && <span>{p.batter1.name} <strong>{p.batter1.runs}</strong>({p.batter1.balls})</span>}
+                                    {p.batter1 && p.batter2 && <span style={{ margin: '0 6px', color: '#475569' }}>|</span>}
+                                    {p.batter2 && <span>{p.batter2.name} <strong>{p.batter2.runs}</strong>({p.batter2.balls})</span>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+  };
+
   if (loading) return <div className="loader" style={{ textAlign: 'center', marginTop: '20vh' }}>Loading Scorecard...</div>;
   if (!data) return <div className="page-container text-center">Scorecard not found or match is incomplete.</div>;
 
   const { match, batting, bowling, innings1Overs, innings2Overs } = data;
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setMousePos({ x, y });
-  };
 
   // Core helpers (must be defined BEFORE any use of them above)
   const calculateTotal = (batters: ScorecardBatting[]) =>
@@ -117,8 +165,10 @@ const MatchScorecard: React.FC = () => {
   const rightTeam    = teamABattedFirst ? match.teamB : match.teamA;
   const leftScore    = teamABattedFirst ? teamAScore   : teamBScore;
   const leftWickets  = teamABattedFirst ? teamAWickets : teamBWickets;
+  const leftBalls    = teamABattedFirst ? (match.firstInningsBalls ?? 0) : (match.currentBalls ?? 0);
   const rightScore   = teamABattedFirst ? teamBScore   : teamAScore;
   const rightWickets = teamABattedFirst ? teamBWickets : teamAWickets;
+  const rightBalls   = teamABattedFirst ? (match.currentBalls ?? 0) : (match.firstInningsBalls ?? 0);
   const leftBatting  = innings1Batting;
   const leftBowling  = innings2Bowling;
   const rightBatting = innings2Batting;
@@ -387,8 +437,8 @@ const MatchScorecard: React.FC = () => {
                             : { label: 'Status', value: 'Upcoming', sub: match.matchDateTime ? new Date(match.matchDateTime).toLocaleDateString() : '-', color: '#64748b' };
 
                           return [
-                            { label: '1st Inn', value: `${leftScore}-${leftWickets}`,  sub: leftTeam.teamName,  color: '#3b82f6' },
-                            { label: '2nd Inn', value: `${rightScore}-${rightWickets}`, sub: rightTeam.teamName, color: '#8b5cf6' },
+                            { label: '1st Inn', value: <>{leftScore}-{leftWickets} <span style={{fontSize: '0.8rem', fontWeight: 'normal'}}>({Math.floor(leftBalls / 6)}.{leftBalls % 6})</span></>,  sub: leftTeam.teamName,  color: '#3b82f6' },
+                            { label: '2nd Inn', value: <>{rightScore}-{rightWickets} <span style={{fontSize: '0.8rem', fontWeight: 'normal'}}>({Math.floor(rightBalls / 6)}.{rightBalls % 6})</span></>, sub: rightTeam.teamName, color: '#8b5cf6' },
                             { label: 'Boundaries', value: String(batting.reduce((a, b) => a + (b.fours || 0) + (b.sixes || 0), 0)), sub: '4s + 6s total', color: '#10b981' },
                             winPill,
                           ].map((s, i) => (
@@ -454,8 +504,8 @@ const MatchScorecard: React.FC = () => {
                             const s = { team: leftTeam, batters: leftBatting, bowlers: leftBowling, color: '#3b82f6', inningsLabel: '1st Innings' };
                             const topB = getTopBatter(s.batters);
                             const topW = getTopBowler(s.bowlers);
-                            const total = calculateTotal(s.batters);
-                            const wkts = calculateWickets(s.batters);
+                            const total = leftScore;
+                            const wkts = leftWickets;
                             const t4 = s.batters.reduce((a, b) => a + (b.fours || 0), 0);
                             const t6 = s.batters.reduce((a, b) => a + (b.sixes || 0), 0);
                             const isWinner = match.winnerTeam?.id === s.team.id;
@@ -491,8 +541,8 @@ const MatchScorecard: React.FC = () => {
                             const s = { team: rightTeam, batters: rightBatting, bowlers: rightBowling, color: '#8b5cf6', inningsLabel: '2nd Innings' };
                             const topB = getTopBatter(s.batters);
                             const topW = getTopBowler(s.bowlers);
-                            const total = calculateTotal(s.batters);
-                            const wkts = calculateWickets(s.batters);
+                            const total = rightScore;
+                            const wkts = rightWickets;
                             const t4 = s.batters.reduce((a, b) => a + (b.fours || 0), 0);
                             const t6 = s.batters.reduce((a, b) => a + (b.sixes || 0), 0);
                             const isWinner = match.winnerTeam?.id === s.team.id;
@@ -679,7 +729,7 @@ const MatchScorecard: React.FC = () => {
                               {(activeTab === '1st Innings' ? innings1Batting : innings2Batting)[0].team.teamName} Innings
                             </h4>
                             <div style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem' }}>
-                              {calculateTotal(activeTab === '1st Innings' ? innings1Batting : innings2Batting)}-{calculateWickets(activeTab === '1st Innings' ? innings1Batting : innings2Batting)}
+                              {activeTab === '1st Innings' ? leftScore : rightScore}-{activeTab === '1st Innings' ? leftWickets : rightWickets}
                             </div>
                         </div>
                         
@@ -713,14 +763,20 @@ const MatchScorecard: React.FC = () => {
                             
                             <div style={{ padding: '0.75rem 1rem', borderTop: '2px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.01)', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                                 <div style={{ color: '#94a3b8', fontWeight: 600 }}>Extras</div>
-                                <div style={{ color: '#f1f5f9', fontWeight: 800 }}>-</div>
+                                <div style={{ color: '#f1f5f9', fontWeight: 800 }}>
+                                  {(() => {
+                                      const ex = activeTab === '1st Innings' ? data?.innings1Extras : data?.innings2Extras;
+                                      if (!ex) return '-';
+                                      return <span><strong style={{color: 'var(--primary)', fontSize: '1rem'}}>{ex.total}</strong> <span style={{fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal'}}>(W {ex.WIDE}, NB {ex.NO_BALL}, B {ex.BYE}, LB {ex.LEG_BYE})</span></span>;
+                                  })()}
+                                </div>
                             </div>
                             
                             <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div style={{ color: '#fff', fontWeight: 800, fontSize: '1.1rem' }}>Total</div>
                                 <div style={{ textAlign: 'right' }}>
                                   <div style={{ color: 'var(--primary)', fontWeight: 900, fontSize: '1.4rem' }}>
-                                    {calculateTotal(activeTab === '1st Innings' ? innings1Batting : innings2Batting)}-{calculateWickets(activeTab === '1st Innings' ? innings1Batting : innings2Batting)}
+                                    {activeTab === '1st Innings' ? leftScore : rightScore}-{activeTab === '1st Innings' ? leftWickets : rightWickets}
                                   </div>
                                 </div>
                             </div>
@@ -751,6 +807,7 @@ const MatchScorecard: React.FC = () => {
                                 </div>
                             ))}
                         </div>
+                        {renderFowAndPartnerships(activeTab === '1st Innings' ? data?.innings1Fow || [] : data?.innings2Fow || [], activeTab === '1st Innings' ? data?.innings1Partnerships || [] : data?.innings2Partnerships || [])}
                     </div>
                 </AnimatedSection>
             ) : <div className="glass-panel text-center" style={{ padding: '3rem' }}>Data not yet available</div>
@@ -765,22 +822,45 @@ const MatchScorecard: React.FC = () => {
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
                         {[
-                          { team: match.teamA, players: match.playingXiTeamA },
-                          { team: match.teamB, players: match.playingXiTeamB }
+                          { 
+                            team: match.teamA, 
+                            players: match.playingXiTeamA || [], 
+                            bench: match.teamA.players?.filter((p: any) => !(match.playingXiTeamA || []).some((pxi: any) => pxi.id === p.id)) || []
+                          },
+                          { 
+                            team: match.teamB, 
+                            players: match.playingXiTeamB || [],
+                            bench: match.teamB.players?.filter((p: any) => !(match.playingXiTeamB || []).some((pxi: any) => pxi.id === p.id)) || []
+                          }
                         ].map((s, idx) => (
                           <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.75rem' }}>
                                   <img src={s.team.teamLogo || getRandomLogo(s.team.id || 0)} style={{ width: 32, height: 32, borderRadius: '50%' }} alt="Logo" />
                                   <h4 style={{ color: 'var(--primary)', margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>{s.team.teamName}</h4>
                               </div>
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
-                                  {s.players?.map(p => (
+                              <div style={{ marginBottom: '0.5rem', color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Playing XI</div>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                                  {s.players?.map((p: any) => (
                                       <div key={p.id} style={{ color: '#cbd5e1', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }}></div>
                                         <Link to={'/players/' + p.id} style={{ color: '#60a5fa', textDecoration: 'underline', textUnderlineOffset: '2px', cursor: 'pointer' }}>{p.name}</Link> {p.isCaptain ? <span style={{ color: '#f59e0b', fontSize: '0.7rem', fontWeight: 900 }}>(C)</span> : ''} {p.isViceCaptain ? <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>(VC)</span> : ''}
                                       </div>
                                   ))}
                               </div>
+
+                              {s.bench?.length > 0 && (
+                                <>
+                                  <div style={{ marginBottom: '0.5rem', color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>Bench Strength</div>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
+                                      {s.bench.map((p: any) => (
+                                          <div key={p.id} style={{ color: '#94a3b8', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }}></div>
+                                            <Link to={'/players/' + p.id} style={{ color: '#94a3b8', textDecoration: 'none', cursor: 'pointer' }}>{p.name}</Link>
+                                          </div>
+                                      ))}
+                                  </div>
+                                </>
+                              )}
                           </div>
                         ))}
                     </div>

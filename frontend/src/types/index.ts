@@ -61,6 +61,8 @@ export interface Match {
   currentWickets?: number;
   firstInningsScore?: number;
   firstInningsWickets?: number;
+  firstInningsBalls?: number;
+  currentBalls?: number;
 }
 
 export interface LiveMatchSetupDto {

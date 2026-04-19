@@ -215,6 +215,9 @@ public class MatchScoringService {
             if (isWicket) {
                 event.setWicketType(ballDto.getWicketType());
                 event.setPlayerOut(playerRepository.findById(ballDto.getPlayerOutId()).orElse(null));
+                if (ballDto.getFielderId() != null) {
+                    event.setFielder(playerRepository.findById(ballDto.getFielderId()).orElse(null));
+                }
             }
     
             ballEventRepository.save(event);
@@ -760,6 +763,21 @@ public class MatchScoringService {
             stats.setMaidens(stats.getMaidens() + (b.getMaidens() == null ? 0 : b.getMaidens()));
         });
         
+        List<BallEvent> events = ballEventRepository.findByMatchIdOrderByOverNumberAscBallNumberAsc(matchId);
+        events.forEach(e -> {
+            if (Boolean.TRUE.equals(e.getIsWicket()) && e.getFielder() != null) {
+                Player p = e.getFielder();
+                PlayerMatchStats stats = statsMap.computeIfAbsent(p.getId(), k -> new PlayerMatchStats(p, match, match.getMatchType()));
+                if ("CAUGHT".equals(e.getWicketType())) {
+                    stats.setCatches(stats.getCatches() + 1);
+                } else if ("RUN_OUT".equals(e.getWicketType())) {
+                    stats.setRunOuts(stats.getRunOuts() + 1);
+                } else if ("STUMPED".equals(e.getWicketType())) {
+                    stats.setStumpings(stats.getStumpings() + 1);
+                }
+            }
+        });
+        
         playerMatchStatsRepository.saveAll(statsMap.values());
         liveDetailsCache.invalidate(matchId);
         return getLiveDetails(matchId, true);
@@ -779,7 +797,131 @@ public class MatchScoringService {
         response.put("innings1Overs", buildOversList(balls1));
         response.put("innings2Overs", buildOversList(balls2));
         
+        response.put("innings1Extras", calculateExtras(balls1));
+        response.put("innings2Extras", calculateExtras(balls2));
+        
+        Map<String, Object> fp1 = calculateFowAndPartnerships(balls1);
+        response.put("innings1Fow", fp1.get("fow"));
+        response.put("innings1Partnerships", fp1.get("partnerships"));
+        
+        Map<String, Object> fp2 = calculateFowAndPartnerships(balls2);
+        response.put("innings2Fow", fp2.get("fow"));
+        response.put("innings2Partnerships", fp2.get("partnerships"));
+        
         return response;
+    }
+
+    private Map<String, Object> calculateFowAndPartnerships(List<BallEvent> balls) {
+        List<Map<String, Object>> fowList = new ArrayList<>();
+        List<Map<String, Object>> partnerships = new ArrayList<>();
+        
+        int totalRuns = 0;
+        int wickets = 0;
+        
+        int currentPartnershipRuns = 0;
+        int currentPartnershipBalls = 0;
+        
+        Map<Long, Map<String, Object>> batterStats = new HashMap<>();
+        Player currentStriker = null;
+        Player currentNonStriker = null;
+        
+        for (BallEvent b : balls) {
+            int runs = b.getRuns() != null ? b.getRuns() : 0;
+            int extras = b.getExtraRuns() != null ? b.getExtraRuns() : 0;
+            boolean isWide = "WIDE".equals(b.getExtraType());
+            
+            totalRuns += (runs + extras);
+            currentPartnershipRuns += (runs + extras);
+            if (!isWide) {
+                currentPartnershipBalls++;
+            }
+            
+            if (b.getStriker() != null) {
+                currentStriker = b.getStriker();
+                batterStats.putIfAbsent(currentStriker.getId(), new HashMap<>(Map.of("name", currentStriker.getName(), "runs", 0, "balls", 0)));
+                Map<String, Object> strikerStats = batterStats.get(currentStriker.getId());
+                strikerStats.put("runs", (int)strikerStats.get("runs") + runs);
+                if (!isWide) {
+                    strikerStats.put("balls", (int)strikerStats.get("balls") + 1);
+                }
+            }
+            if (b.getNonStriker() != null) {
+                currentNonStriker = b.getNonStriker();
+                batterStats.putIfAbsent(currentNonStriker.getId(), new HashMap<>(Map.of("name", currentNonStriker.getName(), "runs", 0, "balls", 0)));
+            }
+            
+            if (Boolean.TRUE.equals(b.getIsWicket())) {
+                wickets++;
+                Player playerOut = b.getPlayerOut();
+                String playerOutName = playerOut != null ? playerOut.getName() : "Unknown";
+                
+                Map<String, Object> fow = new HashMap<>();
+                fow.put("runs", totalRuns);
+                fow.put("wickets", wickets);
+                fow.put("playerOutName", playerOutName);
+                fow.put("overNumber", b.getOverNumber());
+                fow.put("ballNumber", b.getBallNumber());
+                fowList.add(fow);
+                
+                Map<String, Object> p = new HashMap<>();
+                p.put("wicket", wickets);
+                p.put("runs", currentPartnershipRuns);
+                p.put("balls", currentPartnershipBalls);
+                p.put("unbeaten", false);
+                if (currentStriker != null && batterStats.containsKey(currentStriker.getId())) {
+                    p.put("batter1", new HashMap<>(batterStats.get(currentStriker.getId())));
+                }
+                if (currentNonStriker != null && batterStats.containsKey(currentNonStriker.getId())) {
+                    p.put("batter2", new HashMap<>(batterStats.get(currentNonStriker.getId())));
+                }
+                partnerships.add(p);
+                
+                currentPartnershipRuns = 0;
+                currentPartnershipBalls = 0;
+                if (playerOut != null) {
+                    batterStats.remove(playerOut.getId());
+                } else {
+                    batterStats.clear();
+                }
+            }
+        }
+        
+        if (currentPartnershipBalls > 0 || currentPartnershipRuns > 0) {
+            Map<String, Object> p = new HashMap<>();
+            p.put("wicket", wickets + 1);
+            p.put("unbeaten", true);
+            p.put("runs", currentPartnershipRuns);
+            p.put("balls", currentPartnershipBalls);
+            if (currentStriker != null && batterStats.containsKey(currentStriker.getId())) {
+                p.put("batter1", new HashMap<>(batterStats.get(currentStriker.getId())));
+            }
+            if (currentNonStriker != null && batterStats.containsKey(currentNonStriker.getId())) {
+                p.put("batter2", new HashMap<>(batterStats.get(currentNonStriker.getId())));
+            }
+            partnerships.add(p);
+        }
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("fow", fowList);
+        result.put("partnerships", partnerships);
+        return result;
+    }
+
+    private Map<String, Integer> calculateExtras(List<BallEvent> balls) {
+        Map<String, Integer> extras = new HashMap<>();
+        extras.put("WIDE", 0);
+        extras.put("NO_BALL", 0);
+        extras.put("BYE", 0);
+        extras.put("LEG_BYE", 0);
+        extras.put("total", 0);
+        for (BallEvent b : balls) {
+            if (b.getExtraType() != null && !b.getExtraType().isEmpty()) {
+                int extRuns = b.getExtraRuns() != null ? b.getExtraRuns() : 0;
+                extras.put(b.getExtraType(), extras.getOrDefault(b.getExtraType(), 0) + extRuns);
+                extras.put("total", extras.get("total") + extRuns);
+            }
+        }
+        return extras;
     }
 
     private List<Map<String, Object>> buildOversList(List<BallEvent> events) {
