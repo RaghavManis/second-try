@@ -88,7 +88,7 @@ export const PointsService = {
 export const MatchScoringService = {
   getLiveMatches: () => api.get<Match[]>('/scoring/live'),
   getLiveDetails: (matchId: number, force: boolean = false) => api.get<LiveMatchDetailsDto>(`/scoring/${matchId}/live-details?_t=${Date.now()}${force ? '&force=true' : ''}`),
-  getCompleteScorecard: (matchId: number) => api.get<{ match: Match, batting: ScorecardBatting[], bowling: ScorecardBowling[], innings1Overs?: OverDetail[], innings2Overs?: OverDetail[], innings1Extras?: any, innings2Extras?: any, innings1Fow?: any[], innings2Fow?: any[], innings1Partnerships?: any[], innings2Partnerships?: any[] }>(`/scoring/${matchId}/scorecard`),
+  getCompleteScorecard: (matchId: number) => api.get<{ match: Match, batting: ScorecardBatting[], bowling: ScorecardBowling[], innings1Overs?: OverDetail[], innings2Overs?: OverDetail[], innings1Extras?: any, innings2Extras?: any, innings1Fow?: any[], innings2Fow?: any[], innings1Partnerships?: any[], innings2Partnerships?: any[], teamAPlayers?: Player[], teamBPlayers?: Player[] }>(`/scoring/${matchId}/scorecard`),
   startLiveScoring: (matchId: number, setup: LiveMatchSetupDto) => api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/setup`, setup),
   recordBall: (matchId: number, ballDto: BallSubmissionDto) => api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/ball`, ballDto),
   undoLastBall: (matchId: number) => api.delete<LiveMatchDetailsDto>(`/scoring/${matchId}/last-ball`),

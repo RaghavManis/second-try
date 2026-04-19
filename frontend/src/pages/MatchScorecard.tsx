@@ -19,6 +19,8 @@ interface ScorecardData {
   innings2Fow?: any[];
   innings1Partnerships?: any[];
   innings2Partnerships?: any[];
+  teamAPlayers?: any[];
+  teamBPlayers?: any[];
 }
 
 const MatchScorecard: React.FC = () => {
@@ -825,12 +827,12 @@ const MatchScorecard: React.FC = () => {
                           { 
                             team: match.teamA, 
                             players: match.playingXiTeamA || [], 
-                            bench: match.teamA.players?.filter((p: any) => !(match.playingXiTeamA || []).some((pxi: any) => pxi.id === p.id)) || []
+                            bench: data?.teamAPlayers?.filter((p: any) => !(match.playingXiTeamA || []).some((pxi: any) => pxi.id === p.id)) || []
                           },
                           { 
                             team: match.teamB, 
                             players: match.playingXiTeamB || [],
-                            bench: match.teamB.players?.filter((p: any) => !(match.playingXiTeamB || []).some((pxi: any) => pxi.id === p.id)) || []
+                            bench: data?.teamBPlayers?.filter((p: any) => !(match.playingXiTeamB || []).some((pxi: any) => pxi.id === p.id)) || []
                           }
                         ].map((s, idx) => (
                           <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>

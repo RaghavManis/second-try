@@ -70,7 +70,8 @@ public class Team {
         this.teamLogo = teamLogo;
     }
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @ManyToMany(fetch = jakarta.persistence.FetchType.LAZY)
     @JoinTable(
         name = "team_players",
         joinColumns = @JoinColumn(name = "team_id"),

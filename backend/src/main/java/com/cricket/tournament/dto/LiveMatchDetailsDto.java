@@ -38,6 +38,9 @@ public class LiveMatchDetailsDto {
     private String streamUrl;
     private Integer streamDelaySeconds;
 
+    private List<Player> teamAPlayers;
+    private List<Player> teamBPlayers;
+
     public LiveMatchDetailsDto() {}
     
     // ... Getters and Setters omitted for brevity are untouched ...
@@ -87,4 +90,8 @@ public class LiveMatchDetailsDto {
     public void setStreamUrl(String streamUrl) { this.streamUrl = streamUrl; }
     public Integer getStreamDelaySeconds() { return streamDelaySeconds; }
     public void setStreamDelaySeconds(Integer streamDelaySeconds) { this.streamDelaySeconds = streamDelaySeconds; }
+    public List<Player> getTeamAPlayers() { return teamAPlayers; }
+    public void setTeamAPlayers(List<Player> teamAPlayers) { this.teamAPlayers = teamAPlayers; }
+    public List<Player> getTeamBPlayers() { return teamBPlayers; }
+    public void setTeamBPlayers(List<Player> teamBPlayers) { this.teamBPlayers = teamBPlayers; }
 }

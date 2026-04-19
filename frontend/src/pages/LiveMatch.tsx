@@ -798,12 +798,12 @@ const LiveMatch: React.FC = () => {
                           { 
                             team: details.match.teamA, 
                             players: details.match.playingXiTeamA || [], 
-                            bench: details.match.teamA.players?.filter((p: any) => !(details.match.playingXiTeamA || []).some((pxi: any) => pxi.id === p.id)) || []
+                            bench: details.teamAPlayers?.filter((p: any) => !(details.match.playingXiTeamA || []).some((pxi: any) => pxi.id === p.id)) || []
                           },
                           { 
                             team: details.match.teamB, 
                             players: details.match.playingXiTeamB || [],
-                            bench: details.match.teamB.players?.filter((p: any) => !(details.match.playingXiTeamB || []).some((pxi: any) => pxi.id === p.id)) || []
+                            bench: details.teamBPlayers?.filter((p: any) => !(details.match.playingXiTeamB || []).some((pxi: any) => pxi.id === p.id)) || []
                           }
                         ].map((s, idx) => (
                           <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>

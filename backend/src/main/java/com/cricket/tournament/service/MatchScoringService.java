@@ -619,6 +619,15 @@ public class MatchScoringService {
         
         dto.setStreamUrl(match.getStreamUrl());
         dto.setStreamDelaySeconds(match.getStreamDelaySeconds() != null ? match.getStreamDelaySeconds() : 0);
+
+        if (match.getTeamA() != null && match.getTeamA().getPlayers() != null) {
+            org.hibernate.Hibernate.initialize(match.getTeamA().getPlayers());
+            dto.setTeamAPlayers(new ArrayList<>(match.getTeamA().getPlayers()));
+        }
+        if (match.getTeamB() != null && match.getTeamB().getPlayers() != null) {
+            org.hibernate.Hibernate.initialize(match.getTeamB().getPlayers());
+            dto.setTeamBPlayers(new ArrayList<>(match.getTeamB().getPlayers()));
+        }
         
         // Rule 16 Fallbacks: if they haven't been fetched yet but they exist in match, default to zero
         if (match.getCurrentStriker() != null && dto.getStrikerRuns() == null) {
@@ -790,6 +799,15 @@ public class MatchScoringService {
         response.put("match", match);
         response.put("batting", scorecardBattingRepository.findByMatchId(matchId));
         response.put("bowling", scorecardBowlingRepository.findByMatchId(matchId));
+        
+        if (match.getTeamA() != null && match.getTeamA().getPlayers() != null) {
+            org.hibernate.Hibernate.initialize(match.getTeamA().getPlayers());
+            response.put("teamAPlayers", new ArrayList<>(match.getTeamA().getPlayers()));
+        }
+        if (match.getTeamB() != null && match.getTeamB().getPlayers() != null) {
+            org.hibernate.Hibernate.initialize(match.getTeamB().getPlayers());
+            response.put("teamBPlayers", new ArrayList<>(match.getTeamB().getPlayers()));
+        }
         
         List<BallEvent> balls1 = ballEventRepository.findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(matchId, 1);
         List<BallEvent> balls2 = ballEventRepository.findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(matchId, 2);

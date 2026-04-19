@@ -113,6 +113,8 @@ export interface LiveMatchDetailsDto {
   
   streamUrl?: string;
   streamDelaySeconds?: number;
+  teamAPlayers?: Player[];
+  teamBPlayers?: Player[];
 }
 
 export interface ScorecardBatting {
