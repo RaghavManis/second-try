@@ -109,7 +109,7 @@ public class Match {
     @JoinColumn(name = "current_bowler_id")
     private Player currentBowler;
 
-    @ManyToMany
+    @ManyToMany(fetch = jakarta.persistence.FetchType.EAGER)
     @JoinTable(
         name = "match_playing_xi_a",
         joinColumns = @JoinColumn(name = "match_id"),
@@ -117,7 +117,7 @@ public class Match {
     )
     private java.util.Set<Player> playingXiTeamA = new java.util.HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = jakarta.persistence.FetchType.EAGER)
     @JoinTable(
         name = "match_playing_xi_b",
         joinColumns = @JoinColumn(name = "match_id"),

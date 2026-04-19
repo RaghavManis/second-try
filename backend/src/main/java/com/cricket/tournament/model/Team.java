@@ -70,7 +70,7 @@ public class Team {
         this.teamLogo = teamLogo;
     }
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "team_players",
         joinColumns = @JoinColumn(name = "team_id"),

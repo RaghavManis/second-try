@@ -45,7 +45,7 @@ public class MatchScoringService {
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         match.setStatus(Match.MatchStatus.ONGOING);
         liveDetailsCache.invalidate(matchId);
-        match.setTossWinner(teamRepository.findById(setup.getTossWinnerId()).orElse(null));
+        match.setTossWinner(teamRepository.findById(setup.getTossWinnerId()).orElseThrow(() -> new IllegalArgumentException("Invalid Toss Winner")));
         match.setTossDecision(setup.getTossDecision());
         
         if ("BATTING".equals(setup.getTossDecision())) {
@@ -60,9 +60,9 @@ public class MatchScoringService {
         match.setCurrentScore(0);
         match.setCurrentWickets(0);
         match.setCurrentBalls(0);
-        match.setCurrentStriker(playerRepository.findById(setup.getStrikerId()).orElseThrow());
-        match.setCurrentNonStriker(playerRepository.findById(setup.getNonStrikerId()).orElseThrow());
-        match.setCurrentBowler(playerRepository.findById(setup.getOpeningBowlerId()).orElseThrow());
+        match.setCurrentStriker(playerRepository.findById(setup.getStrikerId()).orElseThrow(() -> new IllegalArgumentException("Striker not found")));
+        match.setCurrentNonStriker(playerRepository.findById(setup.getNonStrikerId()).orElseThrow(() -> new IllegalArgumentException("Non-striker not found")));
+        match.setCurrentBowler(playerRepository.findById(setup.getOpeningBowlerId()).orElseThrow(() -> new IllegalArgumentException("Bowler not found")));
         
         if (setup.getPlayingXiTeamAIds() != null) {
             match.setPlayingXiTeamA(new HashSet<>(playerRepository.findAllById(setup.getPlayingXiTeamAIds())));
@@ -917,6 +917,9 @@ public class MatchScoringService {
         for (BallEvent b : balls) {
             if (b.getExtraType() != null && !b.getExtraType().isEmpty()) {
                 int extRuns = b.getExtraRuns() != null ? b.getExtraRuns() : 0;
+                if ("WIDE".equals(b.getExtraType()) || "BYE".equals(b.getExtraType()) || "LEG_BYE".equals(b.getExtraType())) {
+                    extRuns += (b.getRuns() != null ? b.getRuns() : 0);
+                }
                 extras.put(b.getExtraType(), extras.getOrDefault(b.getExtraType(), 0) + extRuns);
                 extras.put("total", extras.get("total") + extRuns);
             }
