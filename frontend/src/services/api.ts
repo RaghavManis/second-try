@@ -98,6 +98,8 @@ export const MatchScoringService = {
     api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/end-innings`, null, { params }),
   completeMatch: (matchId: number, winnerTeamId?: number, manOfTheMatchId?: number) =>
     api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/complete`, null, { params: { winnerTeamId, manOfTheMatchId } }),
+  updateManOfTheMatch: (matchId: number, playerId: number) =>
+    api.put<Match>(`/scoring/${matchId}/motm`, null, { params: { playerId } }),
   updateStreamConfig: (matchId: number, config: { streamUrl: string, streamDelaySeconds: number }) => 
     api.put<Match>(`/scoring/${matchId}/stream-config`, config),
 };

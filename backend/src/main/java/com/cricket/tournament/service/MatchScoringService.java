@@ -640,6 +640,54 @@ public class MatchScoringService {
             dto.setBowlerRuns(0); dto.setBowlerWickets(0); dto.setBowlerOvers(0.0); dto.setBowlerEconomy(0.0);
         }
         
+        // Current Partnership Calculation
+        List<BallEvent> allInningsBalls = ballEventRepository.findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(matchId, match.getCurrentInnings());
+        int pRuns = 0;
+        int pBalls = 0;
+        Map<Long, Map<String, Integer>> pStats = new HashMap<>();
+        
+        for (BallEvent b : allInningsBalls) {
+            int r = b.getRuns() != null ? b.getRuns() : 0;
+            int extras = b.getExtraRuns() != null ? b.getExtraRuns() : 0;
+            boolean isWide = "WIDE".equals(b.getExtraType());
+            
+            pRuns += (r + extras);
+            if (!isWide) pBalls++;
+            
+            if (b.getStriker() != null) {
+                pStats.putIfAbsent(b.getStriker().getId(), new HashMap<>(Map.of("runs", 0, "balls", 0)));
+                Map<String, Integer> sStats = pStats.get(b.getStriker().getId());
+                sStats.put("runs", sStats.get("runs") + r);
+                if (!isWide) sStats.put("balls", sStats.get("balls") + 1);
+            }
+            if (b.getNonStriker() != null) {
+                pStats.putIfAbsent(b.getNonStriker().getId(), new HashMap<>(Map.of("runs", 0, "balls", 0)));
+            }
+            
+            if (Boolean.TRUE.equals(b.getIsWicket())) {
+                pRuns = 0;
+                pBalls = 0;
+                pStats.clear();
+            }
+        }
+        
+        dto.setCurrentPartnershipRuns(pRuns);
+        dto.setCurrentPartnershipBalls(pBalls);
+        if (match.getCurrentStriker() != null && pStats.containsKey(match.getCurrentStriker().getId())) {
+            dto.setCurrentPartnershipStrikerRuns(pStats.get(match.getCurrentStriker().getId()).get("runs"));
+            dto.setCurrentPartnershipStrikerBalls(pStats.get(match.getCurrentStriker().getId()).get("balls"));
+        } else {
+            dto.setCurrentPartnershipStrikerRuns(0);
+            dto.setCurrentPartnershipStrikerBalls(0);
+        }
+        if (match.getCurrentNonStriker() != null && pStats.containsKey(match.getCurrentNonStriker().getId())) {
+            dto.setCurrentPartnershipNonStrikerRuns(pStats.get(match.getCurrentNonStriker().getId()).get("runs"));
+            dto.setCurrentPartnershipNonStrikerBalls(pStats.get(match.getCurrentNonStriker().getId()).get("balls"));
+        } else {
+            dto.setCurrentPartnershipNonStrikerRuns(0);
+            dto.setCurrentPartnershipNonStrikerBalls(0);
+        }
+
         // Rule 16: Last six balls display
         List<BallEvent> eventsDb = ballEventRepository.findTop20ByMatchIdAndInningsOrderByOverNumberDescBallNumberDescIdDesc(matchId, match.getCurrentInnings());
         List<BallEvent> events = new ArrayList<>(eventsDb);
@@ -792,6 +840,14 @@ public class MatchScoringService {
         return getLiveDetails(matchId, true);
     }
     
+    @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
+    public Match updateManOfTheMatch(Long matchId, Long playerId) {
+        Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
+        match.setManOfTheMatch(playerRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found")));
+        return matchRepository.save(match);
+    }
+    
     @Transactional(readOnly = true)
     public Map<String, Object> getCompleteScorecard(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
@@ -896,11 +952,7 @@ public class MatchScoringService {
                 
                 currentPartnershipRuns = 0;
                 currentPartnershipBalls = 0;
-                if (playerOut != null) {
-                    batterStats.remove(playerOut.getId());
-                } else {
-                    batterStats.clear();
-                }
+                batterStats.clear();
             }
         }
         

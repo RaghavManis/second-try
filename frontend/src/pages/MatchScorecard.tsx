@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MatchScoringService } from '../services/api';
 import type { Match, ScorecardBatting, ScorecardBowling } from '../types';
-import { X, Crown, Medal } from 'lucide-react';
+import { X, Crown, Medal, Edit2, Check } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 import { AnimatedSection } from '../components/AnimatedSection';
 import confetti from 'canvas-confetti';
 import type { OverDetail } from '../types';
@@ -26,11 +28,31 @@ interface ScorecardData {
 const MatchScorecard: React.FC = () => {
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [data, setData] = useState<ScorecardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('Summary');
   const [showPomStats, setShowPomStats] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const [isEditingMotm, setIsEditingMotm] = useState(false);
+  const [newMotmId, setNewMotmId] = useState<number | ''>('');
+  const [isUpdatingMotm, setIsUpdatingMotm] = useState(false);
+
+  const handleUpdateMotm = async () => {
+    if (!newMotmId || !matchId) return;
+    try {
+      setIsUpdatingMotm(true);
+      await MatchScoringService.updateManOfTheMatch(parseInt(matchId), Number(newMotmId));
+      toast.success('Man of the Match updated!');
+      setIsEditingMotm(false);
+      fetchScorecard(parseInt(matchId));
+    } catch (err) {
+      toast.error('Failed to update Man of the Match');
+    } finally {
+      setIsUpdatingMotm(false);
+    }
+  };
 
   // Confetti when on Summary tab for completed matches
   useEffect(() => {
@@ -167,10 +189,10 @@ const MatchScorecard: React.FC = () => {
   const rightTeam    = teamABattedFirst ? match.teamB : match.teamA;
   const leftScore    = teamABattedFirst ? teamAScore   : teamBScore;
   const leftWickets  = teamABattedFirst ? teamAWickets : teamBWickets;
-  const leftBalls    = teamABattedFirst ? (match.firstInningsBalls ?? 0) : (match.currentBalls ?? 0);
+  const leftBalls    = match.firstInningsBalls ?? 0;
   const rightScore   = teamABattedFirst ? teamBScore   : teamAScore;
   const rightWickets = teamABattedFirst ? teamBWickets : teamAWickets;
-  const rightBalls   = teamABattedFirst ? (match.currentBalls ?? 0) : (match.firstInningsBalls ?? 0);
+  const rightBalls   = match.currentBalls ?? 0;
   const leftBatting  = innings1Batting;
   const leftBowling  = innings2Bowling;
   const rightBatting = innings2Batting;
@@ -454,7 +476,26 @@ const MatchScorecard: React.FC = () => {
                     </div>
 
                     {/* ── Row 2: MVP Card (full-width centrepiece) ── */}
-                    {match.manOfTheMatch && (
+                    {isEditingMotm ? (
+                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(245,158,11,0.5)', textAlign: 'center' }}>
+                            <h3 style={{ color: '#f59e0b', marginBottom: '1rem', marginTop: 0 }}>Change Player of the Match</h3>
+                            <select className="form-input" value={newMotmId} onChange={e => setNewMotmId(Number(e.target.value))} style={{ maxWidth: '300px', margin: '0 auto 1rem auto' }}>
+                                <option value="">Select New MVP</option>
+                                <optgroup label={match.teamA.teamName}>
+                                    {data.teamAPlayers?.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                </optgroup>
+                                <optgroup label={match.teamB.teamName}>
+                                    {data.teamBPlayers?.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                </optgroup>
+                            </select>
+                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                                <button className="btn" onClick={() => setIsEditingMotm(false)} disabled={isUpdatingMotm} style={{ background: 'transparent', border: '1px solid #64748b' }}>Cancel</button>
+                                <button className="btn btn-primary" onClick={handleUpdateMotm} disabled={!newMotmId || isUpdatingMotm} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    {isUpdatingMotm ? 'Saving...' : <><Check size={16} /> Save MVP</>}
+                                </button>
+                            </div>
+                        </div>
+                    ) : match.manOfTheMatch && (
                         <div
                           className="hologram-card"
                           onMouseMove={handleMouseMove}
@@ -489,7 +530,18 @@ const MatchScorecard: React.FC = () => {
                                     <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', background: '#f59e0b', color: '#0f172a', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.6rem', border: '2px solid #0f172a' }}>MVP</div>
                                 </div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ color: '#f59e0b', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '4px', fontWeight: 800 }}>Player of the Match</div>
+                                    <div style={{ color: '#f59e0b', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '4px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        Player of the Match
+                                        {isAuthenticated && (
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); setIsEditingMotm(true); setNewMotmId(match.manOfTheMatch!.id!); }} 
+                                                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '4px', cursor: 'pointer', padding: '2px 6px', display: 'inline-flex', alignItems: 'center', color: '#cbd5e1' }}
+                                                title="Edit MVP"
+                                            >
+                                                <Edit2 size={10} /> <span style={{ marginLeft: '4px', fontSize: '10px' }}>Edit</span>
+                                            </button>
+                                        )}
+                                    </div>
                                     <div style={{ color: '#fff', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.5px', marginTop: '2px' }}>{match.manOfTheMatch.name}</div>
                                     <div style={{ color: '#475569', fontSize: '0.78rem', marginTop: '4px' }}>Tap to view full performance →</div>
                                 </div>

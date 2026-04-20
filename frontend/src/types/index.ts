@@ -111,6 +111,14 @@ export interface LiveMatchDetailsDto {
   recentBalls: string[];
   thisOverBalls: string[];
   
+  // Current Partnership Stats
+  currentPartnershipRuns?: number;
+  currentPartnershipBalls?: number;
+  currentPartnershipStrikerRuns?: number;
+  currentPartnershipStrikerBalls?: number;
+  currentPartnershipNonStrikerRuns?: number;
+  currentPartnershipNonStrikerBalls?: number;
+  
   streamUrl?: string;
   streamDelaySeconds?: number;
   teamAPlayers?: Player[];

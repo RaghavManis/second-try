@@ -514,6 +514,28 @@ const LiveMatch: React.FC = () => {
               </div>
             </div>
 
+            {/* Line 3.2: Current Partnership */}
+            {(details.currentPartnershipRuns ?? 0) > 0 && (
+               <div style={{ padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                 <div style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Partnership</div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {details.currentStriker && (
+                      <div style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>
+                        {details.currentStriker.name.split(' ')[0]} <span style={{ fontWeight: 'bold', color: '#fff' }}>{details.currentPartnershipStrikerRuns}</span><span style={{ fontSize: '0.7rem', color: '#64748b', marginLeft: '2px' }}>({details.currentPartnershipStrikerBalls})</span>
+                      </div>
+                    )}
+                    <div style={{ color: '#fbbf24', fontWeight: 'bold', fontSize: '0.95rem', display: 'flex', alignItems: 'center' }}>
+                       {details.currentPartnershipRuns}<span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: '2px', fontWeight: 'normal' }}>({details.currentPartnershipBalls})</span>
+                    </div>
+                    {details.currentNonStriker && (
+                      <div style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>
+                        {details.currentNonStriker.name.split(' ')[0]} <span style={{ fontWeight: 'bold', color: '#fff' }}>{details.currentPartnershipNonStrikerRuns}</span><span style={{ fontSize: '0.7rem', color: '#64748b', marginLeft: '2px' }}>({details.currentPartnershipNonStrikerBalls})</span>
+                      </div>
+                    )}
+                 </div>
+               </div>
+            )}
+
             {/* Line 3.5: Match Pressure Indicator — 2nd Innings only */}
             {details.match.currentInnings === 2 && runsRequired > 0 && ballsRemaining > 0 && (
               <div style={{

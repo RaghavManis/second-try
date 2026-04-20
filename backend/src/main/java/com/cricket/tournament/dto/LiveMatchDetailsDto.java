@@ -35,6 +35,14 @@ public class LiveMatchDetailsDto {
     private List<String> recentBalls; 
     private List<String> thisOverBalls; 
 
+    // Current Partnership Stats
+    private Integer currentPartnershipRuns;
+    private Integer currentPartnershipBalls;
+    private Integer currentPartnershipStrikerRuns;
+    private Integer currentPartnershipStrikerBalls;
+    private Integer currentPartnershipNonStrikerRuns;
+    private Integer currentPartnershipNonStrikerBalls;
+
     private String streamUrl;
     private Integer streamDelaySeconds;
 
@@ -94,4 +102,17 @@ public class LiveMatchDetailsDto {
     public void setTeamAPlayers(List<Player> teamAPlayers) { this.teamAPlayers = teamAPlayers; }
     public List<Player> getTeamBPlayers() { return teamBPlayers; }
     public void setTeamBPlayers(List<Player> teamBPlayers) { this.teamBPlayers = teamBPlayers; }
+    
+    public Integer getCurrentPartnershipRuns() { return currentPartnershipRuns; }
+    public void setCurrentPartnershipRuns(Integer currentPartnershipRuns) { this.currentPartnershipRuns = currentPartnershipRuns; }
+    public Integer getCurrentPartnershipBalls() { return currentPartnershipBalls; }
+    public void setCurrentPartnershipBalls(Integer currentPartnershipBalls) { this.currentPartnershipBalls = currentPartnershipBalls; }
+    public Integer getCurrentPartnershipStrikerRuns() { return currentPartnershipStrikerRuns; }
+    public void setCurrentPartnershipStrikerRuns(Integer currentPartnershipStrikerRuns) { this.currentPartnershipStrikerRuns = currentPartnershipStrikerRuns; }
+    public Integer getCurrentPartnershipStrikerBalls() { return currentPartnershipStrikerBalls; }
+    public void setCurrentPartnershipStrikerBalls(Integer currentPartnershipStrikerBalls) { this.currentPartnershipStrikerBalls = currentPartnershipStrikerBalls; }
+    public Integer getCurrentPartnershipNonStrikerRuns() { return currentPartnershipNonStrikerRuns; }
+    public void setCurrentPartnershipNonStrikerRuns(Integer currentPartnershipNonStrikerRuns) { this.currentPartnershipNonStrikerRuns = currentPartnershipNonStrikerRuns; }
+    public Integer getCurrentPartnershipNonStrikerBalls() { return currentPartnershipNonStrikerBalls; }
+    public void setCurrentPartnershipNonStrikerBalls(Integer currentPartnershipNonStrikerBalls) { this.currentPartnershipNonStrikerBalls = currentPartnershipNonStrikerBalls; }
 }

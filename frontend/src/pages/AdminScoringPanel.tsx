@@ -483,9 +483,32 @@ const AdminScoringPanel: React.FC = () => {
         <div style={{ textAlign: 'right' }}>
           <div>Striker: <strong>{details.currentStriker?.name}</strong> {details.strikerRuns}({details.strikerBalls})</div>
           <div>Non: <strong>{details.currentNonStriker?.name}</strong> {details.nonStrikerRuns}({details.nonStrikerBalls})</div>
-          <div style={{ color: 'var(--primary)', marginTop: '0.4rem' }}>Bowler: <strong>{details.currentBowler ? details.currentBowler.name : 'AWAITING NEXT OVER'}</strong> {details.bowlerRuns}-{details.bowlerWickets}</div>
+          <div style={{ color: 'var(--primary)', marginTop: '0.4rem' }}>Bowler: <strong>{details.currentBowler ? details.currentBowler.name : 'AWAITING NEXT OVER'}</strong> {details.bowlerWickets}-{details.bowlerRuns} <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>({details.bowlerOvers})</span></div>
         </div>
       </div>
+
+      {/* CURRENT PARTNERSHIP MINI BAR */}
+      {(details.currentPartnershipRuns ?? 0) > 0 && (
+         <div className="glass-panel" style={{ marginBottom: '1rem', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+           <div style={{ fontSize: '0.85rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Current Partnership</div>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {details.currentStriker && (
+                <div style={{ fontSize: '0.9rem', color: '#cbd5e1' }}>
+                  {details.currentStriker.name.split(' ')[0]} <span style={{ fontWeight: 'bold', color: '#fff' }}>{details.currentPartnershipStrikerRuns}</span><span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '2px' }}>({details.currentPartnershipStrikerBalls})</span>
+                </div>
+              )}
+              <div style={{ color: '#fbbf24', fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center' }}>
+                 {details.currentPartnershipRuns}<span style={{ fontSize: '0.8rem', color: '#94a3b8', marginLeft: '2px', fontWeight: 'normal' }}>({details.currentPartnershipBalls})</span>
+              </div>
+              {details.currentNonStriker && (
+                <div style={{ fontSize: '0.9rem', color: '#cbd5e1' }}>
+                  {details.currentNonStriker.name.split(' ')[0]} <span style={{ fontWeight: 'bold', color: '#fff' }}>{details.currentPartnershipNonStrikerRuns}</span><span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '2px' }}>({details.currentPartnershipNonStrikerBalls})</span>
+                </div>
+              )}
+           </div>
+         </div>
+      )}
+
 
       {isAwaitingSecondInnings && !isMatchOverWarning && (
          <div className="glass-panel text-center animate-slide-up" style={{ marginTop: '2rem', border: '2px solid var(--primary)', padding: '2.5rem' }}>

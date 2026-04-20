@@ -13,8 +13,8 @@ const Navbar: React.FC = () => {
   const isScoringPage = location.pathname.includes('/score');
 
   const [hasLiveMatch, setHasLiveMatch] = React.useState(false);
-  const [theme, setTheme] = React.useState<'light'|'dark'>(() => {
-    return (localStorage.getItem('theme') as 'light'|'dark') || 'dark';
+  const [theme, setTheme] = React.useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
   });
 
   React.useEffect(() => {
@@ -80,7 +80,7 @@ const Navbar: React.FC = () => {
         <li>
           <NavLink to="/points-table" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <Trophy size={20} />
-            <span>Standings</span>
+            <span>Points-table</span>
           </NavLink>
         </li>
         <li>
