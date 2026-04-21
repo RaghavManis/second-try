@@ -9,9 +9,13 @@ import java.util.Optional;
 
 @Repository
 public interface ScorecardBowlingRepository extends JpaRepository<ScorecardBowling, Long> {
-    List<ScorecardBowling> findByMatchId(Long matchId);
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM ScorecardBowling s WHERE s.match.id = :matchId ORDER BY s.id ASC")
+    List<ScorecardBowling> findByMatchId(@org.springframework.data.repository.query.Param("matchId") Long matchId);
+    
     Optional<ScorecardBowling> findFirstByMatchIdAndInningsAndPlayerId(Long matchId, Integer innings, Long playerId);
-    List<ScorecardBowling> findByMatchIdAndInnings(Long matchId, Integer innings);
+    
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM ScorecardBowling s WHERE s.match.id = :matchId AND s.innings = :innings ORDER BY s.id ASC")
+    List<ScorecardBowling> findByMatchIdAndInnings(@org.springframework.data.repository.query.Param("matchId") Long matchId, @org.springframework.data.repository.query.Param("innings") Integer innings);
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.data.jpa.repository.Query("DELETE FROM ScorecardBowling s WHERE s.match.id = :matchId")
     void deleteByMatchId(@org.springframework.data.repository.query.Param("matchId") Long matchId);
