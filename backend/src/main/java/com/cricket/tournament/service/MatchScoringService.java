@@ -472,6 +472,7 @@ public class MatchScoringService {
              if (Boolean.TRUE.equals(ev.getIsWicket())) {
                  dto.setWicketType(ev.getWicketType());
                  dto.setPlayerOutId(ev.getPlayerOut() != null ? ev.getPlayerOut().getId() : null);
+                 dto.setFielderId(ev.getFielder() != null ? ev.getFielder().getId() : null);
                  
                  BallEvent nextEv = (i + 1 < events.size()) ? events.get(i + 1) : lastEvent;
                  Player outPlayer = ev.getPlayerOut();

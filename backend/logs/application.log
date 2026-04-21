@@ -1,12 +1,55 @@
-2026-04-21 00:00:01 [http-nio-0.0.0.0-8080-exec-7] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 32ms
-2026-04-21 00:00:16 [http-nio-0.0.0.0-8080-exec-2] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 32ms
-2026-04-21 00:00:31 [http-nio-0.0.0.0-8080-exec-6] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 26ms
-2026-04-21 00:00:46 [http-nio-0.0.0.0-8080-exec-8] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 25ms
-2026-04-21 00:01:01 [http-nio-0.0.0.0-8080-exec-9] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 26ms
-2026-04-21 00:01:16 [http-nio-0.0.0.0-8080-exec-1] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 29ms
-2026-04-21 00:01:31 [http-nio-0.0.0.0-8080-exec-5] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 41ms
-2026-04-21 00:01:46 [http-nio-0.0.0.0-8080-exec-10] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 20ms
-2026-04-21 00:02:01 [http-nio-0.0.0.0-8080-exec-4] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 25ms
-2026-04-21 00:02:16 [http-nio-0.0.0.0-8080-exec-3] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 43ms
-2026-04-21 00:21:46 [http-nio-0.0.0.0-8080-exec-7] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
-2026-04-21 00:21:46 [http-nio-0.0.0.0-8080-exec-7] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 48ms
+2026-04-22 00:35:09 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h41m49s712ms63µs500ns).
+2026-04-22 00:35:10 [http-nio-0.0.0.0-8080-exec-6] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 134ms
+2026-04-22 00:35:11 [http-nio-0.0.0.0-8080-exec-8] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 24ms
+2026-04-22 00:35:11 [http-nio-0.0.0.0-8080-exec-7] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 20ms
+2026-04-22 00:35:11 [http-nio-0.0.0.0-8080-exec-1] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/53/scorecard - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 108ms
+2026-04-22 00:35:11 [http-nio-0.0.0.0-8080-exec-3] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/53/scorecard - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 71ms
+2026-04-22 00:35:26 [http-nio-0.0.0.0-8080-exec-2] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 17ms
+2026-04-22 00:35:41 [http-nio-0.0.0.0-8080-exec-9] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 25ms
+2026-04-22 00:35:56 [http-nio-0.0.0.0-8080-exec-5] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 20ms
+2026-04-22 00:36:11 [http-nio-0.0.0.0-8080-exec-4] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 23ms
+2026-04-22 00:36:26 [http-nio-0.0.0.0-8080-exec-10] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 22ms
+2026-04-22 00:36:41 [http-nio-0.0.0.0-8080-exec-6] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 26ms
+2026-04-22 00:36:56 [http-nio-0.0.0.0-8080-exec-8] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 22ms
+2026-04-22 00:37:13 [http-nio-0.0.0.0-8080-exec-7] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 25ms
+2026-04-22 00:38:13 [http-nio-0.0.0.0-8080-exec-1] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 23ms
+2026-04-22 00:39:13 [http-nio-0.0.0.0-8080-exec-3] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 31ms
+2026-04-22 00:40:13 [http-nio-0.0.0.0-8080-exec-2] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 23ms
+2026-04-22 00:52:13 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-04-22 00:52:13 [Thread-5] INFO  o.a.coyote.http11.Http11NioProtocol - Stopping ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-22 00:52:13 [Thread-5] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-04-22 00:52:13 [Thread-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-04-22 00:52:13 [Thread-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-04-22 00:52:14 [restartedMain] INFO  c.c.t.CricketTournamentApplication - Starting CricketTournamentApplication using Java 23.0.1 with PID 15496 (C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\target\classes started by ragha in C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend)
+2026-04-22 00:52:14 [restartedMain] INFO  c.c.t.CricketTournamentApplication - The following 1 profile is active: "dev"
+2026-04-22 00:52:15 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-22 00:52:15 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 89 ms. Found 9 JPA repository interfaces.
+2026-04-22 00:52:16 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-22 00:52:16 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-22 00:52:16 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-22 00:52:16 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-04-22 00:52:16 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-22 00:52:16 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1874 ms
+2026-04-22 00:52:16 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-04-22 00:52:16 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4b4eeeb8
+2026-04-22 00:52:16 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-04-22 00:52:16 [restartedMain] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:mysql://localhost:3306/cricket_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true'
+2026-04-22 00:52:16 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-22 00:52:16 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-22 00:52:16 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-22 00:52:17 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-22 00:52:17 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-22 00:52:19 [restartedMain] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-22 00:52:19 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: ffe7aa2e-7e25-46d8-b87c-21db14b8aaa7
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-22 00:52:19 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2026-04-22 00:52:19 [restartedMain] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@9939b3a, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@e5435d, org.springframework.security.web.context.SecurityContextHolderFilter@40edd243, org.springframework.security.web.header.HeaderWriterFilter@65f80386, org.springframework.web.filter.CorsFilter@1af4abb2, org.springframework.security.web.authentication.logout.LogoutFilter@523c41ab, com.cricket.tournament.security.JwtAuthenticationFilter@685841fa, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@558f6f37, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@33ebb5c1, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@466b1ea8, org.springframework.security.web.session.SessionManagementFilter@47e90a26, org.springframework.security.web.access.ExceptionTranslationFilter@1d5cbad8, org.springframework.security.web.access.intercept.AuthorizationFilter@48883ef3]
+2026-04-22 00:52:19 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-04-22 00:52:19 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-22 00:52:19 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-04-22 00:52:19 [restartedMain] INFO  c.c.t.CricketTournamentApplication - Started CricketTournamentApplication in 5.586 seconds (process running for 15399.989)
+2026-04-22 00:52:19 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
