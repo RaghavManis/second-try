@@ -27,9 +27,15 @@ public interface PlayerMatchStatsRepository extends JpaRepository<PlayerMatchSta
            "MAX(pms.runsScored) as highestScore, " +
            "SUM(CASE WHEN pms.runsScored >= 50 AND pms.runsScored < 100 THEN 1 ELSE 0 END) as fifties, " +
            "SUM(CASE WHEN pms.runsScored >= 100 THEN 1 ELSE 0 END) as hundreds, " +
+           "SUM(pms.fours) as fours, " +
+           "SUM(pms.sixes) as sixes, " +
            "SUM(pms.oversBowled) as oversBowled, " +
            "SUM(pms.runsConceded) as runsConceded, " +
-           "SUM(pms.wickets) as wickets " +
+           "SUM(pms.wickets) as wickets, " +
+           "SUM(pms.maidens) as maidens, " +
+           "SUM(pms.catches) as catches, " +
+           "SUM(pms.runOuts) as runOuts, " +
+           "SUM(pms.stumpings) as stumpings " +
            ") FROM PlayerMatchStats pms WHERE pms.player.id = :playerId GROUP BY pms.matchType")
     List<Map<String, Object>> getAggregatedStatsByPlayer(@Param("playerId") Long playerId);
 
@@ -41,9 +47,15 @@ public interface PlayerMatchStatsRepository extends JpaRepository<PlayerMatchSta
            "MAX(pms.runsScored) as highestScore, " +
            "SUM(CASE WHEN pms.runsScored >= 50 AND pms.runsScored < 100 THEN 1 ELSE 0 END) as fifties, " +
            "SUM(CASE WHEN pms.runsScored >= 100 THEN 1 ELSE 0 END) as hundreds, " +
+           "SUM(pms.fours) as fours, " +
+           "SUM(pms.sixes) as sixes, " +
            "SUM(pms.oversBowled) as oversBowled, " +
            "SUM(pms.runsConceded) as runsConceded, " +
-           "SUM(pms.wickets) as wickets " +
+           "SUM(pms.wickets) as wickets, " +
+           "SUM(pms.maidens) as maidens, " +
+           "SUM(pms.catches) as catches, " +
+           "SUM(pms.runOuts) as runOuts, " +
+           "SUM(pms.stumpings) as stumpings " +
            ") FROM PlayerMatchStats pms WHERE pms.player.id = :playerId")
     Map<String, Object> getOverallAggregatedStatsByPlayer(@Param("playerId") Long playerId);
 

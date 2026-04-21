@@ -97,7 +97,7 @@ public class MatchScoringService {
         s.setMatch(match);
         s.setInnings(match.getCurrentInnings());
         s.setPlayer(player);
-        Team team = match.getCurrentInnings() == 1 ? match.getBattingTeam() : match.getBattingTeam(); 
+        Team team = match.getBattingTeam();
         s.setTeam(team);
         s.setRuns(0); s.setBalls(0); s.setFours(0); s.setSixes(0); s.setStrikeRate(0.0);
         return s;
@@ -108,7 +108,7 @@ public class MatchScoringService {
         s.setMatch(match);
         s.setInnings(match.getCurrentInnings());
         s.setPlayer(player);
-        Team team = match.getCurrentInnings() == 1 ? match.getBowlingTeam() : match.getBowlingTeam();
+        Team team = match.getBowlingTeam();
         s.setTeam(team);
         s.setRuns(0); s.setWickets(0); s.setOvers(0.0); s.setMaidens(0); s.setEconomyRate(0.0);
         return s;
@@ -247,19 +247,19 @@ public class MatchScoringService {
                 outCard.setHowOut("b " + match.getCurrentBowler().getName());
             } else if ("CAUGHT".equals(ballDto.getWicketType())) {
                 String fielderName = "Sub";
-                if (ballDto.getFielderId() != null) {
+                if (ballDto.getFielderId() != null && ballDto.getFielderId() > 0) {
                     fielderName = playerRepository.findById(ballDto.getFielderId()).map(Player::getName).orElse("Sub");
                 }
                 outCard.setHowOut("c " + fielderName + " b " + match.getCurrentBowler().getName());
             } else if ("RUN_OUT".equals(ballDto.getWicketType())) {
                 String fielderName = "Sub";
-                if (ballDto.getFielderId() != null) {
+                if (ballDto.getFielderId() != null && ballDto.getFielderId() > 0) {
                     fielderName = playerRepository.findById(ballDto.getFielderId()).map(Player::getName).orElse("Sub");
                 }
                 outCard.setHowOut("run out (" + fielderName + ")");
             } else if ("STUMPED".equals(ballDto.getWicketType())) {
                 String fielderName = "Sub";
-                if (ballDto.getFielderId() != null) {
+                if (ballDto.getFielderId() != null && ballDto.getFielderId() > 0) {
                     fielderName = playerRepository.findById(ballDto.getFielderId()).map(Player::getName).orElse("Sub");
                 }
                 outCard.setHowOut("stumped (" + fielderName + ")");
@@ -786,19 +786,29 @@ public class MatchScoringService {
         
         logger.info("[AUDIT] Match {} Officially Completed! Result: {}", matchId, match.getResult());
         
-        // Save PlayerMatchStats
+        this.updatePlayerMatchStatsFromScorecards(match);
+        
+        liveDetailsCache.invalidate(matchId);
+        return getLiveDetails(matchId, true);
+    }
+
+    private void updatePlayerMatchStatsFromScorecards(Match match) {
+        Long matchId = match.getId();
         List<ScorecardBatting> battingCards = scorecardBattingRepository.findByMatchId(matchId);
         List<ScorecardBowling> bowlingCards = scorecardBowlingRepository.findByMatchId(matchId);
+        
+        // Clear existing stats for this match first to avoid duplicates or orphaned data
+        playerMatchStatsRepository.deleteByMatchId(matchId);
         
         Map<Long, PlayerMatchStats> statsMap = new HashMap<>();
 
         battingCards.forEach(b -> {
             Player p = b.getPlayer();
             PlayerMatchStats stats = statsMap.computeIfAbsent(p.getId(), k -> new PlayerMatchStats(p, match, match.getMatchType()));
-            stats.setRunsScored(stats.getRunsScored() + b.getRuns());
-            stats.setBallsFaced(stats.getBallsFaced() + b.getBalls());
-            stats.setFours(stats.getFours() + b.getFours());
-            stats.setSixes(stats.getSixes() + b.getSixes());
+            stats.setRunsScored(stats.getRunsScored() + (b.getRuns() == null ? 0 : b.getRuns()));
+            stats.setBallsFaced(stats.getBallsFaced() + (b.getBalls() == null ? 0 : b.getBalls()));
+            stats.setFours(stats.getFours() + (b.getFours() == null ? 0 : b.getFours()));
+            stats.setSixes(stats.getSixes() + (b.getSixes() == null ? 0 : b.getSixes()));
             if (!"Not Out".equals(b.getHowOut()) && !"Yet to bat".equals(b.getHowOut()) && b.getHowOut() != null && !b.getHowOut().isEmpty()) {
                 stats.setOut(true);
             }
@@ -821,9 +831,9 @@ public class MatchScoringService {
             stats.setMaidens(stats.getMaidens() + (b.getMaidens() == null ? 0 : b.getMaidens()));
         });
         
-        List<BallEvent> events = ballEventRepository.findByMatchIdOrderByOverNumberAscBallNumberAsc(matchId);
+        List<BallEvent> events = ballEventRepository.findByMatchIdAndIsWicketTrue(matchId);
         events.forEach(e -> {
-            if (Boolean.TRUE.equals(e.getIsWicket()) && e.getFielder() != null) {
+            if (e.getFielder() != null) {
                 Player p = e.getFielder();
                 PlayerMatchStats stats = statsMap.computeIfAbsent(p.getId(), k -> new PlayerMatchStats(p, match, match.getMatchType()));
                 if ("CAUGHT".equals(e.getWicketType())) {
@@ -837,8 +847,6 @@ public class MatchScoringService {
         });
         
         playerMatchStatsRepository.saveAll(statsMap.values());
-        liveDetailsCache.invalidate(matchId);
-        return getLiveDetails(matchId, true);
     }
     
     @Transactional
@@ -1052,5 +1060,113 @@ public class MatchScoringService {
             result.add(overDetails);
         }
         return result;
+    }
+    @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
+    public void repairScorecard(Long matchId) {
+        Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
+        
+        // 1. Clear existing scorecard entries for this match
+        scorecardBattingRepository.deleteByMatchId(matchId);
+        scorecardBowlingRepository.deleteByMatchId(matchId);
+        
+        // 2. Fetch all ball events in chronological order
+        List<BallEvent> allEvents = ballEventRepository.findByMatchIdOrderByOverNumberAscBallNumberAscIdAsc(matchId);
+        if (allEvents.isEmpty()) return;
+
+        // 3. Temporarily reset match live state for re-processing simulation
+        // Note: We don't save the match at the end to avoid overwriting final results if we don't want to,
+        // but processBallMath will update the match object in memory and save it.
+        // So we record the final status and restore it if necessary.
+        Match.MatchStatus finalStatus = match.getStatus();
+        
+        match.setCurrentScore(0);
+        match.setCurrentWickets(0);
+        match.setCurrentOvers(0.0);
+        match.setCurrentInnings(1);
+        
+        // Reset to initial batting/bowling team based on toss
+        if (match.getTossWinner() != null) {
+            if ("BATTING".equals(match.getTossDecision())) {
+                match.setBattingTeam(match.getTossWinner());
+                match.setBowlingTeam(match.getTossWinner().getId().equals(match.getTeamA().getId()) ? match.getTeamB() : match.getTeamA());
+            } else {
+                match.setBowlingTeam(match.getTossWinner());
+                match.setBattingTeam(match.getTossWinner().getId().equals(match.getTeamA().getId()) ? match.getTeamB() : match.getTeamA());
+            }
+        }
+
+        // Initialize strikers from the first ball
+        BallEvent firstBall = allEvents.get(0);
+        match.setCurrentStriker(firstBall.getStriker());
+        match.setCurrentNonStriker(firstBall.getNonStriker());
+        match.setCurrentBowler(firstBall.getBowler());
+        matchRepository.save(match);
+
+        // 4. Re-process each ball
+        for (int i = 0; i < allEvents.size(); i++) {
+            BallEvent ev = allEvents.get(i);
+            
+            // Handle innings transition
+            if (ev.getInnings() > match.getCurrentInnings()) {
+                match.setCurrentInnings(ev.getInnings());
+                match.setCurrentScore(0);
+                match.setCurrentWickets(0);
+                match.setCurrentOvers(0.0);
+                
+                // Swap teams
+                Team temp = match.getBattingTeam();
+                match.setBattingTeam(match.getBowlingTeam());
+                match.setBowlingTeam(temp);
+                
+                // Reset strikers for new innings from the first ball of that innings
+                match.setCurrentStriker(ev.getStriker());
+                match.setCurrentNonStriker(ev.getNonStriker());
+                match.setCurrentBowler(ev.getBowler());
+                matchRepository.save(match);
+            }
+
+            // Sync match state with event's participants to handle mid-over changes or manual adjustments
+            match.setCurrentStriker(ev.getStriker());
+            match.setCurrentNonStriker(ev.getNonStriker());
+            match.setCurrentBowler(ev.getBowler());
+
+            BallSubmissionDto dto = new BallSubmissionDto();
+            dto.setRuns(ev.getRuns());
+            dto.setExtraType(ev.getExtraType());
+            dto.setExtraRuns(ev.getExtraRuns());
+            dto.setIsWicket(ev.getIsWicket());
+            
+            if (Boolean.TRUE.equals(ev.getIsWicket())) {
+                dto.setWicketType(ev.getWicketType());
+                dto.setPlayerOutId(ev.getPlayerOut() != null ? ev.getPlayerOut().getId() : null);
+                dto.setFielderId(ev.getFielder() != null ? ev.getFielder().getId() : null);
+                
+                // To handle strike rotation correctly, we need to know who the next batsman was
+                BallEvent nextEv = (i + 1 < allEvents.size()) ? allEvents.get(i + 1) : null;
+                if (nextEv != null && nextEv.getInnings().equals(ev.getInnings())) {
+                    Player outPlayer = ev.getPlayerOut();
+                    if (outPlayer != null) {
+                        Player survivor = outPlayer.getId().equals(ev.getStriker().getId()) ? ev.getNonStriker() : ev.getStriker();
+                        if (nextEv.getStriker().getId().equals(survivor.getId())) {
+                            dto.setNextBatsmanId(nextEv.getNonStriker().getId());
+                        } else {
+                            dto.setNextBatsmanId(nextEv.getStriker().getId());
+                        }
+                    }
+                }
+            }
+            
+            this.processBallMath(matchId, match, dto, false);
+        }
+
+        // 5. Restore final match metadata
+        match.setStatus(finalStatus);
+        
+        // 6. Recalculate Player Match Stats from the newly repaired scorecard
+        this.updatePlayerMatchStatsFromScorecards(match);
+        
+        matchRepository.save(match);
+        liveDetailsCache.invalidate(matchId);
     }
 }

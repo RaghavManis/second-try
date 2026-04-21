@@ -164,7 +164,7 @@ const AdminScoringPanel: React.FC = () => {
         isWicket,
         wicketType: isWicket ? wicketType : undefined,
         playerOutId: isWicket ? Number(playerOutId) : undefined,
-        fielderId: (isWicket && ['CAUGHT', 'RUN_OUT', 'STUMPED'].includes(wicketType)) ? Number(fielderId) : undefined,
+        fielderId: (isWicket && ['CAUGHT', 'RUN_OUT', 'STUMPED'].includes(wicketType) && fielderId !== '') ? Number(fielderId) : undefined,
         crossed: isWicket ? crossed : undefined,
         nextBatsmanId: (isWicket && nextBatsmanId !== '') ? Number(nextBatsmanId) : undefined,
         nextBowlerId: nextBowlerId !== '' ? Number(nextBowlerId) : undefined
@@ -447,7 +447,35 @@ const AdminScoringPanel: React.FC = () => {
   }
 
   if (match.status === 'COMPLETED') {
-    return <div className="page-container text-center"><h1 className="page-title gradient-text">Match is already completed.</h1><button className="btn" onClick={() => navigate('/matches')}>Back to Matches</button></div>;
+    return (
+      <div className="page-container text-center">
+        <h1 className="page-title gradient-text">Match is already completed.</h1>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem' }}>
+          <button className="btn" onClick={() => navigate('/matches')}>Back to Matches</button>
+          <button 
+            className="btn btn-primary" 
+            style={{ background: '#10b981' }} 
+            onClick={async () => {
+              if (window.confirm("Repair Scorecard? This will re-calculate the entire batting and bowling data from the ball history to fix discrepancies (like incorrect names or scrambled scores).")) {
+                try {
+                  setIsSubmitting(true);
+                  await MatchScoringService.repairScorecard(Number(matchId));
+                  toast.success("Scorecard repaired successfully!");
+                  loadMatchData(Number(matchId), true);
+                } catch (err) {
+                  toast.error("Failed to repair scorecard.");
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }
+            }}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Repairing..." : "Repair Scorecard Data"}
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // ONGOING STATE

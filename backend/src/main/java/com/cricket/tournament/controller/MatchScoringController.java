@@ -83,4 +83,9 @@ public class MatchScoringController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ongoingMatches);
     }
+    @PostMapping("/{matchId}/repair")
+    public ResponseEntity<java.util.Map<String, Object>> repairScorecard(@PathVariable Long matchId) {
+        matchScoringService.repairScorecard(matchId);
+        return ResponseEntity.ok(matchScoringService.getCompleteScorecard(matchId));
+    }
 }

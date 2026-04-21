@@ -167,8 +167,19 @@ const MatchScorecard: React.FC = () => {
   const innings2Bowling = bowling.filter(b => b.innings === 2);
 
   // ── Determine which team batted in which innings ──
-  const inn1Team = innings1Batting.length > 0 ? innings1Batting[0].team : null;
-  const teamABattedFirst = inn1Team ? inn1Team.id === match.teamA.id : true;
+  // Using match metadata is much more stable than guessing from the first player in the scorecard
+  let teamABattedFirst = true;
+  if (match.currentInnings === 1 && match.battingTeam) {
+    teamABattedFirst = match.battingTeam.id === match.teamA.id;
+  } else if (match.currentInnings === 2 && match.bowlingTeam) {
+    teamABattedFirst = match.bowlingTeam.id === match.teamA.id;
+  } else if (match.tossWinner && match.tossDecision) {
+    const tossWinnerIsA = match.tossWinner.id === match.teamA.id;
+    teamABattedFirst = match.tossDecision === 'BATTING' ? tossWinnerIsA : !tossWinnerIsA;
+  } else {
+    const inn1Team = innings1Batting.length > 0 ? innings1Batting[0].team : null;
+    teamABattedFirst = inn1Team ? inn1Team.id === match.teamA.id : true;
+  }
 
   // Scores per team (using correct innings mapping)
   const teamAScore   = teamABattedFirst

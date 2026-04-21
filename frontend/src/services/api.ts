@@ -102,6 +102,7 @@ export const MatchScoringService = {
     api.put<Match>(`/scoring/${matchId}/motm`, null, { params: { playerId } }),
   updateStreamConfig: (matchId: number, config: { streamUrl: string, streamDelaySeconds: number }) => 
     api.put<Match>(`/scoring/${matchId}/stream-config`, config),
+  repairScorecard: (matchId: number) => api.post<any>(`/scoring/${matchId}/repair`),
 };
 
 export const UploadService = {
