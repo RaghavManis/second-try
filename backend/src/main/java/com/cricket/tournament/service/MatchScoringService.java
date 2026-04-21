@@ -1082,7 +1082,7 @@ public class MatchScoringService {
         
         match.setCurrentScore(0);
         match.setCurrentWickets(0);
-        match.setCurrentOvers(0.0);
+        match.setCurrentBalls(0);
         match.setCurrentInnings(1);
         
         // Reset to initial batting/bowling team based on toss
@@ -1112,7 +1112,7 @@ public class MatchScoringService {
                 match.setCurrentInnings(ev.getInnings());
                 match.setCurrentScore(0);
                 match.setCurrentWickets(0);
-                match.setCurrentOvers(0.0);
+                match.setCurrentBalls(0);
                 
                 // Swap teams
                 Team temp = match.getBattingTeam();

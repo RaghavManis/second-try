@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface BallEventRepository extends JpaRepository<BallEvent, Long> {
     List<BallEvent> findByMatchIdOrderByOverNumberAscBallNumberAsc(Long matchId);
+    List<BallEvent> findByMatchIdOrderByOverNumberAscBallNumberAscIdAsc(Long matchId);
     List<BallEvent> findByMatchIdAndInningsOrderByOverNumberAscBallNumberAscIdAsc(Long matchId, Integer innings);
     List<BallEvent> findByMatchIdAndIsWicketTrue(Long matchId);
     List<BallEvent> findTop20ByMatchIdAndInningsOrderByOverNumberDescBallNumberDescIdDesc(Long matchId, Integer innings);
