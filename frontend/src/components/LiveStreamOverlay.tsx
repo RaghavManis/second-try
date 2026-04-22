@@ -104,9 +104,31 @@ const LiveStreamOverlay: React.FC = () => {
         
         // Handle youtube.com/watch?v= links
         if (url.includes('youtube.com/watch')) {
-             const urlParams = new URL(url).searchParams;
-             const id = urlParams.get('v');
-             return id ? `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&modestbranding=1&showinfo=0&rel=0&playsinline=1&enablejsapi=1&origin=${origin}` : null;
+             try {
+                 const urlObj = new URL(url);
+                 const id = urlObj.searchParams.get('v');
+                 return id ? `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&modestbranding=1&showinfo=0&rel=0&playsinline=1&enablejsapi=1&origin=${origin}` : null;
+             } catch (e) {
+                 return null;
+             }
+        }
+
+        // Handle youtube.com/live/ links (Common for mobile live streaming)
+        if (url.includes('youtube.com/live/')) {
+            const parts = url.split('youtube.com/live/');
+            if (parts.length > 1) {
+                const id = parts[1].split('?')[0];
+                return `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&modestbranding=1&showinfo=0&rel=0&playsinline=1&enablejsapi=1&origin=${origin}`;
+            }
+        }
+
+        // Handle youtube.com/shorts/ links
+        if (url.includes('youtube.com/shorts/')) {
+            const parts = url.split('youtube.com/shorts/');
+            if (parts.length > 1) {
+                const id = parts[1].split('?')[0];
+                return `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&modestbranding=1&showinfo=0&rel=0&playsinline=1&enablejsapi=1&origin=${origin}`;
+            }
         }
         
         return url; 
