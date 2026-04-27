@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
       }
     };
     checkLiveMatches();
-    const interval = setInterval(checkLiveMatches, 15000); // Check every 15s
+    const interval = setInterval(checkLiveMatches, 30000); // Check every 30s
     return () => clearInterval(interval);
   }, []);
 

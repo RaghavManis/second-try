@@ -81,7 +81,7 @@ const LiveStreamOverlay: React.FC = () => {
             setLoading(false);
         });
 
-        const detailsInterval = setInterval(fetchLiveDetails, 5 * 1000);
+        const detailsInterval = setInterval(fetchLiveDetails, 10 * 1000);
         
         return () => {
             clearInterval(detailsInterval);

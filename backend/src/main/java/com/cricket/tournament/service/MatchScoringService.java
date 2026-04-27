@@ -45,6 +45,7 @@ public class MatchScoringService {
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         match.setStatus(Match.MatchStatus.ONGOING);
         liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
         match.setTossWinner(teamRepository.findById(setup.getTossWinnerId()).orElseThrow(() -> new IllegalArgumentException("Invalid Toss Winner")));
         match.setTossDecision(setup.getTossDecision());
         
@@ -89,6 +90,7 @@ public class MatchScoringService {
         scorecardBowlingRepository.save(bowlerCard);
         
         liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
         return getLiveDetails(matchId, true);
     }
 
@@ -128,6 +130,7 @@ public class MatchScoringService {
         matchRepository.flush();
         ballEventRepository.flush();
         liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
         return getLiveDetails(matchId, true);
     }
 
@@ -381,6 +384,7 @@ public class MatchScoringService {
         if (match.getStatus() == Match.MatchStatus.COMPLETED) throw new IllegalStateException("Cannot alter a completed match");
         match.setCurrentBowler(playerRepository.findById(newBowlerId).orElseThrow(() -> new RuntimeException("Player not found")));
         liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
         return getLiveDetails(matchId, true);
     }
     
@@ -395,6 +399,7 @@ public class MatchScoringService {
             match.setCurrentNonStriker(temp);
         }
         liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
         return getLiveDetails(matchId, true);
     }
     
@@ -494,6 +499,7 @@ public class MatchScoringService {
         matchRepository.flush();
         ballEventRepository.flush();
         liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
         return getLiveDetails(matchId, true);
     }
 
@@ -529,6 +535,7 @@ public class MatchScoringService {
             if (match.getCurrentBowler() != null) scorecardBowlingRepository.save(createBowlingCard(match, match.getCurrentBowler()));
             
             liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
             return getLiveDetails(matchId, true);
         } else if (match.getCurrentInnings() == 2 && match.getCurrentStriker() == null) {
             match.setCurrentStriker(playerRepository.findById(newStrikerId).orElse(null));
@@ -541,6 +548,7 @@ public class MatchScoringService {
             if (match.getCurrentBowler() != null) scorecardBowlingRepository.save(createBowlingCard(match, match.getCurrentBowler()));
             
             liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
             return getLiveDetails(matchId, true);
         }
         return getLiveDetails(matchId, true);
@@ -548,15 +556,53 @@ public class MatchScoringService {
 
     private final com.github.benmanes.caffeine.cache.Cache<Long, LiveMatchDetailsDto> liveDetailsCache = 
         com.github.benmanes.caffeine.cache.Caffeine.newBuilder()
-            .expireAfterWrite(1, java.util.concurrent.TimeUnit.SECONDS)
+            .expireAfterWrite(10, java.util.concurrent.TimeUnit.SECONDS)
             .maximumSize(100)
+            .recordStats()
+            .build();
+
+    private final com.github.benmanes.caffeine.cache.Cache<Long, java.util.Map<String, Object>> scorecardCache = 
+        com.github.benmanes.caffeine.cache.Caffeine.newBuilder()
+            .expireAfterWrite(15, java.util.concurrent.TimeUnit.SECONDS)
+            .maximumSize(100)
+            .recordStats()
+            .build();
+
+    private final com.github.benmanes.caffeine.cache.Cache<String, List<Match>> liveMatchesCache = 
+        com.github.benmanes.caffeine.cache.Caffeine.newBuilder()
+            .expireAfterWrite(15, java.util.concurrent.TimeUnit.SECONDS)
+            .maximumSize(1)
+            .recordStats()
             .build();
 
     public LiveMatchDetailsDto getLiveDetails(Long matchId, boolean force) {
         if (force) {
+            logger.debug("[CACHE MISS] Force fetching live details for match {}", matchId);
             return fetchLiveDetails(matchId);
         }
-        return liveDetailsCache.get(matchId, k -> fetchLiveDetails(k));
+        LiveMatchDetailsDto cached = liveDetailsCache.getIfPresent(matchId);
+        if (cached != null) {
+            logger.debug("[CACHE HIT] Returning cached live details for match {}", matchId);
+            return cached;
+        } else {
+            logger.debug("[CACHE MISS] Fetching and caching live details for match {}", matchId);
+            LiveMatchDetailsDto fetched = fetchLiveDetails(matchId);
+            liveDetailsCache.put(matchId, fetched);
+            return fetched;
+        }
+    }
+
+    public List<Match> getLiveMatches() {
+        List<Match> cached = liveMatchesCache.getIfPresent("live");
+        if (cached != null) {
+            logger.debug("[CACHE HIT] Returning cached live matches");
+            return cached;
+        } else {
+            logger.debug("[CACHE MISS] Fetching and caching live matches from DB");
+            List<Match> fetched = matchRepository.findByStatusOrderByMatchDateTimeAsc(Match.MatchStatus.ONGOING);
+            liveMatchesCache.put("live", fetched);
+            return fetched;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -751,6 +797,7 @@ public class MatchScoringService {
         match.setStreamUrl(configDto.getStreamUrl());
         match.setStreamDelaySeconds(configDto.getStreamDelaySeconds());
         liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
         return matchRepository.save(match);
     }
 
@@ -789,6 +836,7 @@ public class MatchScoringService {
         this.updatePlayerMatchStatsFromScorecards(match);
         
         liveDetailsCache.invalidate(matchId);
+        scorecardCache.invalidate(matchId);
         return getLiveDetails(matchId, true);
     }
 
@@ -857,8 +905,21 @@ public class MatchScoringService {
         return matchRepository.save(match);
     }
     
-    @Transactional(readOnly = true)
     public Map<String, Object> getCompleteScorecard(Long matchId) {
+        java.util.Map<String, Object> cached = scorecardCache.getIfPresent(matchId);
+        if (cached != null) {
+            logger.debug("[CACHE HIT] Returning cached scorecard for match {}", matchId);
+            return cached;
+        } else {
+            logger.debug("[CACHE MISS] Computing and caching scorecard for match {}", matchId);
+            java.util.Map<String, Object> fetched = computeCompleteScorecard(matchId);
+            scorecardCache.put(matchId, fetched);
+            return fetched;
+        }
+    }
+    
+    @Transactional(readOnly = true)
+    protected Map<String, Object> computeCompleteScorecard(Long matchId) {
         Match match = matchRepository.findById(matchId).orElseThrow();
         Map<String, Object> response = new HashMap<>();
         response.put("match", match);

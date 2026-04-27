@@ -46,7 +46,7 @@ const LiveMatch: React.FC = () => {
       }
     };
     fetchMatches();
-    const interval = setInterval(fetchMatches, 10000);
+    const interval = setInterval(fetchMatches, 30000);
     return () => clearInterval(interval);
   }, [selectedMatchId]);
 
@@ -147,8 +147,8 @@ const LiveMatch: React.FC = () => {
     };
     
     initData();
-    const detailsInterval = setInterval(fetchLiveDetails, 5000); // 5s fast poll for live details
-    const scorecardInterval = setInterval(fetchScorecards, 15000); // 15s slow poll for full scorecard
+    const detailsInterval = setInterval(fetchLiveDetails, 10000); // 10s poll for live details
+    const scorecardInterval = setInterval(fetchScorecards, 30000); // 30s slow poll for full scorecard
     
     return () => {
         clearInterval(detailsInterval);

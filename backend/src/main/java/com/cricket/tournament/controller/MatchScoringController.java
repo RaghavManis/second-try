@@ -78,10 +78,7 @@ public class MatchScoringController {
 
     @GetMapping("/live")
     public ResponseEntity<List<Match>> getLiveMatches() {
-        List<Match> ongoingMatches = matchRepository.findAll().stream()
-                .filter(m -> m.getStatus() == Match.MatchStatus.ONGOING)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ongoingMatches);
+        return ResponseEntity.ok(matchScoringService.getLiveMatches());
     }
     @PostMapping("/{matchId}/repair")
     public ResponseEntity<java.util.Map<String, Object>> repairScorecard(@PathVariable Long matchId) {
