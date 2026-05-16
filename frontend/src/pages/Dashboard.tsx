@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { TeamService, MatchService, PlayerService, PointsService } from '../services/api';
-import { Users, Calendar, Trophy, ArrowRight, Shield, MapPin, Clock } from 'lucide-react';
+import { TeamService, MatchService, PlayerService, PointsService, MatchScoringService } from '../services/api';
+import { Users, Calendar, Trophy, ArrowRight, Shield, MapPin, Clock, Star, Edit2, Check, X, Crown, Activity } from 'lucide-react';
 import type { Team, Match, Player, PointsTableEntry } from '../types';
 import { AnimatedSection } from '../components/AnimatedSection';
 import { AutoScrollContainer } from '../components/AutoScrollContainer';
 import SEO from '../components/common/SEO';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ teams: 0, matches: 0, completedMatches: 0 });
 
@@ -18,6 +21,17 @@ const Dashboard: React.FC = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [standings, setStandings] = useState<PointsTableEntry[]>([]);
+  
+  // Tournament Champion & POTS
+  const [allPlayersList, setAllPlayersList] = useState<Player[]>([]);
+  const [finalMatch, setFinalMatch] = useState<Match | null>(null);
+  const [isEditingPots, setIsEditingPots] = useState(false);
+  const [newPotsId, setNewPotsId] = useState<number | ''>('');
+  const [isUpdatingPots, setIsUpdatingPots] = useState(false);
+  
+  const [showPotsPerformance, setShowPotsPerformance] = useState(false);
+  const [potsStats, setPotsStats] = useState<any>(null);
+  const [loadingPotsStats, setLoadingPotsStats] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -40,13 +54,18 @@ const Dashboard: React.FC = () => {
           completedMatches: completed,
         });
 
+        const allPlayers = Array.isArray(playersRes.data) ? playersRes.data : [];
+        setAllPlayersList(allPlayers);
+        
+        const theFinal = allMatches.find(m => m.matchType === 'FINAL');
+        setFinalMatch(theFinal || null);
+
         // Slice previews
         setTeams(tournamentTeams); // all tournament teams
         setRecentMatches(allMatches.slice(0, 5)); // up to 5 recent matches
         setStandings((pointsRes.data.TOURNAMENT || []).slice(0, 4)); // top 4 standings
 
         // Compute Star Athletes (Shuffled from both Tournament and Practice)
-        const allPlayers = playersRes.data as Player[];
         const tourneyTopScorers = perfRes.data.TOURNAMENT?.topRunScorers || [];
         const tourneyTopWickets = perfRes.data.TOURNAMENT?.topWicketTakers || [];
         const pracTopScorers = perfRes.data.PRACTICE?.topRunScorers || [];
@@ -80,6 +99,46 @@ const Dashboard: React.FC = () => {
     };
     fetchDashboardData();
   }, []);
+
+  const handleViewPotsPerformance = async () => {
+    if (potsStats) {
+      setShowPotsPerformance(true);
+      return;
+    }
+    if (!finalMatch?.playerOfTheSeries?.id) return;
+    try {
+      setLoadingPotsStats(true);
+      const res = await PlayerService.getPlayerById(finalMatch.playerOfTheSeries.id);
+      setPotsStats(res.data.tournamentStats || {});
+      setShowPotsPerformance(true);
+    } catch (err) {
+      toast.error('Failed to load performance data');
+    } finally {
+      setLoadingPotsStats(false);
+    }
+  };
+
+  const handleUpdatePots = async () => {
+    if (!newPotsId || !finalMatch?.id) return;
+    try {
+      setIsUpdatingPots(true);
+      await MatchScoringService.updatePlayerOfTheSeries(finalMatch.id, Number(newPotsId));
+      toast.success('Player of the Series updated!');
+      setIsEditingPots(false);
+      
+      // Update local state to reflect the change immediately
+      const selectedPlayer = allPlayersList.find(p => p.id === Number(newPotsId));
+      if (selectedPlayer) {
+        setFinalMatch(prev => prev ? { ...prev, playerOfTheSeries: selectedPlayer } : null);
+        setPotsStats(null); // Reset stats when player changes
+        setShowPotsPerformance(false);
+      }
+    } catch (err) {
+      toast.error('Failed to update Player of the Series');
+    } finally {
+      setIsUpdatingPots(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -214,6 +273,111 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="dashboard-sections">
+
+        {/* TOURNAMENT CHAMPION & POTS PRESENTATION */}
+        {finalMatch?.status === 'COMPLETED' && (
+          <AnimatedSection className="bg-section-5">
+             <div style={{ padding: '3rem 1rem', background: 'var(--surface-color)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+               <div className="container" style={{ maxWidth: '900px', margin: '0 auto' }}>
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                   <Crown size={36} color="#f59e0b" style={{ margin: '0 auto 0.5rem auto' }} className="animate-pulse" />
+                   <h2 style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)', fontWeight: 900, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '2px', textShadow: '0 4px 15px rgba(245,158,11,0.3)' }}>Season 2026 Results</h2>
+                   <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>The conclusion of an epic tournament.</p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', justifyContent: 'center' }}>
+                   
+                   {/* CHAMPION CARD */}
+                   <div className="hover-lift" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(15,23,42,0.9) 100%)', borderRadius: '16px', padding: '2rem 1.5rem', textAlign: 'center', border: '1px solid rgba(245,158,11,0.4)', position: 'relative', overflow: 'hidden', boxShadow: '0 15px 30px rgba(0,0,0,0.5)', transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+                      <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', background: 'rgba(245,158,11,0.2)', borderRadius: '50%', filter: 'blur(25px)' }}></div>
+                      <Trophy size={48} color="#fcd34d" style={{ margin: '0 auto 1rem auto', filter: 'drop-shadow(0 0 12px rgba(245,158,11,0.8))' }} />
+                      <h3 style={{ fontSize: '1rem', color: '#fcd34d', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem', fontWeight: 700 }}>Tournament Champions</h3>
+                      
+                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <div style={{ position: 'absolute', inset: -5, background: 'linear-gradient(45deg, #f59e0b, #fcd34d, #f59e0b)', borderRadius: '50%', zIndex: 0, opacity: 0.5, filter: 'blur(5px)' }} className="animate-pulse"></div>
+                        <img src={finalMatch.winnerTeam?.teamLogo || getRandomLogo(finalMatch.winnerTeam?.id || 1)} alt="Champion Logo" style={{ width: '90px', height: '90px', borderRadius: '50%', border: '3px solid #fcd34d', margin: '0 auto 1rem auto', objectFit: 'cover', background: '#fff', padding: '5px', position: 'relative', zIndex: 1 }} />
+                      </div>
+
+                      <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', marginBottom: '0.5rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{finalMatch.winnerTeam?.teamName || 'N/A'}</h2>
+                      <div style={{ display: 'inline-block', padding: '0.4rem 1rem', background: 'rgba(245,158,11,0.25)', borderRadius: '20px', color: '#fde68a', fontWeight: 600, fontSize: '0.85rem', boxShadow: '0 0 10px rgba(245,158,11,0.2)' }}>Winner of SPL 2026</div>
+                   </div>
+
+                   {/* PLAYER OF THE SERIES CARD */}
+                   <div className="hover-lift" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(15,23,42,0.9) 100%)', borderRadius: '16px', padding: '2rem 1.5rem', textAlign: 'center', border: '1px solid rgba(16,185,129,0.4)', position: 'relative', overflow: 'hidden', boxShadow: '0 15px 30px rgba(0,0,0,0.5)', transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+                      <div style={{ position: 'absolute', top: '-40px', left: '-40px', width: '120px', height: '120px', background: 'rgba(16,185,129,0.2)', borderRadius: '50%', filter: 'blur(25px)' }}></div>
+                      <Star size={48} color="#6ee7b7" style={{ margin: '0 auto 1rem auto', filter: 'drop-shadow(0 0 12px rgba(16,185,129,0.8))' }} />
+                      <h3 style={{ fontSize: '1rem', color: '#6ee7b7', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem', fontWeight: 700 }}>Player of the Series</h3>
+                      
+                      {finalMatch.playerOfTheSeries ? (
+                         <>
+                            <div style={{ position: 'relative', display: 'inline-block' }}>
+                               <div style={{ position: 'absolute', inset: -5, background: 'linear-gradient(45deg, #10b981, #6ee7b7, #10b981)', borderRadius: '50%', zIndex: 0, opacity: 0.5, filter: 'blur(5px)' }} className="animate-pulse"></div>
+                               <img src={finalMatch.playerOfTheSeries.playerImage || getRandomAvatar(finalMatch.playerOfTheSeries.id || 1)} alt="Player of the Series" style={{ width: '90px', height: '90px', borderRadius: '50%', border: '3px solid #6ee7b7', margin: '0 auto 1rem auto', objectFit: 'cover', background: 'var(--surface-color)', position: 'relative', zIndex: 1 }} />
+                            </div>
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', marginBottom: '0.5rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{finalMatch.playerOfTheSeries.name}</h2>
+                            <div style={{ display: 'inline-block', padding: '0.4rem 1rem', background: 'rgba(16,185,129,0.25)', borderRadius: '20px', color: '#a7f3d0', fontWeight: 600, fontSize: '0.85rem', boxShadow: '0 0 10px rgba(16,185,129,0.2)', marginBottom: '1rem' }}>MVP of SPL 2026</div>
+
+                            <div style={{ position: 'relative', zIndex: 10 }}>
+                               {showPotsPerformance && potsStats ? (
+                                  <div className="animate-slide-up" style={{ textAlign: 'left', background: 'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(15,23,42,0.8) 100%)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.4)', marginBottom: '1rem', color: '#fff', fontSize: '0.9rem', boxShadow: 'inset 0 0 20px rgba(16,185,129,0.1)' }}>
+                                      <h4 style={{ color: '#6ee7b7', borderBottom: '1px solid rgba(16,185,129,0.3)', paddingBottom: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}><Activity size={16} style={{ display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} /> Tournament Stats</h4>
+                                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                                         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}><span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Matches</span> <strong style={{ fontSize: '1.1rem', color: '#f8fafc' }}>{potsStats.matchesPlayed || 0}</strong></div>
+                                         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}><span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Runs</span> <strong style={{ fontSize: '1.1rem', color: '#f8fafc' }}>{potsStats.runsScored || 0}</strong></div>
+                                         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}><span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Wickets</span> <strong style={{ fontSize: '1.1rem', color: '#f8fafc' }}>{potsStats.wickets || 0}</strong></div>
+                                         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}><span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Strike Rate</span> <strong style={{ fontSize: '1.1rem', color: '#f8fafc' }}>{potsStats.ballsFaced > 0 ? ((potsStats.runsScored / potsStats.ballsFaced) * 100).toFixed(1) : '0.0'}</strong></div>
+                                         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}><span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>4s / 6s</span> <strong style={{ fontSize: '1.1rem', color: '#f8fafc' }}>{potsStats.fours || 0} / {potsStats.sixes || 0}</strong></div>
+                                         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}><span style={{ color: '#94a3b8', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Economy</span> <strong style={{ fontSize: '1.1rem', color: '#f8fafc' }}>{potsStats.oversBowled > 0 ? (potsStats.runsConceded / potsStats.oversBowled).toFixed(1) : '0.0'}</strong></div>
+                                      </div>
+                                      <button className="btn hover-lift" onClick={() => setShowPotsPerformance(false)} style={{ marginTop: '1rem', width: '100%', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(110,231,183,0.5)', color: '#6ee7b7', padding: '0.5rem', borderRadius: '8px', fontWeight: 600, transition: 'all 0.3s' }}>Close Stats</button>
+                                  </div>
+                               ) : (
+                                  <button className="btn btn-outline hover-lift" onClick={handleViewPotsPerformance} disabled={loadingPotsStats} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', borderColor: 'rgba(16,185,129,0.5)', color: '#6ee7b7', padding: '0.5rem 1.2rem', fontSize: '0.85rem', background: 'rgba(16,185,129,0.1)', marginBottom: '1rem', borderRadius: '30px' }}>
+                                      <Activity size={14} /> {loadingPotsStats ? 'Loading...' : 'View Performance'}
+                                  </button>
+                               )}
+                            </div>
+                         </>
+                      ) : (
+                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                            <div style={{ width: '90px', height: '90px', borderRadius: '50%', border: '2px dashed rgba(255,255,255,0.3)', margin: '0 auto 1rem auto', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)' }}>
+                               <Users size={32} color="rgba(255,255,255,0.4)" />
+                            </div>
+                            <h2 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Not announced yet</h2>
+                         </div>
+                      )}
+
+                      {isAuthenticated && (
+                         <div style={{ marginTop: '1.5rem', position: 'relative', zIndex: 10 }}>
+                            {isEditingPots ? (
+                               <div style={{ background: 'rgba(0,0,0,0.4)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                  <select className="form-input" value={newPotsId} onChange={(e) => setNewPotsId(Number(e.target.value))} style={{ marginBottom: '0.75rem', width: '100%', fontSize: '0.9rem', padding: '0.5rem' }}>
+                                     <option value="">Select Player...</option>
+                                     {allPlayersList.map(p => (
+                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                     ))}
+                                  </select>
+                                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                                     <button className="btn" onClick={() => setIsEditingPots(false)} style={{ background: 'transparent', border: '1px solid #64748b', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} disabled={isUpdatingPots}><X size={14}/> Cancel</button>
+                                     <button className="btn btn-primary" onClick={handleUpdatePots} disabled={!newPotsId || isUpdatingPots} style={{ background: '#10b981', color: '#000', border: 'none', display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                                        {isUpdatingPots ? 'Saving...' : <><Check size={14}/> Save MVP</>}
+                                     </button>
+                                  </div>
+                               </div>
+                            ) : (
+                               <button className="btn btn-outline hover-lift" onClick={() => { setIsEditingPots(true); setNewPotsId(finalMatch.playerOfTheSeries?.id || ''); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', borderColor: '#10b981', color: '#10b981', padding: '0.5rem 1rem', fontSize: '0.9rem', background: 'rgba(16,185,129,0.1)' }}>
+                                  <Edit2 size={14} /> {finalMatch.playerOfTheSeries ? 'Change MVP' : 'Select MVP'}
+                               </button>
+                            )}
+                         </div>
+                      )}
+                   </div>
+
+                </div>
+             </div>
+           </div>
+          </AnimatedSection>
+        )}
 
         {/* SECTION SEO: TOURNAMENT INFO & INTERNAL LINKS */}
         <AnimatedSection id="seo-content-section" className="bg-section-6">

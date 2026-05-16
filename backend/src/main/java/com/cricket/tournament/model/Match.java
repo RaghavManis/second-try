@@ -132,6 +132,10 @@ public class Match {
     @JoinColumn(name = "man_of_the_match_id")
     private Player manOfTheMatch;
 
+    @ManyToOne
+    @JoinColumn(name = "player_of_the_series_id")
+    private Player playerOfTheSeries;
+
     @Column(name = "stream_url")
     private String streamUrl;
 
@@ -377,6 +381,14 @@ public class Match {
 
     public void setManOfTheMatch(Player manOfTheMatch) {
         this.manOfTheMatch = manOfTheMatch;
+    }
+
+    public Player getPlayerOfTheSeries() {
+        return playerOfTheSeries;
+    }
+
+    public void setPlayerOfTheSeries(Player playerOfTheSeries) {
+        this.playerOfTheSeries = playerOfTheSeries;
     }
 
     public String getStreamUrl() {

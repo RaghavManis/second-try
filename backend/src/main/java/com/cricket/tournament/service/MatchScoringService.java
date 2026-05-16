@@ -904,6 +904,17 @@ public class MatchScoringService {
         match.setManOfTheMatch(playerRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found")));
         return matchRepository.save(match);
     }
+
+    @Transactional
+    @CacheEvict(value = {"matches", "upcomingMatches", "completedMatches"}, allEntries = true)
+    public Match updatePlayerOfTheSeries(Long matchId, Long playerId) {
+        Match match = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
+        if (match.getMatchType() != Match.MatchType.FINAL || match.getStatus() != Match.MatchStatus.COMPLETED) {
+            throw new IllegalStateException("Player of the series can only be set for a completed FINAL match");
+        }
+        match.setPlayerOfTheSeries(playerRepository.findById(playerId).orElseThrow(() -> new RuntimeException("Player not found")));
+        return matchRepository.save(match);
+    }
     
     public Map<String, Object> getCompleteScorecard(Long matchId) {
         java.util.Map<String, Object> cached = scorecardCache.getIfPresent(matchId);

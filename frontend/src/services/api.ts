@@ -100,6 +100,8 @@ export const MatchScoringService = {
     api.post<LiveMatchDetailsDto>(`/scoring/${matchId}/complete`, null, { params: { winnerTeamId, manOfTheMatchId } }),
   updateManOfTheMatch: (matchId: number, playerId: number) =>
     api.put<Match>(`/scoring/${matchId}/motm`, null, { params: { playerId } }),
+  updatePlayerOfTheSeries: (matchId: number, playerId: number) =>
+    api.put<Match>(`/scoring/${matchId}/player-of-the-series`, null, { params: { playerId } }),
   updateStreamConfig: (matchId: number, config: { streamUrl: string, streamDelaySeconds: number }) => 
     api.put<Match>(`/scoring/${matchId}/stream-config`, config),
   repairScorecard: (matchId: number) => api.post<any>(`/scoring/${matchId}/repair`),

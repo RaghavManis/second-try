@@ -55,6 +55,7 @@ export interface Match {
   playingXiTeamB?: Player[];
   result?: string;
   manOfTheMatch?: Player;
+  playerOfTheSeries?: Player;
   streamUrl?: string;
   streamDelaySeconds?: number;
   currentScore?: number;

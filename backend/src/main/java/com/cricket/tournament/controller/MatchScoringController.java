@@ -71,6 +71,11 @@ public class MatchScoringController {
         return ResponseEntity.ok(matchScoringService.updateManOfTheMatch(matchId, playerId));
     }
 
+    @PutMapping("/{matchId}/player-of-the-series")
+    public ResponseEntity<Match> updatePlayerOfTheSeries(@PathVariable Long matchId, @RequestParam Long playerId) {
+        return ResponseEntity.ok(matchScoringService.updatePlayerOfTheSeries(matchId, playerId));
+    }
+
     @GetMapping("/{matchId}/scorecard")
     public ResponseEntity<java.util.Map<String, Object>> getCompleteScorecard(@PathVariable Long matchId) {
         return ResponseEntity.ok(matchScoringService.getCompleteScorecard(matchId));

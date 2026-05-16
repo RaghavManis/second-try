@@ -85,16 +85,20 @@ public class PlayerService {
             overall = new HashMap<>(); // Empty stats map
         }
         
-        List<Map<String, Object>> aggregated = playerMatchStatsRepository.getAggregatedStatsByPlayer(id);
-        Map<String, Object> tournamentStats = new HashMap<>();
-        Map<String, Object> practiceStats = new HashMap<>();
-        
-        for (Map<String, Object> statBreakdown : aggregated) {
-            if ("TOURNAMENT".equals(String.valueOf(statBreakdown.get("matchType")))) {
-                tournamentStats = statBreakdown;
-            } else if ("PRACTICE".equals(String.valueOf(statBreakdown.get("matchType")))) {
-                practiceStats = statBreakdown;
-            }
+        // Fetch Tournament stats combining both TOURNAMENT and FINAL matches
+        Map<String, Object> tournamentStats = playerMatchStatsRepository.getAggregatedStatsByPlayerAndMatchTypes(id, List.of(com.cricket.tournament.model.Match.MatchType.TOURNAMENT, com.cricket.tournament.model.Match.MatchType.FINAL));
+        if (tournamentStats == null || tournamentStats.get("matchesPlayed") == null || ((Number)tournamentStats.get("matchesPlayed")).intValue() == 0) {
+            tournamentStats = new HashMap<>();
+        } else {
+            tournamentStats.put("matchType", "TOURNAMENT");
+        }
+
+        // Fetch Practice stats
+        Map<String, Object> practiceStats = playerMatchStatsRepository.getAggregatedStatsByPlayerAndMatchTypes(id, List.of(com.cricket.tournament.model.Match.MatchType.PRACTICE));
+        if (practiceStats == null || practiceStats.get("matchesPlayed") == null || ((Number)practiceStats.get("matchesPlayed")).intValue() == 0) {
+            practiceStats = new HashMap<>();
+        } else {
+            practiceStats.put("matchType", "PRACTICE");
         }
         
         return new PlayerProfileDto(player, overall, tournamentStats, practiceStats);
