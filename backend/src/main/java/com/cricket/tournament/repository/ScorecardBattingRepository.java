@@ -22,22 +22,22 @@ public interface ScorecardBattingRepository extends JpaRepository<ScorecardBatti
     
     @org.springframework.data.jpa.repository.Query("SELECT new map(s.player as player, SUM(s.runs) as totalRuns) " +
            "FROM ScorecardBatting s " +
-           "WHERE s.match.matchType = :matchType " +
+           "WHERE s.match.matchType IN :matchTypes " +
            "GROUP BY s.player " +
            "ORDER BY SUM(s.runs) DESC")
-    List<java.util.Map<String, Object>> getTopRunScorersByMatchType(@org.springframework.data.repository.query.Param("matchType") com.cricket.tournament.model.Match.MatchType matchType);
+    List<java.util.Map<String, Object>> getTopRunScorersByMatchTypes(@org.springframework.data.repository.query.Param("matchTypes") List<com.cricket.tournament.model.Match.MatchType> matchTypes);
 
     @org.springframework.data.jpa.repository.Query("SELECT new map(s.player as player, SUM(s.sixes) as totalSixes) " +
            "FROM ScorecardBatting s " +
-           "WHERE s.match.matchType = :matchType " +
+           "WHERE s.match.matchType IN :matchTypes " +
            "GROUP BY s.player " +
            "ORDER BY SUM(s.sixes) DESC")
-    List<java.util.Map<String, Object>> getTopSixHittersByMatchType(@org.springframework.data.repository.query.Param("matchType") com.cricket.tournament.model.Match.MatchType matchType);
+    List<java.util.Map<String, Object>> getTopSixHittersByMatchTypes(@org.springframework.data.repository.query.Param("matchTypes") List<com.cricket.tournament.model.Match.MatchType> matchTypes);
 
     @org.springframework.data.jpa.repository.Query("SELECT new map(s.player as player, SUM(s.fours) as totalFours) " +
            "FROM ScorecardBatting s " +
-           "WHERE s.match.matchType = :matchType " +
+           "WHERE s.match.matchType IN :matchTypes " +
            "GROUP BY s.player " +
            "ORDER BY SUM(s.fours) DESC")
-    List<java.util.Map<String, Object>> getTopFourHittersByMatchType(@org.springframework.data.repository.query.Param("matchType") com.cricket.tournament.model.Match.MatchType matchType);
+    List<java.util.Map<String, Object>> getTopFourHittersByMatchTypes(@org.springframework.data.repository.query.Param("matchTypes") List<com.cricket.tournament.model.Match.MatchType> matchTypes);
 }

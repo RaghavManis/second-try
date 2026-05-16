@@ -22,8 +22,8 @@ public interface ScorecardBowlingRepository extends JpaRepository<ScorecardBowli
     
     @org.springframework.data.jpa.repository.Query("SELECT new map(s.player as player, SUM(s.wickets) as totalWickets) " +
            "FROM ScorecardBowling s " +
-           "WHERE s.match.matchType = :matchType " +
+           "WHERE s.match.matchType IN :matchTypes " +
            "GROUP BY s.player " +
            "ORDER BY SUM(s.wickets) DESC")
-    List<java.util.Map<String, Object>> getTopWicketTakersByMatchType(@org.springframework.data.repository.query.Param("matchType") com.cricket.tournament.model.Match.MatchType matchType);
+    List<java.util.Map<String, Object>> getTopWicketTakersByMatchTypes(@org.springframework.data.repository.query.Param("matchTypes") List<com.cricket.tournament.model.Match.MatchType> matchTypes);
 }

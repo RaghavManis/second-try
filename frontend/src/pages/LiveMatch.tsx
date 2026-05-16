@@ -421,6 +421,11 @@ const LiveMatch: React.FC = () => {
                 <Circle size={8} className="animate-pulse" style={{ fill: '#ef4444', marginRight: '6px' }} /> LIVE
               </div>
             )}
+            {details.match.matchType === 'FINAL' && (
+              <div style={{ display: 'inline-flex', marginLeft: '0.5rem', alignItems: 'center', background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', padding: '0.3rem 0.75rem', borderRadius: '30px', fontSize: '0.8rem', fontWeight: 'bold', border: '1px solid rgba(245, 158, 11, 0.4)' }}>
+                🏆 FINAL
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem', marginTop: '0.5rem' }}>
@@ -776,6 +781,11 @@ const LiveMatch: React.FC = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                      <span style={{ color: '#94a3b8' }}>Tournament</span>
                      <span>Cricket Tournament League</span>
+                  </div>
+                  <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ color: '#94a3b8' }}>Match Type</span>
+                     <span>{details.match.matchType}</span>
                   </div>
                   <hr style={{ borderColor: 'rgba(255,255,255,0.05)', margin: '0' }}/>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>

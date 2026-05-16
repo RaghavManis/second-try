@@ -49,40 +49,40 @@ public class PointsService {
             }
         }
 
-        response.put("TOURNAMENT", buildPerformersMap(Match.MatchType.TOURNAMENT, tournamentPlayerTeamMap));
-        response.put("PRACTICE", buildPerformersMap(Match.MatchType.PRACTICE, new HashMap<>()));
+        response.put("TOURNAMENT", buildPerformersMap(List.of(Match.MatchType.TOURNAMENT, Match.MatchType.FINAL), tournamentPlayerTeamMap));
+        response.put("PRACTICE", buildPerformersMap(List.of(Match.MatchType.PRACTICE), new HashMap<>()));
 
         return response;
     }
 
-    private Map<String, Object> buildPerformersMap(Match.MatchType matchType, Map<Long, String> teamMap) {
+    private Map<String, Object> buildPerformersMap(List<Match.MatchType> matchTypes, Map<Long, String> teamMap) {
         Map<String, Object> performers = new HashMap<>();
-        performers.put("topRunScorers", fetchWithTeamName(matchType, "runs", teamMap));
-        performers.put("topWicketTakers", fetchWithTeamName(matchType, "wickets", teamMap));
-        performers.put("topSixHitters", fetchWithTeamName(matchType, "sixes", teamMap));
-        performers.put("topFourHitters", fetchWithTeamName(matchType, "fours", teamMap));
-        performers.put("topCatchTakers", fetchWithTeamName(matchType, "catches", teamMap));
+        performers.put("topRunScorers", fetchWithTeamName(matchTypes, "runs", teamMap));
+        performers.put("topWicketTakers", fetchWithTeamName(matchTypes, "wickets", teamMap));
+        performers.put("topSixHitters", fetchWithTeamName(matchTypes, "sixes", teamMap));
+        performers.put("topFourHitters", fetchWithTeamName(matchTypes, "fours", teamMap));
+        performers.put("topCatchTakers", fetchWithTeamName(matchTypes, "catches", teamMap));
         return performers;
     }
 
-    private List<Map<String, Object>> fetchWithTeamName(Match.MatchType matchType, String type, Map<Long, String> teamMap) {
+    private List<Map<String, Object>> fetchWithTeamName(List<Match.MatchType> matchTypes, String type, Map<Long, String> teamMap) {
         List<Map<String, Object>> rawStats;
         switch (type) {
             case "wickets":
-                rawStats = bowlingRepository.getTopWicketTakersByMatchType(matchType);
+                rawStats = bowlingRepository.getTopWicketTakersByMatchTypes(matchTypes);
                 break;
             case "sixes":
-                rawStats = battingRepository.getTopSixHittersByMatchType(matchType);
+                rawStats = battingRepository.getTopSixHittersByMatchTypes(matchTypes);
                 break;
             case "fours":
-                rawStats = battingRepository.getTopFourHittersByMatchType(matchType);
+                rawStats = battingRepository.getTopFourHittersByMatchTypes(matchTypes);
                 break;
             case "catches":
-                rawStats = statsRepository.getTopCatchTakersByMatchType(matchType);
+                rawStats = statsRepository.getTopCatchTakersByMatchTypes(matchTypes);
                 break;
             case "runs":
             default:
-                rawStats = battingRepository.getTopRunScorersByMatchType(matchType);
+                rawStats = battingRepository.getTopRunScorersByMatchTypes(matchTypes);
                 break;
         }
 

@@ -361,6 +361,11 @@ const MatchScorecard: React.FC = () => {
             <div className="hero-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', minWidth: '70px' }}>
               <h1 className="gradient-text" style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0 }}>VS</h1>
               <div style={{ color: '#64748b', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{new Date(match.matchDateTime).toLocaleDateString()}</div>
+              {match.matchType === 'FINAL' && (
+                <div style={{ background: '#ef444420', border: '1px solid #ef444450', padding: '2px 8px', borderRadius: '12px', color: '#ef4444', fontSize: '0.6rem', fontWeight: 900, letterSpacing: '1px', marginTop: '4px' }}>
+                  FINAL
+                </div>
+              )}
               {match.status === 'COMPLETED' && match.winnerTeam && (
                 <div style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '2px 10px', borderRadius: '12px', color: '#fbbf24', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px' }}>
                   🏆 Winner

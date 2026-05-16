@@ -327,11 +327,21 @@ const Dashboard: React.FC = () => {
                         <Clock size={16} color="var(--primary)" /> {new Date(match.matchDateTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                       </div>
 
-                      <div style={{
-                        background: `${getStatusColor(match.status)}15`, color: getStatusColor(match.status),
-                        padding: '4px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase'
-                      }}>
-                        {match.status}
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {match.matchType === 'FINAL' && (
+                          <div style={{
+                            background: '#ef444420', color: '#ef4444', border: '1px solid #ef444450',
+                            padding: '4px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase'
+                          }}>
+                            FINAL
+                          </div>
+                        )}
+                        <div style={{
+                          background: `${getStatusColor(match.status)}15`, color: getStatusColor(match.status),
+                          padding: '4px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase'
+                        }}>
+                          {match.status}
+                        </div>
                       </div>
                     </div>
 
@@ -370,7 +380,7 @@ const Dashboard: React.FC = () => {
                         <div style={{ color: '#34d399', fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.5px', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{match.result}</div>
                       ) : (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: '#e2e8f0', fontSize: '0.85rem', fontWeight: 700, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
-                          <MapPin size={14} color="var(--primary)" /> {match.overs} Overs Match • {match.matchType === 'TOURNAMENT' ? 'League' : 'Practice'}
+                          <MapPin size={14} color="var(--primary)" /> {match.overs} Overs Match • {match.matchType === 'TOURNAMENT' ? 'League' : match.matchType === 'FINAL' ? 'Final' : 'Practice'}
                         </div>
                       )}
                     </div>

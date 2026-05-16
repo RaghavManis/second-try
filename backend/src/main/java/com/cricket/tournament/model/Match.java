@@ -21,7 +21,7 @@ public class Match {
     private Long version;
 
     public enum MatchType {
-        TOURNAMENT, PRACTICE
+        TOURNAMENT, PRACTICE, FINAL
     }
 
     @Enumerated(EnumType.STRING)

@@ -32,7 +32,7 @@ export interface PlayerProfileDto {
 
 export interface Match {
   id?: number;
-  matchType?: 'TOURNAMENT' | 'PRACTICE';
+  matchType?: 'TOURNAMENT' | 'PRACTICE' | 'FINAL';
   teamA: Team;
   teamB: Team;
   matchDateTime: string;

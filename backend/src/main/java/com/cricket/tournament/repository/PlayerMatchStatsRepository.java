@@ -61,37 +61,37 @@ public interface PlayerMatchStatsRepository extends JpaRepository<PlayerMatchSta
 
     @Query("SELECT new map(pms.player as player, SUM(pms.runsScored) as totalRuns) " +
            "FROM PlayerMatchStats pms " +
-           "WHERE pms.matchType = :matchType " +
+           "WHERE pms.matchType IN :matchTypes " +
            "GROUP BY pms.player " +
            "ORDER BY SUM(pms.runsScored) DESC")
-    List<Map<String, Object>> getTopRunScorersByMatchType(@Param("matchType") Match.MatchType matchType);
+    List<Map<String, Object>> getTopRunScorersByMatchTypes(@Param("matchTypes") List<Match.MatchType> matchTypes);
 
     @Query("SELECT new map(pms.player as player, SUM(pms.wickets) as totalWickets) " +
            "FROM PlayerMatchStats pms " +
-           "WHERE pms.matchType = :matchType " +
+           "WHERE pms.matchType IN :matchTypes " +
            "GROUP BY pms.player " +
            "ORDER BY SUM(pms.wickets) DESC")
-    List<Map<String, Object>> getTopWicketTakersByMatchType(@Param("matchType") Match.MatchType matchType);
+    List<Map<String, Object>> getTopWicketTakersByMatchTypes(@Param("matchTypes") List<Match.MatchType> matchTypes);
 
     @Query("SELECT new map(pms.player as player, SUM(pms.sixes) as totalSixes) " +
            "FROM PlayerMatchStats pms " +
-           "WHERE pms.matchType = :matchType " +
+           "WHERE pms.matchType IN :matchTypes " +
            "GROUP BY pms.player " +
            "ORDER BY SUM(pms.sixes) DESC")
-    List<Map<String, Object>> getTopSixHittersByMatchType(@Param("matchType") Match.MatchType matchType);
+    List<Map<String, Object>> getTopSixHittersByMatchTypes(@Param("matchTypes") List<Match.MatchType> matchTypes);
 
     @Query("SELECT new map(pms.player as player, SUM(pms.fours) as totalFours) " +
            "FROM PlayerMatchStats pms " +
-           "WHERE pms.matchType = :matchType " +
+           "WHERE pms.matchType IN :matchTypes " +
            "GROUP BY pms.player " +
            "ORDER BY SUM(pms.fours) DESC")
-    List<Map<String, Object>> getTopFourHittersByMatchType(@Param("matchType") Match.MatchType matchType);
+    List<Map<String, Object>> getTopFourHittersByMatchTypes(@Param("matchTypes") List<Match.MatchType> matchTypes);
 
     @Query("SELECT new map(pms.player as player, SUM(pms.catches) as totalCatches) " +
            "FROM PlayerMatchStats pms " +
-           "WHERE pms.matchType = :matchType " +
+           "WHERE pms.matchType IN :matchTypes " +
            "GROUP BY pms.player " +
            "HAVING SUM(pms.catches) > 0 " +
            "ORDER BY SUM(pms.catches) DESC")
-    List<Map<String, Object>> getTopCatchTakersByMatchType(@Param("matchType") Match.MatchType matchType);
+    List<Map<String, Object>> getTopCatchTakersByMatchTypes(@Param("matchTypes") List<Match.MatchType> matchTypes);
 }

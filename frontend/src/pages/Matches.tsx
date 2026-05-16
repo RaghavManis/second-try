@@ -26,7 +26,7 @@ const Matches: React.FC = () => {
     matchDateTime: '', 
     overs: 20,
     status: 'SCHEDULED' as const,
-    matchType: 'TOURNAMENT' as 'TOURNAMENT' | 'PRACTICE'
+    matchType: 'TOURNAMENT' as 'TOURNAMENT' | 'PRACTICE' | 'FINAL'
   });
   
 
@@ -187,6 +187,11 @@ const Matches: React.FC = () => {
         {match.matchType === 'PRACTICE' && (
           <div style={{ background: '#8b5cf620', color: '#8b5cf6', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
             PRACTICE
+          </div>
+        )}
+        {match.matchType === 'FINAL' && (
+          <div style={{ background: '#ef444420', color: '#ef4444', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600, border: '1px solid #ef444450', boxShadow: '0 0 10px rgba(239, 68, 68, 0.3)' }}>
+            FINAL
           </div>
         )}
         {showActions && isAuthenticated && onEdit && match.status === 'SCHEDULED' && (
@@ -407,8 +412,9 @@ const Matches: React.FC = () => {
               <div className="form-group" style={{ marginTop: '1.5rem' }}>
                 <label className="form-label">Match Type</label>
                 <select required className="form-input" 
-                  value={newMatch.matchType} onChange={e => setNewMatch({...newMatch, matchType: e.target.value as 'TOURNAMENT' | 'PRACTICE'})}>
-                  <option value="TOURNAMENT">Tournament (Fixed Teams)</option>
+                  value={newMatch.matchType} onChange={e => setNewMatch({...newMatch, matchType: e.target.value as 'TOURNAMENT' | 'PRACTICE' | 'FINAL'})}>
+                  <option value="TOURNAMENT">Tournament (League)</option>
+                  <option value="FINAL">Final (Knockout)</option>
                   <option value="PRACTICE">Practice (Dynamic Teams)</option>
                 </select>
               </div>

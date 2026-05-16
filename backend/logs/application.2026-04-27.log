@@ -1,0 +1,104 @@
+2026-04-27 23:57:07 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-04-27 23:57:07 [restartedMain] INFO  c.c.t.CricketTournamentApplication - Starting CricketTournamentApplication using Java 23.0.1 with PID 24296 (C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend\target\classes started by ragha in C:\Users\ragha\.gemini\antigravity\scratch\cricket-tournament\backend)
+2026-04-27 23:57:07 [restartedMain] INFO  c.c.t.CricketTournamentApplication - The following 1 profile is active: "dev"
+2026-04-27 23:57:07 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-04-27 23:57:07 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-04-27 23:57:10 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-27 23:57:10 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 158 ms. Found 9 JPA repository interfaces.
+2026-04-27 23:57:13 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-04-27 23:57:13 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-27 23:57:13 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-27 23:57:13 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-04-27 23:57:13 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-27 23:57:13 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 6539 ms
+2026-04-27 23:57:14 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-27 23:57:15 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@11164749
+2026-04-27 23:57:15 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-27 23:57:15 [restartedMain] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:mysql://localhost:3306/cricket_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true'
+2026-04-27 23:57:15 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-27 23:57:15 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-04-27 23:57:15 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-04-27 23:57:16 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-27 23:57:20 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-27 23:57:21 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-27 23:57:23 [restartedMain] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-27 23:57:26 [restartedMain] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-27 23:57:26 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: e1e9be7f-74a1-4060-9ed9-6a915f0280bb
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-27 23:57:28 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoint(s) beneath base path '/actuator'
+2026-04-27 23:57:29 [restartedMain] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@4b3703e4, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@190608e9, org.springframework.security.web.context.SecurityContextHolderFilter@2a15a3c5, org.springframework.security.web.header.HeaderWriterFilter@390d4055, org.springframework.web.filter.CorsFilter@56266c16, org.springframework.security.web.authentication.logout.LogoutFilter@2a50cfe9, com.cricket.tournament.security.JwtAuthenticationFilter@1e655cb9, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@3876bbaf, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@56ed028f, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1b5773c, org.springframework.security.web.session.SessionManagementFilter@c16989e, org.springframework.security.web.access.ExceptionTranslationFilter@4afde28b, org.springframework.security.web.access.intercept.AuthorizationFilter@54140f4d]
+2026-04-27 23:57:30 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-04-27 23:57:30 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-0.0.0.0-8080"]
+2026-04-27 23:57:30 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-04-27 23:57:30 [restartedMain] INFO  c.c.t.CricketTournamentApplication - Started CricketTournamentApplication in 24.998 seconds (process running for 26.262)
+2026-04-27 23:57:41 [http-nio-0.0.0.0-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-27 23:57:41 [http-nio-0.0.0.0-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-04-27 23:57:41 [http-nio-0.0.0.0-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2026-04-27 23:57:42 [http-nio-0.0.0.0-8080-exec-2] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:42 [http-nio-0.0.0.0-8080-exec-1] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:42 [http-nio-0.0.0.0-8080-exec-3] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:42 [http-nio-0.0.0.0-8080-exec-5] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:42 [http-nio-0.0.0.0-8080-exec-4] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:42 [http-nio-0.0.0.0-8080-exec-6] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:42 [http-nio-0.0.0.0-8080-exec-3] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/points - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 678ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-7] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-2] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/teams - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 712ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-5] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/players - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 716ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-7] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/points - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 11ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-1] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 746ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-8] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-9] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-4] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 761ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-9] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/players - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 5ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-8] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/teams - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 4ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-3] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-10] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-3] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 9ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-6] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/points/top-performers - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 810ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-10] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 28ms
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-2] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:43 [http-nio-0.0.0.0-8080-exec-2] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/points/top-performers - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 81ms
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-5] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-5] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 6ms
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-7] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-7] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 3ms
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-1] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-4] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-4] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 10ms
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-1] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/55/live-details - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 187ms
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-9] WARN  c.c.t.s.JwtAuthenticationFilter - Unable to get JWT Token or JWT Token has expired
+2026-04-27 23:57:47 [http-nio-0.0.0.0-8080-exec-9] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/55/scorecard - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 85ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-8] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] POST /api/auth/login - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 40ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-3] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/teams - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 9ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-10] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/players - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 6ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-2] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/points - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 7ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-6] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 26ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-7] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/teams - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 4ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-4] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/players - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 4ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-1] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 8ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-9] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/points - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 6ms
+2026-04-27 23:57:52 [http-nio-0.0.0.0-8080-exec-5] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/points/top-performers - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 135ms
+2026-04-27 23:57:53 [http-nio-0.0.0.0-8080-exec-8] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/points/top-performers - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 88ms
+2026-04-27 23:57:57 [http-nio-0.0.0.0-8080-exec-3] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 8ms
+2026-04-27 23:57:57 [http-nio-0.0.0.0-8080-exec-6] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/teams - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 4ms
+2026-04-27 23:57:57 [http-nio-0.0.0.0-8080-exec-2] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches/completed - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 9ms
+2026-04-27 23:57:57 [http-nio-0.0.0.0-8080-exec-10] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches/upcoming - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 19ms
+2026-04-27 23:57:57 [http-nio-0.0.0.0-8080-exec-7] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 4ms
+2026-04-27 23:57:57 [http-nio-0.0.0.0-8080-exec-4] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/teams - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 5ms
+2026-04-27 23:57:57 [http-nio-0.0.0.0-8080-exec-9] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches/completed - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 4ms
+2026-04-27 23:57:57 [http-nio-0.0.0.0-8080-exec-1] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches/upcoming - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 4ms
+2026-04-27 23:58:03 [http-nio-0.0.0.0-8080-exec-5] INFO  c.c.tournament.service.MatchService - [AUDIT] Initiating robust bulk deletion for match ID: 55
+2026-04-27 23:58:03 [http-nio-0.0.0.0-8080-exec-5] INFO  c.c.tournament.service.MatchService - [AUDIT] Robust bulk deletion completed for match ID: 55
+2026-04-27 23:58:03 [http-nio-0.0.0.0-8080-exec-5] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] DELETE /api/matches/55 - Status: 204 - IP: 0:0:0:0:0:0:0:1 - Time: 252ms
+2026-04-27 23:58:03 [http-nio-0.0.0.0-8080-exec-2] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/teams - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 3ms
+2026-04-27 23:58:03 [http-nio-0.0.0.0-8080-exec-3] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches/upcoming - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 13ms
+2026-04-27 23:58:03 [http-nio-0.0.0.0-8080-exec-8] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 54ms
+2026-04-27 23:58:03 [http-nio-0.0.0.0-8080-exec-6] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/matches/completed - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 53ms
+2026-04-27 23:58:11 [http-nio-0.0.0.0-8080-exec-10] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 12ms
+2026-04-27 23:58:42 [http-nio-0.0.0.0-8080-exec-7] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 13ms
+2026-04-27 23:59:12 [http-nio-0.0.0.0-8080-exec-4] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 9ms
+2026-04-27 23:59:42 [http-nio-0.0.0.0-8080-exec-9] INFO  c.c.t.c.RequestLoggingInterceptor - [API LOG] GET /api/scoring/live - Status: 200 - IP: 0:0:0:0:0:0:0:1 - Time: 10ms
